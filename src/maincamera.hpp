@@ -12,6 +12,7 @@ public:
     void toggle_freecam();
 
     const Camera3D& get_camera() const;
+    const Vector3& get_direction() const;
     int get_mode() const;
 
 private:

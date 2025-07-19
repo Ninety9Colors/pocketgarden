@@ -12,6 +12,7 @@ class Player {
 public:
     Player(std::string username, Vector3 position);
     void draw(std::string current_user, int camera_mode) const;
+    void move(float dt, const Vector3& direction, int camera_mode, const std::vector<bool>& keys_down);
     void on_join();
     void on_disconnect();
 
@@ -20,6 +21,7 @@ public:
     
 private:
     std::string username_;
+    float speed_;
     bool online_;
 
     Cube hitbox_;

@@ -1,7 +1,5 @@
 #include <cmath>
 
-#include <iostream>
-
 #include "maincamera.hpp"
 #include <algorithm>
 
@@ -26,25 +24,27 @@ void MainCamera::update(const std::shared_ptr<Player> player, Vector2 mouse_delt
         UpdateCamera(&camera_,camera_mode_);
         return;
     }
-    camera_.position = Vector3{player->get_hitbox().position.x, player->get_hitbox().position.y + 1.0f, player->get_hitbox().position.z};
+    camera_.position = Vector3{player->get_hitbox().get_x(), player->get_hitbox().get_y() + 0.5f, player->get_hitbox().get_z()};
     camera_.target = Vector3{camera_.position.x + direction_.x, camera_.position.y + direction_.y, camera_.position.z + direction_.z};
 
     float dpitch = mouse_delta.y*sensitivity_; // 0 when straight on y axis, positive downward
     float dyaw = mouse_delta.x*sensitivity_; // 0 when straight on x axis, positive leftward
-    
+
     float prev_pitch = acosf(direction_.y);
-    float new_pitch = prev_pitch + dpitch;
-    if (new_pitch > 3.1)
-        new_pitch = 3.1;
-    if (new_pitch < 0.1)
-        new_pitch = 0.1;
+
+    if (prev_pitch+dpitch > 3.1)
+        dpitch = 3.1-prev_pitch;
+    else if (prev_pitch + dpitch < 0.1)
+        dpitch = prev_pitch-0.1;
 
     float sideways_vector_magnitude = sqrt(pow(direction_.x,2.0f) + pow(direction_.z, 2));
     Vector3 sideways_vector = Vector3{direction_.x/sideways_vector_magnitude, 0.0f, direction_.z/sideways_vector_magnitude};
 
-    float new_x = sin(new_pitch)*sideways_vector.x;
-    float new_y = cos(new_pitch);
-    float new_z = sin(new_pitch)*sideways_vector.z;
+    float comp_y_r = direction_.y;
+
+    float new_x = sideways_vector_magnitude*(sideways_vector.x*cosf(dpitch)) + comp_y_r*(sideways_vector.x*sinf(dpitch));
+    float new_y = sideways_vector_magnitude*(-sinf(dpitch)) + comp_y_r*(cosf(dpitch));
+    float new_z = sideways_vector_magnitude*(sideways_vector.z*cosf(dpitch)) + comp_y_r*(sideways_vector.z*sinf(dpitch));
     float new_magnitude = sqrt(pow(new_x,2) + pow(new_y,2) + pow(new_z,2));
 
     direction_.x = new_x/new_magnitude;
@@ -53,10 +53,11 @@ void MainCamera::update(const std::shared_ptr<Player> player, Vector2 mouse_delt
 
     new_x = direction_.x * cosf(dyaw) - direction_.z * sinf(dyaw);
     new_z = direction_.x * sinf(dyaw) + direction_.z * cosf(dyaw);
-    float new_sideways_magnitude = sqrt(pow(new_x,2) + pow(new_z,2));
+    new_magnitude = sqrt(pow(new_x,2) + pow(direction_.y,2) + pow(new_z,2));
 
-    direction_.x = new_x/new_sideways_magnitude;
-    direction_.z = new_z/new_sideways_magnitude;
+    direction_.x = new_x/new_magnitude;
+    direction_.y = direction_.y/new_magnitude;
+    direction_.z = new_z/new_magnitude;
 }
 
 void MainCamera::toggle_freecam() {
@@ -69,6 +70,10 @@ void MainCamera::toggle_freecam() {
 
 const Camera3D& MainCamera::get_camera() const {
     return camera_;
+}
+
+const Vector3& MainCamera::get_direction() const {
+    return direction_;
 }
 
 int MainCamera::get_mode() const {
