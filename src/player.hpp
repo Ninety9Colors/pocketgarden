@@ -18,6 +18,9 @@ public:
 
     std::string get_username();
     const Cube& get_hitbox();
+    Vector3 get_position() const;
+
+    std::string get_packet_string() const;
     
 private:
     std::string username_;

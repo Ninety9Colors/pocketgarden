@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 class Object3d {
 public:
@@ -11,6 +12,8 @@ public:
     virtual float get_x() const = 0;
     virtual float get_y() const = 0;
     virtual float get_z() const = 0;
+
+    virtual std::string get_packet_string() const = 0;
 
     virtual ~Object3d() {};
 };

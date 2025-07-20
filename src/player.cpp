@@ -1,7 +1,6 @@
 #include <cassert>
 #include <cmath>
 
-
 #include "player.hpp"
 
 Player::Player(std::string username, Vector3 position) : username_(username) {
@@ -21,8 +20,8 @@ void Player::draw(std::string current_user, int camera_mode) const {
 }
 
 void Player::move(float dt, const Vector3& direction, int camera_mode, const std::vector<bool>& keys_down) {
-    assert(keys_down.size() == 4);
-    if (camera_mode == CAMERA_FREE)
+    assert(keys_down.size() >= 4);
+    if (camera_mode == CAMERA_FREE || !online_)
         return;
     Vector3 left = Vector3{direction.z, 0.0f, -direction.x};
     float dx = (keys_down[0]*direction.x-keys_down[2]*direction.x-keys_down[3]*left.x+keys_down[1]*left.x);
@@ -56,3 +55,12 @@ std::string Player::get_username() {
     return username_;
 }
 
+Vector3 Player::get_position() const {
+    return Vector3{hitbox_.get_x(), hitbox_.get_y()-0.5f, hitbox_.get_z()};
+}
+
+std::string Player::get_packet_string() const {
+    return "Player " + 
+        username_ + " " +
+        std::to_string(get_position().x) + " " + std::to_string(get_position().y) + " " + std::to_string(get_position().z);
+}

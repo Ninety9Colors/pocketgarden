@@ -24,7 +24,7 @@ void MainCamera::update(const std::shared_ptr<Player> player, Vector2 mouse_delt
         UpdateCamera(&camera_,camera_mode_);
         return;
     }
-    camera_.position = Vector3{player->get_hitbox().get_x(), player->get_hitbox().get_y() + 0.5f, player->get_hitbox().get_z()};
+    camera_.position = Vector3{player->get_position().x, player->get_position().y + 1.0f, player->get_position().z};
     camera_.target = Vector3{camera_.position.x + direction_.x, camera_.position.y + direction_.y, camera_.position.z + direction_.z};
 
     float dpitch = mouse_delta.y*sensitivity_; // 0 when straight on y axis, positive downward

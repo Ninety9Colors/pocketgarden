@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 
 #define RAYGUI_IMPLEMENTATION
@@ -31,9 +32,14 @@ void Application::run(Game& game) {
         }
         float dt = GetFrameTime(); // seconds
         std::string fps = std::to_string((int)round(1.0/dt));
-        std::vector<bool> keys_down = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D)};
-        game.get_player(game.get_current_user())->move(dt, main_camera.get_direction(), main_camera.get_mode(), keys_down);
-        main_camera.update(game.get_player(game.get_current_user()), GetMouseDelta());
+        std::vector<bool> keys_down = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB)};
+        const auto player = game.get_player(game.get_current_user());
+        if (player != nullptr) {
+            game.get_player(game.get_current_user())->move(dt, main_camera.get_direction(), main_camera.get_mode(), keys_down);
+            main_camera.update(game.get_player(game.get_current_user()), GetMouseDelta());
+            if (game.is_host())
+                game.sync_clients();
+        }
         BeginDrawing();
 
         BeginMode3D(main_camera.get_camera());
@@ -44,7 +50,7 @@ void Application::run(Game& game) {
 
         int fps_size = MeasureText(fps.c_str(),FONT_SIZE);
         GuiLabel((Rectangle){0,0,fps_size,FONT_SIZE},fps.c_str());
-
+        if (keys_down[4]) {display_scoreboard(game.get_players());}
         EndDrawing();
     }
 }
@@ -70,19 +76,31 @@ void Application::display_menu(Game& game, char* ip, char* port, bool& ip_focus,
     GuiTextBox(ip_box, ip, 15+1, ip_focus);
     GuiTextBox(port_box, port, 4+1, port_focus);
     if (GuiButton((Rectangle){SCREEN_WIDTH/2-text_width/2, SCREEN_HEIGHT/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Host")) {
-        DisableCursor();
-        game.host("darek","test world",ip,port);
-        auto player = game.get_player(game.get_current_user());
-        assert(player != nullptr);
-        player->on_join();
+        if (ip[0] == '\0' || port[0] == '\0') {
+        } else if (game.host("darek","test world",ip,port)) {
+            DisableCursor();
+        }
     } else if (GuiButton((Rectangle){SCREEN_WIDTH/2+text_width*0.1, SCREEN_HEIGHT/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Join")) {
-        DisableCursor();
-        game.join("darek",ip,port);
+        if (ip[0] == '\0' || port[0] == '\0') {
+        } else if (game.join("isabella",ip,port)) {
+            DisableCursor();
+        }
     }
     EndDrawing();
 }
 
-void Application::draw_objects(const std::vector<std::unique_ptr<Object3d>>& objects) {
+void Application::display_scoreboard(const std::vector<std::shared_ptr<Player>>& players) {
+    int lineHeight = FONT_SIZE + 4;
+    for (int i = 0; i < players.size(); ++i) {
+        std::string line = players[i]->get_username() + " (" +
+                       std::to_string((int)players[i]->get_position().x) + "," +
+                       std::to_string((int)players[i]->get_position().y) + "," +
+                       std::to_string((int)players[i]->get_position().z) + ")";
+        DrawText(line.c_str(), SCREEN_WIDTH/2-MeasureText(line.c_str(), FONT_SIZE)/2, i * lineHeight, FONT_SIZE, LIGHTGRAY);
+    }
+}
+
+void Application::draw_objects(const std::vector<std::shared_ptr<Object3d>>& objects) {
     for (const auto &object : objects)
         object->draw();
 }

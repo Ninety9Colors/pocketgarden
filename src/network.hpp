@@ -1,8 +1,10 @@
 #pragma once
-#include <memory>
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
+
+#include "event.hpp"
 
 struct _ENetHost;
 typedef struct _ENetHost ENetHost;
@@ -14,12 +16,16 @@ public:
     Network();
     ~Network();
 
-    void poll_events();
-    void host_server(std::string ip, std::string port);
-    void join_server(std::string ip, std::string port);
+    std::unique_ptr<Event> poll_events();
+    void send_packet(std::string data, bool reliable) const;
+    bool host_server(std::string ip, std::string port);
+    bool join_server(std::string ip, std::string port);
+    bool is_online(std::string username) const;
+    bool is_host() const;
 private:
     bool initialized_;
     int mode_; // 0 - none, 1 - host, 2 - join
-    std::unique_ptr<ENetHost> server_;
-    std::map<std::string, std::shared_ptr<ENetPeer>> players_;
+    ENetHost* host_;
+    ENetPeer* server_;
+    std::map<std::string, ENetPeer*> players_;
 };

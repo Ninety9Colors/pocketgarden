@@ -11,7 +11,8 @@ public:
 
     void run(Game& game);
     void display_menu(Game& game, char* ip, char* port, bool& ip_focus, bool& port_focus);
-    void draw_objects(const std::vector<std::unique_ptr<Object3d>>& objects);
+    void display_scoreboard(const std::vector<std::shared_ptr<Player>>& players);
+    void draw_objects(const std::vector<std::shared_ptr<Object3d>>& objects);
     void draw_players(std::string current_user, const std::vector<std::shared_ptr<Player>>& players, const MainCamera& main_camera);
     void exit();
 };
