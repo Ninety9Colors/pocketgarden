@@ -21,18 +21,21 @@ public:
 
     void load_object(std::shared_ptr<Object3d> object);
     void load_player(std::string username);
-    void load_player(std::string username, Vector3 position);
+    void load_player(std::string username, Vector3 position, bool online);
     const std::vector<std::shared_ptr<Object3d>>& get_objects();
     const std::vector<std::shared_ptr<Player>>& get_players();
     const std::shared_ptr<Player> get_player(std::string username);
 
     void sync_clients();
+    void sync_client(std::string target_username);
     bool is_host() const;
     bool is_online(std::string username) const;
 
     const std::string& get_current_user();
 
     void send_packet(std::string data, bool reliable) const;
+    void send_packet_excluding(std::string data, bool reliable, std::string exclude) const;
+    void send_packet(std::string data, bool reliable, std::string target_username) const;
 private:
     bool in_world_;
     std::vector<std::shared_ptr<Object3d>> objects_;

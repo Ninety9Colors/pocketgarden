@@ -64,9 +64,9 @@ void Game::load_player(std::string username) {
     }
 }
 
-void Game::load_player(std::string username, Vector3 position) {
+void Game::load_player(std::string username, Vector3 position, bool online) {
     if (get_player(username) == nullptr) {
-        players_.push_back(std::make_shared<Player>(username, position));
+        players_.push_back(std::make_shared<Player>(username, position, online));
     }
 }
 
@@ -95,6 +95,11 @@ void Game::sync_clients() {
     send_packet(event.make_packet(), true);
 };
 
+void Game::sync_client(std::string target_username) {
+    SyncEvent event {objects_, players_};
+    network_->send_packet(event.make_packet(), true, target_username);
+};
+
 bool Game::is_host() const {
     return network_->is_host();
 }
@@ -105,4 +110,12 @@ bool Game::is_online(std::string username) const {
 
 void Game::send_packet(std::string data, bool reliable) const {
     network_->send_packet(data, reliable);
+};
+
+void Game::send_packet_excluding(std::string data, bool reliable, std::string exclude) const {
+    network_->send_packet_excluding(data, reliable, exclude);
+};
+
+void Game::send_packet(std::string data, bool reliable, std::string target_username) const {
+    network_->send_packet(data, reliable, target_username);
 };

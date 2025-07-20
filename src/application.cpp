@@ -18,12 +18,22 @@ Application::Application() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "PocketLife");
 }
 
+void Application::tick(Game& game, const std::vector<bool>& keys_down, MainCamera& main_camera, float tps, bool moved) {
+    const auto player = game.get_player(game.get_current_user());
+    if (moved) {
+        PlayerMoveEvent move_event (player->get_username(), player->get_position().x, player->get_position().y, player->get_position().z);
+        game.send_packet(move_event.make_packet(), false);
+    }
+}
+
 void Application::run(Game& game) {
     MainCamera main_camera {};
     char ip[16] = {0};
     char port[5] = {0};
     bool ip_focus = false;
     bool port_focus = false;
+    float tps = 20.0f;
+    float dt_tick = 0;
     while (!WindowShouldClose()) {
         game.poll_events();
         if (!game.in_world()) {
@@ -31,15 +41,19 @@ void Application::run(Game& game) {
             continue;
         }
         float dt = GetFrameTime(); // seconds
+        dt_tick += dt;
         std::string fps = std::to_string((int)round(1.0/dt));
         std::vector<bool> keys_down = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB)};
         const auto player = game.get_player(game.get_current_user());
-        if (player != nullptr) {
-            game.get_player(game.get_current_user())->move(dt, main_camera.get_direction(), main_camera.get_mode(), keys_down);
-            main_camera.update(game.get_player(game.get_current_user()), GetMouseDelta());
-            if (game.is_host())
-                game.sync_clients();
+        if (player == nullptr)
+            continue;
+        bool moved = player->move(dt, main_camera.get_direction(), main_camera.get_mode(), keys_down);
+        while (dt_tick >= 1/tps) {
+            tick(game, keys_down, main_camera, tps, moved);
+            dt_tick -= 1/tps;
+            moved = false;
         }
+        main_camera.update(player, GetMouseDelta());
         BeginDrawing();
 
         BeginMode3D(main_camera.get_camera());
@@ -91,12 +105,16 @@ void Application::display_menu(Game& game, char* ip, char* port, bool& ip_focus,
 
 void Application::display_scoreboard(const std::vector<std::shared_ptr<Player>>& players) {
     int lineHeight = FONT_SIZE + 4;
+    int y_pos = 0;
     for (int i = 0; i < players.size(); ++i) {
-        std::string line = players[i]->get_username() + " (" +
-                       std::to_string((int)players[i]->get_position().x) + "," +
-                       std::to_string((int)players[i]->get_position().y) + "," +
-                       std::to_string((int)players[i]->get_position().z) + ")";
-        DrawText(line.c_str(), SCREEN_WIDTH/2-MeasureText(line.c_str(), FONT_SIZE)/2, i * lineHeight, FONT_SIZE, LIGHTGRAY);
+        if (players[i]->is_online()) {
+            std::string line = players[i]->get_username() + " (" +
+                        std::to_string((int)players[i]->get_position().x) + "," +
+                        std::to_string((int)players[i]->get_position().y) + "," +
+                        std::to_string((int)players[i]->get_position().z) + ")";
+            DrawText(line.c_str(), SCREEN_WIDTH/2-MeasureText(line.c_str(), FONT_SIZE)/2, y_pos, FONT_SIZE, LIGHTGRAY);
+            y_pos += lineHeight;
+        }
     }
 }
 

@@ -9,6 +9,8 @@ class Application {
 public:
     Application();
 
+    void tick(Game& game, const std::vector<bool>& keys_down, MainCamera& main_camera, float tps, bool moved);
+
     void run(Game& game);
     void display_menu(Game& game, char* ip, char* port, bool& ip_focus, bool& port_focus);
     void display_scoreboard(const std::vector<std::shared_ptr<Player>>& players);

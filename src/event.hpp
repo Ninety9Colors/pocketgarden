@@ -15,10 +15,30 @@ public:
     virtual ~Event() {};
 };
 
+class IAmHostEvent : public Event {
+public:
+    IAmHostEvent(std::string username);
+    ~IAmHostEvent();
+    std::string make_packet() override;
+    void receive(Game& game) override;
+private:
+    std::string username_;
+};
+
 class ConnectEvent : public Event {
 public:
     ConnectEvent(std::string username);
     ~ConnectEvent();
+    std::string make_packet() override;
+    void receive(Game& game) override;
+private:
+    std::string username_;
+};
+
+class DisconnectEvent : public Event {
+public:
+    DisconnectEvent(std::string username);
+    ~DisconnectEvent();
     std::string make_packet() override;
     void receive(Game& game) override;
 private:
@@ -35,4 +55,18 @@ public:
 private:
     std::string object_packet_string_;
     std::string player_packet_string_;
+};
+
+class PlayerMoveEvent : public Event {
+public:
+    PlayerMoveEvent(std::string username, float x, float y, float z);
+    PlayerMoveEvent(std::string packet);
+    ~PlayerMoveEvent();
+    std::string make_packet() override;
+    void receive(Game& game) override;
+private:
+    std::string username_;
+    float x_;
+    float y_;
+    float z_;
 };

@@ -11,6 +11,8 @@ public:
 
     void draw() const override;
     void draw_outline() const override;
+    virtual void draw_offset(float x, float y, float z) const override;
+    virtual void draw_outline_offset(float x, float y, float z) const override;
 
     void set_x(float new_x) override;
     void set_y(float new_y) override;

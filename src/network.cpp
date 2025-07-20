@@ -5,6 +5,7 @@
 #include "enet/enet.h"
 
 #include "network.hpp"
+#include "util.hpp"
 
 Network::Network() {
     mode_ = 0;
@@ -27,8 +28,7 @@ std::unique_ptr<Event> Network::poll_events() {
     ENetEvent event;
     std::vector<std::string> split {};
     int i = 0;
-    int r = 0;
-    int l = 0;
+    std::string* username;
     if (enet_host_service(host_,&event,0) > 0) {
         std::string data;
         switch (event.type) {
@@ -38,28 +38,39 @@ std::unique_ptr<Event> Network::poll_events() {
         case ENET_EVENT_TYPE_RECEIVE:
             data = std::string((char*)event.packet->data, event.packet->dataLength-1);
             //std::cout << "Packet of length " << event.packet->dataLength << " containing " << data << " received from " << event.peer->data << "\n";
-            while (r < data.size()) {
-                while (r < data.size() && data[r] != ' ')
-                    r++;
-                if (r >= data.size())
-                    break;
-                split.push_back(data.substr(l, r-l));
-                l=r+1;
-                r++;
-            }
-            split.push_back(data.substr(l, r-l));
-            if (split[0] == "ConnectEvent") {
-                std::cout << "Making connect event with player: " << split[1] << "\n";
-                result = std::make_unique<ConnectEvent>(split[1]);
+            split = split_string(data);
+            if (split[0] == "IAmHostEvent") {
+                result = std::make_unique<IAmHostEvent>(split[1]);
+                username = new std::string(split[1]);
                 players_[split[1]] = event.peer;
+                event.peer->data = (void*) (username);
+            } else if (split[0] == "ConnectEvent") {
+                result = std::make_unique<ConnectEvent>(split[1]);
+                if (is_host()) {
+                    username = new std::string(split[1]);
+                    players_[split[1]] = event.peer;
+                    event.peer->data = (void*) (username);
+                }
             } else if (split[0] == "SyncEvent") {
                 result = std::make_unique<SyncEvent>(data);
+            } else if (split[0] == "DisconnectEvent") {
+                result = std::make_unique<DisconnectEvent>(split[1]);
+                if (is_host()) {
+                    players_.erase(split[1]);
+                }
+            } else if (split[0] == "PlayerMoveEvent") {
+                result = std::make_unique<PlayerMoveEvent>(data);
             }
             enet_packet_destroy (event.packet);
             break;
         case ENET_EVENT_TYPE_DISCONNECT:
-            std::cout << "Disconnection: " << event.peer->address.host << "," << event.peer->address.port << ", data: " << event.peer->data << "\n";
-            event.peer -> data = NULL;
+            username = (std::string*)event.peer->data;
+            std::cout << "Disconnection: " << event.peer->address.host << "," << event.peer->address.port << ", data: " << *username << "\n";
+            result = std::make_unique<DisconnectEvent>(*username);
+            delete (std::string*)event.peer->data;
+            if (!is_host()) {
+                
+            }
         }
     }
     return std::move(result);
@@ -77,6 +88,34 @@ void Network::send_packet(std::string data, bool reliable) const {
     } else if (mode_ == 2) {
         assert(server_ != nullptr);
         enet_peer_send(server_, 0, packet);
+    }
+}
+
+void Network::send_packet_excluding(std::string data, bool reliable, std::string exclude) const {
+    if (mode_ == 0)
+        return;
+    ENetPacket* packet = enet_packet_create(data.c_str(), data.size()+1, reliable);
+    if (mode_ == 1) {
+        for (const auto& pair : players_) {
+            assert(pair.second != nullptr);
+            if (pair.first == exclude)
+                continue;
+            enet_peer_send(pair.second, 0, packet);
+        }
+    } else if (mode_ == 2) {
+        // RelayEvent
+    }
+}
+
+void Network::send_packet(std::string data, bool reliable, std::string target_username) const {
+    if (mode_ == 0)
+        return;
+    ENetPacket* packet = enet_packet_create(data.c_str(), data.size()+1, reliable);
+    if (mode_ == 1) {
+        assert(players_.find(target_username) != players_.end());
+        enet_peer_send(players_.at(target_username), 0, packet);
+    } else if (mode_ == 2) {
+        // RelayEvent
     }
 }
 

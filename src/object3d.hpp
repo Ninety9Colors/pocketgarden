@@ -5,6 +5,8 @@ class Object3d {
 public:
     virtual void draw() const = 0;
     virtual void draw_outline() const = 0;
+    virtual void draw_offset(float x, float y, float z) const = 0;
+    virtual void draw_outline_offset(float x, float y, float z) const = 0;
 
     virtual void set_x(float new_x) = 0;
     virtual void set_y(float new_y) = 0;

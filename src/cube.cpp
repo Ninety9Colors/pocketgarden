@@ -17,6 +17,14 @@ void Cube::draw_outline() const {
     DrawCubeWiresV(position_, size_, WHITE);
 };
 
+void Cube::draw_offset(float x, float y, float z) const {
+    DrawCubeV(Vector3{position_.x+x, position_.y+y, position_.z+z}, size_, color_);
+    Cube::draw_outline_offset(x,y,z);
+};
+void Cube::draw_outline_offset(float x, float y, float z) const {
+    DrawCubeWiresV(Vector3{position_.x+x, position_.y+y, position_.z+z}, size_, WHITE);
+};
+
 void Cube::set_x(float new_x) {
     position_.x = new_x;
 }
