@@ -6,8 +6,8 @@
 class Cube : public Object3d {
 public:
     Cube();
-    Cube(float x, float y, float z, float width, float height, float length, int r, int g, int b, int a);
-    Cube(Vector3 pos, Vector3 s, Color c);
+    Cube(std::string data);
+    Cube(Vector3 position, Vector3 size, float scale, Color color);
 
     void draw() const override;
     void draw_outline() const override;
@@ -21,9 +21,11 @@ public:
     float get_y() const override;
     float get_z() const override;
 
-    std::string get_packet_string() const override;
+    std::string to_string() const override;
 private:
+    Model model_;
     Vector3 position_;
     Vector3 size_;
+    float scale_;
     Color color_;
 };

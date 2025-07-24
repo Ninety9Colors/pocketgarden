@@ -52,6 +52,7 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "iostream": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "fstream": "cpp"
     }
 }

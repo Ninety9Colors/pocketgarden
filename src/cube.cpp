@@ -1,28 +1,40 @@
+#include <assert.h>
+#include <iostream>
+#include <string>
+
 #include "cube.hpp"
+#include "util.hpp"
 
 Cube::Cube() : position_{0.0f,0.0f,0.0f}, size_{0.0f,0.0f,0.0f}, color_(WHITE){};
-Cube::Cube(float x, float y, float z, float width, float height, float length, int r, int g, int b, int a) :
-    position_{x,y,z},
-    size_{width,height,length},
-    color_{r,g,b,a}
-{};
-Cube::Cube(Vector3 position, Vector3 size, Color color) : position_(position), size_(size), color_(color) {};
+Cube::Cube(std::string data) {
+    std::vector<std::string> split = split_string(data);
+    assert(split[0] == "Cube" && split.size() == 12);
+    position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
+    size_ = Vector3{std::stof(split[4]), std::stof(split[5]), std::stof(split[6])};
+    scale_ = std::stof(split[7]);
+    color_ = Color{(unsigned char)std::stoi(split[8]), (unsigned char)std::stoi(split[9]), (unsigned char)std::stoi(split[10]), (unsigned char)std::stoi(split[11])};
+    model_ = LoadModelFromMesh(GenMeshCube(size_.x, size_.y, size_.z));
+    std::cout << "Loaded cube with " << scale_ << "\n";
+}
+Cube::Cube(Vector3 position, Vector3 size, float scale, Color color) : position_(position), size_(size), scale_(scale), color_(color) {
+    model_ = LoadModelFromMesh(GenMeshCube(size_.x, size_.y, size_.z));
+};
 
 void Cube::draw() const {
-    DrawCubeV(position_, size_, color_);
+    DrawModel(model_, position_, scale_, color_);
     draw_outline();
 };
 
 void Cube::draw_outline() const {
-    DrawCubeWiresV(position_, size_, WHITE);
+    //TODO
 };
 
 void Cube::draw_offset(float x, float y, float z) const {
-    DrawCubeV(Vector3{position_.x+x, position_.y+y, position_.z+z}, size_, color_);
-    Cube::draw_outline_offset(x,y,z);
+    DrawModel(model_, Vector3{position_.x+x, position_.y+y, position_.z+z}, scale_, color_);
+    draw_outline_offset(x,y,z);
 };
 void Cube::draw_outline_offset(float x, float y, float z) const {
-    DrawCubeWiresV(Vector3{position_.x+x, position_.y+y, position_.z+z}, size_, WHITE);
+    //TODO
 };
 
 void Cube::set_x(float new_x) {
@@ -49,9 +61,10 @@ float Cube::get_z() const {
     return position_.z;
 }
 
-std::string Cube::get_packet_string() const {
+std::string Cube::to_string() const {
     return "Cube " + 
         std::to_string(position_.x) + " " + std::to_string(position_.y) + " " + std::to_string(position_.z) + " " +
-        std::to_string(size_.x) + " " + std::to_string(size_.x) + " " + std::to_string(size_.x) + " " +
+        std::to_string(size_.x) + " " + std::to_string(size_.y) + " " + std::to_string(size_.z) + " " +
+        std::to_string(scale_) + " " +
         std::to_string(color_.r) + " " + std::to_string(color_.g) + " " + std::to_string(color_.b) + " " + std::to_string(color_.a);
 }

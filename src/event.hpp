@@ -4,14 +4,16 @@
 #include <vector>
 
 class Game;
+class Network;
 class Player;
+class World;
 
 #include "object3d.hpp"
 
 class Event {
 public:
     virtual std::string make_packet() = 0;
-    virtual void receive(Game& game) = 0;
+    virtual void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) = 0;
     virtual ~Event() {};
 };
 
@@ -20,7 +22,7 @@ public:
     IAmHostEvent(std::string username);
     ~IAmHostEvent();
     std::string make_packet() override;
-    void receive(Game& game) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
 private:
     std::string username_;
 };
@@ -30,7 +32,7 @@ public:
     ConnectEvent(std::string username);
     ~ConnectEvent();
     std::string make_packet() override;
-    void receive(Game& game) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
 private:
     std::string username_;
 };
@@ -40,7 +42,7 @@ public:
     DisconnectEvent(std::string username);
     ~DisconnectEvent();
     std::string make_packet() override;
-    void receive(Game& game) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
 private:
     std::string username_;
 };
@@ -48,13 +50,12 @@ private:
 class SyncEvent : public Event {
 public:
     SyncEvent(std::string packet);
-    SyncEvent(const std::vector<std::shared_ptr<Object3d>>& objects, const std::vector<std::shared_ptr<Player>>& players);
+    SyncEvent(std::shared_ptr<World> world);
     ~SyncEvent();
     std::string make_packet() override;
-    void receive(Game& game) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
 private:
-    std::string object_packet_string_;
-    std::string player_packet_string_;
+    std::string world_string_;
 };
 
 class PlayerMoveEvent : public Event {
@@ -63,7 +64,7 @@ public:
     PlayerMoveEvent(std::string packet);
     ~PlayerMoveEvent();
     std::string make_packet() override;
-    void receive(Game& game) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
 private:
     std::string username_;
     float x_;

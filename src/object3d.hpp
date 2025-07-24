@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 class Object3d {
 public:
@@ -15,7 +16,13 @@ public:
     virtual float get_y() const = 0;
     virtual float get_z() const = 0;
 
-    virtual std::string get_packet_string() const = 0;
+    virtual std::string to_string() const = 0;
 
     virtual ~Object3d() {};
+};
+
+class Item : public Object3d {
+public:
+    virtual void use(const std::vector<bool>& keybinds) = 0;
+    virtual ~Item() {};
 };

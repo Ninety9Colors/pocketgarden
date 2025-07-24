@@ -37,7 +37,7 @@ std::unique_ptr<Event> Network::poll_events() {
             break;
         case ENET_EVENT_TYPE_RECEIVE:
             data = std::string((char*)event.packet->data, event.packet->dataLength-1);
-            //std::cout << "Packet of length " << event.packet->dataLength << " containing " << data << " received from " << event.peer->data << "\n";
+            std::cout << "Packet of length " << event.packet->dataLength << " containing " << data << " received from " << event.peer->data << "\n";
             split = split_string(data);
             if (split[0] == "IAmHostEvent") {
                 result = std::make_unique<IAmHostEvent>(split[1]);
@@ -68,9 +68,6 @@ std::unique_ptr<Event> Network::poll_events() {
             std::cout << "Disconnection: " << event.peer->address.host << "," << event.peer->address.port << ", data: " << *username << "\n";
             result = std::make_unique<DisconnectEvent>(*username);
             delete (std::string*)event.peer->data;
-            if (!is_host()) {
-                
-            }
         }
     }
     return std::move(result);
@@ -167,4 +164,68 @@ bool Network::is_online(std::string username) const {
 
 bool Network::is_host() const {
     return mode_ == 1;
+}
+
+void Network::disconnect() {
+    if (mode_ == 0)
+        return;
+    if (!is_host()) {
+        if (!server_) {
+            enet_host_destroy(host_);
+            mode_ = 0;
+            return;
+        }
+        ENetEvent event;
+        enet_peer_disconnect (server_, 0);
+        while (enet_host_service (host_, &event, 3000) > 0) {
+            switch (event.type) {
+            case ENET_EVENT_TYPE_RECEIVE:
+                enet_packet_destroy (event.packet);
+                break;
+            case ENET_EVENT_TYPE_DISCONNECT:
+                enet_host_destroy(host_);
+                mode_ = 0;
+                return;
+            }
+        }
+        enet_peer_reset(server_);
+    } else {
+        int disconnects = 0;
+        if (players_.size() == 0) {
+            enet_host_destroy(host_);
+            mode_ = 0;
+            return;
+        }
+        for (const auto& pair : players_) {
+            assert(pair.second != nullptr);
+            enet_peer_disconnect(pair.second, 0);
+        }
+        ENetEvent event;
+        while (enet_host_service (host_, &event, 3000) > 0) {
+            switch (event.type) {
+            case ENET_EVENT_TYPE_RECEIVE:
+                enet_packet_destroy (event.packet);
+                break;
+            case ENET_EVENT_TYPE_DISCONNECT:
+                std::cout << "Disconnection succeeded.\n";
+                disconnects++;
+                if (disconnects == players_.size()) {
+                    enet_host_destroy(host_);
+                    mode_ = 0;
+                    return;
+                }
+                break;
+            }
+        }
+        for (const auto& pair : players_) {
+            assert(pair.second != nullptr);
+            enet_peer_reset(pair.second);
+        }
+    }
+    mode_ = 0;
+    enet_host_destroy(host_);
+}
+
+void Network::delete_server() {
+    server_ = nullptr;
 }

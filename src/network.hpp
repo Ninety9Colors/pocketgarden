@@ -24,6 +24,9 @@ public:
     bool join_server(std::string ip, std::string port);
     bool is_online(std::string username) const;
     bool is_host() const;
+    void disconnect();
+
+    void delete_server();
 private:
     bool initialized_;
     int mode_; // 0 - none, 1 - host, 2 - join

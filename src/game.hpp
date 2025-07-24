@@ -6,6 +6,7 @@
 #include "network.hpp"
 #include "object3d.hpp"
 #include "player.hpp"
+#include "world.hpp"
 
 class Game {
 public:
@@ -15,33 +16,18 @@ public:
     void poll_events();
     bool host(std::string current_user, std::string save_file, char* ip, char* port);
     bool join(std::string current_user, char* ip, char* port);
-    void load_world(std::string save_file);
-    void save_world(std::string save_file);
-    void reset_world();
 
-    void load_object(std::shared_ptr<Object3d> object);
-    void load_player(std::string username);
-    void load_player(std::string username, Vector3 position, bool online);
-    const std::vector<std::shared_ptr<Object3d>>& get_objects();
-    const std::vector<std::shared_ptr<Player>>& get_players();
-    const std::shared_ptr<Player> get_player(std::string username);
-
-    void sync_clients();
-    void sync_client(std::string target_username);
-    bool is_host() const;
-    bool is_online(std::string username) const;
+    void disconnect();
 
     const std::string& get_current_user();
+    const std::shared_ptr<Player> get_current_player();
 
-    void send_packet(std::string data, bool reliable) const;
-    void send_packet_excluding(std::string data, bool reliable, std::string exclude) const;
-    void send_packet(std::string data, bool reliable, std::string target_username) const;
+    std::shared_ptr<Network> get_network() const;
+    std::shared_ptr<World> get_world() const;
 private:
     bool in_world_;
-    std::vector<std::shared_ptr<Object3d>> objects_;
-    std::vector<std::shared_ptr<Player>> players_;
-    Vector3 spawn_point_;
+    std::shared_ptr<World> world_;
     std::string current_user_;
 
-    std::unique_ptr<Network> network_;
+    std::shared_ptr<Network> network_;
 };
