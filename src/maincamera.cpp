@@ -76,6 +76,10 @@ const Vector3& MainCamera::get_direction() const {
     return direction_;
 }
 
+const Vector3& MainCamera::get_position() const {
+    return camera_.position;
+}
+
 int MainCamera::get_mode() const {
     return camera_mode_;
 }

@@ -13,6 +13,7 @@ public:
 
     const Camera3D& get_camera() const;
     const Vector3& get_direction() const;
+    const Vector3& get_position() const;
     int get_mode() const;
 
 private:

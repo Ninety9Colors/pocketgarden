@@ -1,6 +1,12 @@
 #pragma once
 #include <string>
+#include <memory>
 #include <vector>
+
+class Player;
+class World;
+class MainCamera;
+class BoundingBox;
 
 class Object3d {
 public:
@@ -16,6 +22,8 @@ public:
     virtual float get_y() const = 0;
     virtual float get_z() const = 0;
 
+    virtual BoundingBox get_bounding_box() const = 0;
+
     virtual std::string to_string() const = 0;
 
     virtual ~Object3d() {};
@@ -23,6 +31,6 @@ public:
 
 class Item : public Object3d {
 public:
-    virtual void use(const std::vector<bool>& keybinds) = 0;
+    virtual void use(const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds) = 0;
     virtual ~Item() {};
 };

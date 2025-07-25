@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <iostream>
 #include <string>
 
 #include "cube.hpp"
@@ -14,7 +13,6 @@ Cube::Cube(std::string data) {
     scale_ = std::stof(split[7]);
     color_ = Color{(unsigned char)std::stoi(split[8]), (unsigned char)std::stoi(split[9]), (unsigned char)std::stoi(split[10]), (unsigned char)std::stoi(split[11])};
     model_ = LoadModelFromMesh(GenMeshCube(size_.x, size_.y, size_.z));
-    std::cout << "Loaded cube with " << scale_ << "\n";
 }
 Cube::Cube(Vector3 position, Vector3 size, float scale, Color color) : position_(position), size_(size), scale_(scale), color_(color) {
     model_ = LoadModelFromMesh(GenMeshCube(size_.x, size_.y, size_.z));
@@ -59,6 +57,11 @@ float Cube::get_y() const {
 
 float Cube::get_z() const {
     return position_.z;
+}
+
+BoundingBox Cube::get_bounding_box() const {
+    return BoundingBox{Vector3{position_.x - size_.x/2*scale_, position_.y - size_.y/2*scale_, position_.z - size_.z/2*scale_},
+                        Vector3{position_.x + size_.x/2*scale_, position_.y + size_.y/2*scale_, position_.z + size_.z/2*scale_}};
 }
 
 std::string Cube::to_string() const {

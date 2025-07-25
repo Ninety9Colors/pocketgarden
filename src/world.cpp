@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <fstream>
 
+#include "move_tool.hpp"
 #include "world.hpp"
 #include "util.hpp"
 
@@ -17,6 +18,7 @@ void World::load_world(std::string save_file) {
         from_string(data);
     } else {
         load_object(std::make_shared<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,1.0f}, 1.0f, RED));
+        load_object(std::make_shared<MoveTool>(Vector3{0.0f, 3.0f, 0.0f}, 1.0f));
     }
 }
 
@@ -58,8 +60,11 @@ void World::from_string(std::string data) {
     std::vector<std::string> object_data = split_string(split[1]);
     std::vector<std::string> player_data = split_string(split[2]);
     for (const std::string& data : object_data) {
-        if (get_first_word(data) == "Cube") {
+        std::string first = get_first_word(data);
+        if (first == "Cube") {
             load_object(std::make_shared<Cube>(data));
+        } else if (first == "MoveTool") {
+            load_object(std::make_shared<MoveTool>(data));
         }
     }
     for (const std::string& data : player_data) {

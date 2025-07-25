@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "raylib.h"
 
 #include "object3d.hpp"
@@ -11,8 +12,8 @@ public:
 
     void draw() const override;
     void draw_outline() const override;
-    virtual void draw_offset(float x, float y, float z) const override;
-    virtual void draw_outline_offset(float x, float y, float z) const override;
+    void draw_offset(float x, float y, float z) const override;
+    void draw_outline_offset(float x, float y, float z) const override;
 
     void set_x(float new_x) override;
     void set_y(float new_y) override;
@@ -20,6 +21,8 @@ public:
     float get_x() const override;
     float get_y() const override;
     float get_z() const override;
+
+    BoundingBox get_bounding_box() const override;
 
     std::string to_string() const override;
 private:

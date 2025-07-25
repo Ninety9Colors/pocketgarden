@@ -10,6 +10,8 @@
 #include "cube.hpp"
 #include "maincamera.hpp"
 
+#include "move_tool.hpp"
+
 constexpr int DEFAULT_SCREEN_WIDTH = 1280;
 constexpr int DEFAULT_SCREEN_HEIGHT = 720;
 constexpr int FONT_SIZE = 40;
@@ -45,13 +47,15 @@ void Application::run(Game& game) {
         float dt = GetFrameTime(); // seconds
         dt_tick += dt;
         std::string fps = std::to_string((int)round(1.0/dt));
-        std::vector<bool> keys_down = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB), IsKeyDown(KEY_ESCAPE)};
+        std::vector<bool> keybinds = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB), IsKeyDown(KEY_ESCAPE),
+                                        IsMouseButtonPressed(MOUSE_LEFT_BUTTON), (GetMouseWheelMoveV().y > 0), (GetMouseWheelMoveV().y < 0)};
         const auto player = game.get_current_player();
         if (player == nullptr)
             continue;
-        bool moved = player->move(dt, main_camera.get_direction(), main_camera.get_mode(), keys_down);
+        bool moved = player->move(dt, main_camera.get_direction(), main_camera.get_mode(), keybinds);
+        std::dynamic_pointer_cast<MoveTool>(game.get_world()->get_objects()[1])->use(main_camera, player, game.get_world(), keybinds);
         while (dt_tick >= 1/tps) {
-            tick(game, keys_down, main_camera, tps, moved);
+            tick(game, keybinds, main_camera, tps, moved);
             dt_tick -= 1/tps;
             moved = false;
         }
@@ -66,9 +70,9 @@ void Application::run(Game& game) {
 
         int fps_size = MeasureText(fps.c_str(),FONT_SIZE);
         GuiLabel((Rectangle){0,0,fps_size,FONT_SIZE},fps.c_str());
-        if (keys_down[4]) {display_scoreboard(game.get_world()->get_players());}
+        if (keybinds[4]) {display_scoreboard(game.get_world()->get_players());}
         EndDrawing();
-        if (keys_down[5]) {game.disconnect();}
+        if (keybinds[5]) {game.disconnect();}
     }
     game.disconnect();
 }
