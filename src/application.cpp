@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <iostream>
+#include <map>
 #include <memory>
 
 #define RAYGUI_IMPLEMENTATION
@@ -22,12 +23,12 @@ Application::Application() {
     SetExitKey(KEY_NULL);
 }
 
-void Application::tick(Game& game, const std::vector<bool>& keys_down, MainCamera& main_camera, float tps, bool moved) {
+void Application::tick(std::map<std::string, std::shared_ptr<Event>>& event_buffer, Game& game) {
     const auto player = game.get_current_player();
-    if (moved) {
-        PlayerMoveEvent move_event (player->get_username(), player->get_position().x, player->get_position().y, player->get_position().z);
-        game.get_network()->send_packet(move_event.make_packet(), false);
+    for (const auto& p : event_buffer) {
+        game.get_network()->send_packet(p.second->make_packet(), p.second->reliable());
     }
+    event_buffer.clear();
 }
 
 void Application::run(Game& game) {
@@ -38,6 +39,8 @@ void Application::run(Game& game) {
     bool port_focus = false;
     float tps = 20.0f;
     float dt_tick = 0;
+    uint32_t total_ticks = 0;
+    std::map<std::string, std::shared_ptr<Event>> event_buffer {};
     while (!WindowShouldClose()) {
         game.poll_events();
         if (!game.in_world()) {
@@ -52,12 +55,11 @@ void Application::run(Game& game) {
         const auto player = game.get_current_player();
         if (player == nullptr)
             continue;
-        bool moved = player->move(dt, main_camera.get_direction(), main_camera.get_mode(), keybinds);
-        std::dynamic_pointer_cast<MoveTool>(game.get_world()->get_objects()[1])->use(main_camera, player, game.get_world(), keybinds);
-        while (dt_tick >= 1/tps) {
-            tick(game, keybinds, main_camera, tps, moved);
-            dt_tick -= 1/tps;
-            moved = false;
+        player->update(event_buffer, main_camera, game.get_world(), keybinds, dt);
+        if (dt_tick >= 1/tps) {
+            tick(event_buffer, game);
+            dt_tick = 0;
+            total_ticks++;
         }
         main_camera.update(player, GetMouseDelta());
         BeginDrawing();
@@ -130,9 +132,9 @@ void Application::display_scoreboard(const std::vector<std::shared_ptr<Player>>&
     }
 }
 
-void Application::draw_objects(const std::vector<std::shared_ptr<Object3d>>& objects) {
-    for (const auto &object : objects)
-        object->draw();
+void Application::draw_objects(const std::map<uint32_t, std::shared_ptr<Object3d>>& objects) {
+    for (const auto& p : objects)
+        p.second->draw();
 }
 
 void Application::draw_players(std::string current_user, const std::vector<std::shared_ptr<Player>>& players, const MainCamera& main_camera) {

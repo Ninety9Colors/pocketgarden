@@ -4,9 +4,11 @@
 #include "move_tool.hpp"
 #include "world.hpp"
 #include "util.hpp"
+#include <algorithm>
 
 World::World() {
     spawn_point_ = Vector3{0.0f,0.0f,0.0f};
+    next_id_ = 1;
 };
 
 void World::load_world(std::string save_file) {
@@ -18,7 +20,6 @@ void World::load_world(std::string save_file) {
         from_string(data);
     } else {
         load_object(std::make_shared<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,1.0f}, 1.0f, RED));
-        load_object(std::make_shared<MoveTool>(Vector3{0.0f, 3.0f, 0.0f}, 1.0f));
     }
 }
 
@@ -41,10 +42,9 @@ void World::set_alone(std::string current_user) {
 }
 
 std::string World::to_string() const{
-    std::string result = "World (";
-    for (int i = 0; i < objects_.size(); i++) {
-        const auto& object = objects_[i];
-        result += "(" + object->to_string() + ")";
+    std::string result = "World " + std::to_string(next_id_) + " (";
+    for (const auto& p : objects_) {
+        result += "(" + std::to_string(p.first) + " (" + p.second->to_string() + "))";
     }
     result += ")(";
     for (int i = 0; i < players_.size(); i++) {
@@ -57,15 +57,19 @@ std::string World::to_string() const{
 
 void World::from_string(std::string data) {
     std::vector<std::string> split = split_string(data);
-    std::vector<std::string> object_data = split_string(split[1]);
-    std::vector<std::string> player_data = split_string(split[2]);
+    next_id_ = std::stoi(split[1]);
+    std::vector<std::string> object_data = split_string(split[2]);
+    std::vector<std::string> player_data = split_string(split[3]);
     for (const std::string& data : object_data) {
-        std::string first = get_first_word(data);
-        if (first == "Cube") {
-            load_object(std::make_shared<Cube>(data));
-        } else if (first == "MoveTool") {
-            load_object(std::make_shared<MoveTool>(data));
+        std::vector<std::string> object_split = split_string(data);
+        std::string type = get_first_word(object_split[1]);
+        std::shared_ptr<Object3d> object;
+        if (type == "Cube") {
+            object = std::make_shared<Cube>(object_split[1]);
+        } else if (type == "MoveTool") {
+            object = std::make_shared<MoveTool>(object_split[1]);
         }
+        objects_[std::stoi(object_split[0])] = object;
     }
     for (const std::string& data : player_data) {
         load_player(std::make_shared<Player>(data));
@@ -73,7 +77,7 @@ void World::from_string(std::string data) {
 }
 
 void World::load_object(std::shared_ptr<Object3d> object) {
-    objects_.push_back(std::move(object));
+    objects_[next_id_++] = std::move(object);
 }
 
 void World::load_player(std::string username) {
@@ -88,7 +92,29 @@ void World::load_player(std::shared_ptr<Player> player) {
     }
 }
 
-const std::vector<std::shared_ptr<Object3d>>& World::get_objects() const {
+void World::update_object(uint32_t id, Vector3 position) {
+    assert(objects_.find(id) != objects_.end());
+    objects_[id]->set_x(position.x);
+    objects_[id]->set_y(position.y);
+    objects_[id]->set_z(position.z);
+}
+
+uint32_t World::get_object_id(std::shared_ptr<Object3d> object) {
+    for (const auto& p : objects_) {
+        if (object.get() == p.second.get()) {
+            return p.first;
+        }
+    }
+    return 0;
+}
+
+void World::remove_object(uint32_t id) {
+    if (id != 0) {
+        objects_.erase(id);
+    }
+}
+
+const std::map<uint32_t, std::shared_ptr<Object3d>>& World::get_objects() const {
     return objects_;
 }
 

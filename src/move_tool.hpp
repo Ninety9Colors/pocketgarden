@@ -9,6 +9,7 @@
 #include "maincamera.hpp"
 #include "player.hpp"
 #include "world.hpp"
+#include "event.hpp"
 
 class MoveTool : public Item {
 public:
@@ -16,7 +17,7 @@ public:
     MoveTool(std::string data);
     MoveTool(Vector3 position, float scale);
 
-    void use(const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds) override;
+    void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
 
     void draw() const override;
     void draw_outline() const override;
@@ -36,10 +37,11 @@ public:
 
     std::string to_string() const override;
 private:
-    std::shared_ptr<Object3d> held_item;
+    uint32_t held_id_;
     float holding_distance_;
 
     std::vector<std::unique_ptr<Object3d>> model_;
     Vector3 position_;
     float scale_;
+    float speed_;
 };

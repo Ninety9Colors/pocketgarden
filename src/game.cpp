@@ -37,7 +37,7 @@ bool Game::join(std::string current_user, char* ip, char* port) {
     bool success = network_->join_server(ip, port);
     if (success) {
         ConnectEvent event (current_user_);
-        network_->send_packet(event.make_packet(), true);
+        network_->send_packet(event.make_packet(), event.reliable());
         in_world_ = true;
     }
     return success;

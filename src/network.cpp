@@ -55,11 +55,10 @@ std::unique_ptr<Event> Network::poll_events() {
                 result = std::make_unique<SyncEvent>(data);
             } else if (split[0] == "DisconnectEvent") {
                 result = std::make_unique<DisconnectEvent>(split[1]);
-                if (is_host()) {
-                    players_.erase(split[1]);
-                }
             } else if (split[0] == "PlayerMoveEvent") {
                 result = std::make_unique<PlayerMoveEvent>(data);
+            } else if (split[0] == "ObjectMoveEvent") {
+                result = std::make_unique<ObjectMoveEvent>(data);
             }
             enet_packet_destroy (event.packet);
             break;
@@ -67,6 +66,9 @@ std::unique_ptr<Event> Network::poll_events() {
             username = (std::string*)event.peer->data;
             std::cout << "Disconnection: " << event.peer->address.host << "," << event.peer->address.port << ", data: " << *username << "\n";
             result = std::make_unique<DisconnectEvent>(*username);
+            if (is_host()) {
+                players_.erase(*username);
+            }
             delete (std::string*)event.peer->data;
         }
     }
