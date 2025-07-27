@@ -33,42 +33,48 @@ MoveTool::MoveTool(std::string data) {
     speed_ = 2.0f;
 }
 
-MoveTool::MoveTool(Vector3 position, float scale) : position_(position), scale_(scale_), holding_distance_(2.0f) {
-    model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,2.0f}, 0.2f, YELLOW));
-    model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f, LIGHTGRAY));
+MoveTool::MoveTool(Vector3 position, float scale) : position_(position), scale_(scale), holding_distance_(2.0f) {
+    model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,2.0f}, 0.2f*scale_, YELLOW));
+    model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f*scale_, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
 }
 
 void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
+    constexpr float epsilon = 0.02f;
     if (in_use()) {
         std::shared_ptr<Object3d> held_item = world->get_objects().at(held_id_);
         if (keybinds[7])
-            holding_distance_ += 0.1f;
+            holding_distance_ += 0.5f;
         else if (keybinds[8])
-            holding_distance_ -= 0.1f;
+            holding_distance_ -= 0.5f;
+        float x = held_item->get_x();
+        float y = held_item->get_y();
+        float z = held_item->get_z();
         float target_x = camera.get_position().x + camera.get_direction().x * holding_distance_;
-        float target_y = camera.get_position().y + camera.get_direction().y * holding_distance_;
+        float target_y = std::max(0.0f,camera.get_position().y + camera.get_direction().y * holding_distance_);
         float target_z = camera.get_position().z + camera.get_direction().z * holding_distance_;
-        float move_magnitude = std::sqrt(std::pow(held_item->get_x() - target_x,2) + std::pow(held_item->get_y() - target_y,2) + std::pow(held_item->get_z() - target_z,2));
-        Vector3 move_direction = {(-held_item->get_x() + target_x)/move_magnitude, (-held_item->get_y() + target_y)/move_magnitude, (-held_item->get_z() + target_z)/move_magnitude};
-        float move_distance = speed_*dt*(move_magnitude);
+        if ((x <= (target_x-epsilon) || x >= (target_x+epsilon)) || (y <= (target_y-epsilon) || y >= (target_y+epsilon)) || (z <= (target_z-epsilon) || z >= (target_z+epsilon))) {
+            float move_magnitude = std::sqrt(std::pow(x - target_x,2) + std::pow(y - target_y,2) + std::pow(z - target_z,2));
+            Vector3 move_direction = {(target_x-x)/move_magnitude, (target_y-y)/move_magnitude, (target_z-z)/move_magnitude};
+            float move_distance = speed_*dt*(move_magnitude);
 
-        if (move_magnitude <= move_distance) {
-            held_item->set_x(target_x);
-            held_item->set_y(target_y);
-            held_item->set_z(target_z);
-        } else {
-            held_item->set_x(held_item->get_x() + move_direction.x*move_distance);
-            held_item->set_y(held_item->get_y() + move_direction.y*move_distance);
-            held_item->set_z(held_item->get_z() + move_direction.z*move_distance);
-        }
-        if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
-            std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->update(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
-        } else {
-            ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{});
-            move_event.update(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
-            event_buffer["ObjectMoveEvent"] = std::make_shared<ObjectMoveEvent>(move_event);
+            if (move_magnitude <= epsilon) {
+                held_item->set_x(target_x);
+                held_item->set_y(target_y);
+                held_item->set_z(target_z);
+            } else {
+                held_item->set_x(held_item->get_x() + move_direction.x*move_distance);
+                held_item->set_y(held_item->get_y() + move_direction.y*move_distance);
+                held_item->set_z(held_item->get_z() + move_direction.z*move_distance);
+            }
+            if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
+                std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
+            } else {
+                ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{}, user->get_username());
+                move_event.add(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
+                event_buffer["ObjectMoveEvent"] = std::make_shared<ObjectMoveEvent>(move_event);
+            }
         }
     }
     if (!keybinds[6])
@@ -95,14 +101,19 @@ void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, 
         if (nearest != 0) {
             held_id_ = nearest;
             std::shared_ptr<Object3d> held_item = world->get_objects().at(held_id_);
+            float x = held_item->get_x();
+            float y = held_item->get_y();
+            float z = held_item->get_z();
             float target_x = camera.get_position().x + camera.get_direction().x * holding_distance_;
-            float target_y = camera.get_position().y + camera.get_direction().y * holding_distance_;
+            float target_y = std::max(0.0f,camera.get_position().y + camera.get_direction().y * holding_distance_);
             float target_z = camera.get_position().z + camera.get_direction().z * holding_distance_;
-            float move_magnitude = std::sqrt(std::pow(held_item->get_x() - target_x,2) + std::pow(held_item->get_y() - target_y,2) + std::pow(held_item->get_z() - target_z,2));
-            Vector3 move_direction = {(-held_item->get_x() + target_x)/move_magnitude, (-held_item->get_y() + target_y)/move_magnitude, (-held_item->get_z() + target_z)/move_magnitude};
+            if ((x >= (target_x-epsilon) && x <= (target_x+epsilon)) && (y >= (target_y-epsilon) && y <= (target_y+epsilon)) && (z >= (target_z-epsilon) && z <= (target_z+epsilon)))
+                return;
+            float move_magnitude = std::sqrt(std::pow(x - target_x,2) + std::pow(y - target_y,2) + std::pow(z - target_z,2));
+            Vector3 move_direction = {(target_x-x)/move_magnitude, (target_y-y)/move_magnitude, (target_z-z)/move_magnitude};
             float move_distance = speed_*dt*(move_magnitude);
 
-            if (move_magnitude <= move_distance) {
+            if (move_magnitude <= epsilon) {
                 held_item->set_x(target_x);
                 held_item->set_y(target_y);
                 held_item->set_z(target_z);
@@ -112,10 +123,10 @@ void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, 
                 held_item->set_z(held_item->get_z() + move_direction.z*move_distance);
             }
             if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
-                std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->update(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
+                std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
             } else {
-                ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{});
-                move_event.update(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
+                ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{}, user->get_username());
+                move_event.add(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
                 event_buffer["ObjectMoveEvent"] = std::make_shared<ObjectMoveEvent>(move_event);
             }
         }
@@ -127,6 +138,7 @@ void MoveTool::draw() const {
         object->draw_offset(position_.x, position_.y, position_.z);
 }
 void MoveTool::draw_outline() const {};
+
 void MoveTool::draw_offset(float x, float y, float z) const {
     for (const auto& object : model_)
         object->draw_offset(position_.x+x, position_.y+y, position_.z+z);
@@ -153,8 +165,22 @@ float MoveTool::get_z() const {
 }
 
 BoundingBox MoveTool::get_bounding_box() const {
-    //TODO IMPLEMENT
-    return BoundingBox();
+    float max_x = -std::numeric_limits<float>::infinity();
+    float min_x = std::numeric_limits<float>::infinity();
+    float max_y = -std::numeric_limits<float>::infinity();
+    float min_y = std::numeric_limits<float>::infinity();
+    float max_z = -std::numeric_limits<float>::infinity();
+    float min_z = std::numeric_limits<float>::infinity();
+    for (const auto& object : model_) {
+        BoundingBox box = object->get_bounding_box();
+        max_x = std::max(max_x, box.max.x);
+        max_y = std::max(max_y, box.max.y);
+        max_z = std::max(max_z, box.max.z);
+        min_x = std::min(min_x, box.min.x);
+        min_y = std::min(min_y, box.min.y);
+        min_z = std::min(min_z, box.min.z);
+    }
+    return BoundingBox{Vector3{position_.x+min_x, position_.y+min_y, position_.z+min_z}, Vector3{position_.x+max_x, position_.y+max_y, position_.z+max_z}};
 }
 
 bool MoveTool::in_use() const {

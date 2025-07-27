@@ -21,6 +21,7 @@ Application::Application() {
     InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "PocketLife");
     SetWindowSize(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
     SetExitKey(KEY_NULL);
+    event_buffer_ = {};
 }
 
 void Application::tick(std::map<std::string, std::shared_ptr<Event>>& event_buffer, Game& game) {
@@ -40,7 +41,6 @@ void Application::run(Game& game) {
     float tps = 20.0f;
     float dt_tick = 0;
     uint32_t total_ticks = 0;
-    std::map<std::string, std::shared_ptr<Event>> event_buffer {};
     while (!WindowShouldClose()) {
         game.poll_events();
         if (!game.in_world()) {
@@ -51,13 +51,13 @@ void Application::run(Game& game) {
         dt_tick += dt;
         std::string fps = std::to_string((int)round(1.0/dt));
         std::vector<bool> keybinds = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB), IsKeyDown(KEY_ESCAPE),
-                                        IsMouseButtonPressed(MOUSE_LEFT_BUTTON), (GetMouseWheelMoveV().y > 0), (GetMouseWheelMoveV().y < 0)};
+                                        IsMouseButtonPressed(MOUSE_LEFT_BUTTON), (GetMouseWheelMoveV().y > 0), (GetMouseWheelMoveV().y < 0), IsKeyPressed(KEY_SPACE)};
         const auto player = game.get_current_player();
         if (player == nullptr)
             continue;
-        player->update(event_buffer, main_camera, game.get_world(), keybinds, dt);
+        player->update(event_buffer_, main_camera, game.get_world(), keybinds, dt);
         if (dt_tick >= 1/tps) {
-            tick(event_buffer, game);
+            tick(event_buffer_, game);
             dt_tick = 0;
             total_ticks++;
         }
@@ -139,9 +139,13 @@ void Application::draw_objects(const std::map<uint32_t, std::shared_ptr<Object3d
 
 void Application::draw_players(std::string current_user, const std::vector<std::shared_ptr<Player>>& players, const MainCamera& main_camera) {
     for (const auto &player : players)
-        player->draw(current_user, main_camera.get_mode());
+        player->draw(current_user, main_camera);
 }
 
 void Application::exit() {
     CloseWindow();
+}
+
+std::map<std::string, std::shared_ptr<Event>>& Application::get_event_buffer() {
+    return event_buffer_;
 }

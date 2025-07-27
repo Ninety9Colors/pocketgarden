@@ -17,4 +17,8 @@ public:
     void draw_objects(const std::map<uint32_t, std::shared_ptr<Object3d>>& objects);
     void draw_players(std::string current_user, const std::vector<std::shared_ptr<Player>>& players, const MainCamera& main_camera);
     void exit();
+
+    std::map<std::string, std::shared_ptr<Event>>& get_event_buffer();
+private:
+    std::map<std::string, std::shared_ptr<Event>> event_buffer_;
 };

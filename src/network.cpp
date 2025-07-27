@@ -59,6 +59,14 @@ std::unique_ptr<Event> Network::poll_events() {
                 result = std::make_unique<PlayerMoveEvent>(data);
             } else if (split[0] == "ObjectMoveEvent") {
                 result = std::make_unique<ObjectMoveEvent>(data);
+            } else if (split[0] == "ObjectRemoveEvent") {
+                result = std::make_unique<ObjectRemoveEvent>(data); 
+            } else if (split[0] == "ObjectLoadEvent") {
+                result = std::make_unique<ObjectLoadEvent>(data); 
+            } else if (split[0] == "ItemPickupEvent") {
+                result = std::make_unique<ItemPickupEvent>(data); 
+            } else if (split[0] == "ItemDropEvent") {
+                result = std::make_unique<ItemDropEvent>(data);
             }
             enet_packet_destroy (event.packet);
             break;
@@ -88,6 +96,7 @@ void Network::send_packet(std::string data, bool reliable) const {
         assert(server_ != nullptr);
         enet_peer_send(server_, 0, packet);
     }
+    std::cout << "Sent packet with: " << data << "\n";
 }
 
 void Network::send_packet_excluding(std::string data, bool reliable, std::string exclude) const {

@@ -20,6 +20,7 @@ void World::load_world(std::string save_file) {
         from_string(data);
     } else {
         load_object(std::make_shared<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,1.0f}, 1.0f, RED));
+        load_object(std::make_shared<MoveTool>(Vector3{0.0f, 2.0f, 0.0f}, 1.0f));
     }
 }
 
@@ -76,8 +77,15 @@ void World::from_string(std::string data) {
     }
 }
 
-void World::load_object(std::shared_ptr<Object3d> object) {
+uint32_t World::load_object(std::shared_ptr<Object3d> object) {
     objects_[next_id_++] = std::move(object);
+    return next_id_-1;
+}
+
+void World::load_object(std::shared_ptr<Object3d> object, uint32_t id) {
+    assert(objects_.find(id) == objects_.end());
+    objects_[id] = std::move(object);
+    next_id_ = std::max(id+1, next_id_);
 }
 
 void World::load_player(std::string username) {

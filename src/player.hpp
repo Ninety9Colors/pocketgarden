@@ -18,16 +18,16 @@ public:
     Player(std::string username, Vector3 position);
     Player(std::string data);
 
-    void draw(std::string current_user, int camera_mode) const;
+    void draw(std::string current_user, const MainCamera& camera) const;
     bool move(MainCamera& camera, const std::vector<bool>& keybinds, float dt);
-    bool pickup(std::shared_ptr<World> world, const std::vector<bool>& keybinds);
     void set_position(float x, float y, float z);
     void add_to_model(std::unique_ptr<Object3d>&& object);
 
     void update(std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
 
-    void pickup_item(std::shared_ptr<Item> item, std::shared_ptr<World> world);
-    void drop_item(std::shared_ptr<World> world);
+    uint32_t try_pickup(MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds) const;
+    void set_item(std::shared_ptr<Item> item);
+    std::shared_ptr<Item> drop_item(std::shared_ptr<World> world);
     void use_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
 
     void on_join();
@@ -43,6 +43,7 @@ public:
 private:
     std::string username_;
     float speed_;
+    float pickup_range_;
     bool online_;
 
     Cube hitbox_;

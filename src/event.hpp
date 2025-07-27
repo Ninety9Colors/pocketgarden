@@ -83,13 +83,67 @@ private:
 
 class ObjectMoveEvent : public Event {
 public:
-    ObjectMoveEvent(std::map<uint32_t, Vector3> updates);
+    ObjectMoveEvent(std::map<uint32_t, Vector3> objects, std::string sender);
     ObjectMoveEvent(std::string packet);
     ~ObjectMoveEvent();
     std::string make_packet() const override;
     bool reliable() const override;
     void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
-    void update(uint32_t id, Vector3 position);
+    void add(uint32_t id, Vector3 position);
 private:
-    std::map<uint32_t, Vector3> updates_;
+    std::map<uint32_t, Vector3> objects_;
+    std::string sender_;
+};
+
+class ObjectRemoveEvent : public Event {
+public:
+    ObjectRemoveEvent(std::vector<uint32_t> indices, std::string sender);
+    ObjectRemoveEvent(std::string packet);
+    ~ObjectRemoveEvent();
+    std::string make_packet() const override;
+    bool reliable() const override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
+    void add(uint32_t id);
+private:
+    std::vector<uint32_t> indices_;
+    std::string sender_;
+};
+
+class ObjectLoadEvent : public Event {
+public:
+    ObjectLoadEvent(std::map<uint32_t, std::shared_ptr<Object3d>> objects, std::string sender);
+    ObjectLoadEvent(std::string packet);
+    ~ObjectLoadEvent();
+    std::string make_packet() const override;
+    bool reliable() const override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
+    void add(uint32_t id, std::shared_ptr<Object3d> object);
+private:
+    std::map<uint32_t, std::shared_ptr<Object3d>> objects_;
+    std::string sender_;
+};
+
+class ItemPickupEvent : public Event {
+public:
+    ItemPickupEvent(std::shared_ptr<Item> item, std::string player);
+    ItemPickupEvent(std::string packet);
+    ~ItemPickupEvent();
+    std::string make_packet() const override;
+    bool reliable() const override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
+private:
+    std::shared_ptr<Item> item_;
+    std::string player_;
+};
+
+class ItemDropEvent : public Event {
+public:
+    ItemDropEvent(const std::shared_ptr<Player>& player);
+    ItemDropEvent(std::string packet);
+    ~ItemDropEvent();
+    std::string make_packet() const override;
+    bool reliable() const override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
+private:
+    std::string player_;
 };

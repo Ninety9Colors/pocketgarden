@@ -21,7 +21,8 @@ public:
     std::string to_string() const;
     void from_string(std::string data);
 
-    void load_object(std::shared_ptr<Object3d> object);
+    uint32_t load_object(std::shared_ptr<Object3d> object);
+    void load_object(std::shared_ptr<Object3d> object, uint32_t id);
     void load_player(std::string username);
     void load_player(std::shared_ptr<Player> player);
     void update_object(uint32_t id, Vector3 position);

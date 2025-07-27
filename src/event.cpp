@@ -5,6 +5,7 @@
 
 #include "event.hpp"
 #include "game.hpp"
+#include "move_tool.hpp"
 #include "player.hpp"
 #include "util.hpp"
 
@@ -43,10 +44,9 @@ void ConnectEvent::receive(std::string receiving_user, std::shared_ptr<World> wo
         world->load_player(username_);
         world->get_player(username_)->on_join();
         SyncEvent sync {world};
-        ConnectEvent relay (username_);
         IAmHostEvent server_connect (receiving_user);
         network->send_packet(sync.make_packet(), sync.reliable(), username_);
-        network->send_packet_excluding(relay.make_packet(),relay.reliable(),username_);
+        network->send_packet_excluding(make_packet(),reliable(),username_);
         network->send_packet(server_connect.make_packet(),server_connect.reliable(),username_);
     } else {
         world->load_player(username_);
@@ -68,8 +68,7 @@ void DisconnectEvent::receive(std::string receiving_user, std::shared_ptr<World>
     assert(world->get_player(username_) != nullptr);
     if (network->is_host()) {
         world->get_player(username_)->on_disconnect();
-        DisconnectEvent disconnect_event (username_);
-        network->send_packet(disconnect_event.make_packet(), disconnect_event.reliable());
+        network->send_packet(make_packet(), reliable());
     } else {
         network->delete_server();
         game.disconnect();
@@ -126,28 +125,138 @@ void PlayerMoveEvent::receive(std::string receiving_user, std::shared_ptr<World>
     }
 }
 
-ObjectMoveEvent::ObjectMoveEvent(std::map<uint32_t, Vector3> updates) : updates_(std::move(updates)) {};
+ObjectMoveEvent::ObjectMoveEvent(std::map<uint32_t, Vector3> objects, std::string sender) : objects_(std::move(objects)), sender_(sender) {};
 ObjectMoveEvent::ObjectMoveEvent(std::string packet){
     std::vector<std::string> split = split_string(packet);
-    for (int i = 1; i < split.size(); i++) {
+    sender_ = split[1];
+    for (int i = 2; i < split.size(); i++) {
         std::vector<std::string> update = split_string(split[i]);
-        updates_[std::stoi(update[0])] = Vector3{std::stof(update[1]), std::stof(update[2]), std::stof(update[3])};
+        objects_[std::stoi(update[0])] = Vector3{std::stof(update[1]), std::stof(update[2]), std::stof(update[3])};
     }
 }
 ObjectMoveEvent::~ObjectMoveEvent() {};
 
 std::string ObjectMoveEvent::make_packet() const {
-    std::string result = "ObjectMoveEvent ";
-    for (const auto& p : updates_)
+    std::string result = "ObjectMoveEvent " + sender_ + " ";
+    for (const auto& p : objects_)
         result += "(" + std::to_string(p.first) + " " + std::to_string(p.second.x) + " " + std::to_string(p.second.y) + " " + std::to_string(p.second.z) + ")";
     return result;
 }
 bool ObjectMoveEvent::reliable() const {return false;}
 
 void ObjectMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
-    for (const auto& p : updates_)
+    for (const auto& p : objects_)
         world->update_object(p.first, p.second);
+    if (network->is_host()) {
+        network->send_packet_excluding(make_packet(), reliable(), sender_);
+    }
 }
-void ObjectMoveEvent::update(uint32_t id, Vector3 position){
-    updates_[id] = position;
+void ObjectMoveEvent::add(uint32_t id, Vector3 position){
+    objects_[id] = position;
+}
+
+ObjectRemoveEvent::ObjectRemoveEvent(std::vector<uint32_t> indices, std::string sender) : indices_(std::move(indices)), sender_(sender) {}
+ObjectRemoveEvent::ObjectRemoveEvent(std::string packet) {
+    std::vector<std::string> split = split_string(packet);
+    sender_ = split[1];
+    for (int i = 2; i < split.size(); i++)
+        add(std::stoi(split[i]));
+}
+ObjectRemoveEvent::~ObjectRemoveEvent() {}
+std::string ObjectRemoveEvent::make_packet() const {
+    std::string result = "ObjectRemoveEvent " + sender_;
+    for (uint32_t index : indices_)
+        result += " " + std::to_string(index);
+    return result;
+}
+bool ObjectRemoveEvent::reliable() const {return true;}
+
+void ObjectRemoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+    for (uint32_t index : indices_)
+        world->remove_object(index);
+    if (network->is_host())
+        network->send_packet_excluding(make_packet(), reliable(), sender_);
+}
+
+void ObjectRemoveEvent::add(uint32_t id) {
+    indices_.push_back(id);
+}
+
+ObjectLoadEvent::ObjectLoadEvent(std::map<uint32_t, std::shared_ptr<Object3d>> objects, std::string sender) : objects_{std::move(objects)}, sender_(sender) {}
+ObjectLoadEvent::ObjectLoadEvent(std::string packet) {
+    std::vector<std::string> split = split_string(packet);
+    sender_ = split[1];
+    for (int i = 2; i < split.size(); i++) {
+        std::vector<std::string> a = split_string(split[i]);
+        std::string type = get_first_word(a[1]);
+        std::shared_ptr<Object3d> object;
+        if (type == "Cube") {
+            object = std::make_shared<Cube>(a[1]);
+        } else if (type == "MoveTool") {
+            object = std::make_shared<MoveTool>(a[1]);
+        }
+        add((uint32_t) std::stoi(a[0]), std::move(object));
+    }
+}
+ObjectLoadEvent::~ObjectLoadEvent() {}
+std::string ObjectLoadEvent::make_packet() const {
+    std::string result = "ObjectLoadEvent " + sender_ + " ";
+    for (const auto& p : objects_)
+        result += "(" + std::to_string(p.first) + " (" + p.second->to_string() + "))";
+    return result;
+}
+bool ObjectLoadEvent::reliable() const {
+    return true;
+}
+void ObjectLoadEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+    for (const auto& p : objects_)
+        world->load_object(p.second, p.first);
+    if (network->is_host())
+        network->send_packet_excluding(make_packet(), reliable(), sender_);
+}
+void ObjectLoadEvent::add(uint32_t id, std::shared_ptr<Object3d> object) {
+    assert(objects_.find(id) == objects_.end());
+    objects_[id] = object;
+}
+
+ItemPickupEvent::ItemPickupEvent(std::shared_ptr<Item> item, std::string player) : item_(std::move(item)), player_(player) {}
+ItemPickupEvent::ItemPickupEvent(std::string packet) {
+    std::vector<std::string> split = split_string(packet);
+    std::string type = get_first_word(split[2]);
+    player_ = split[1];
+    if (type == "MoveTool") {
+        item_ = std::make_shared<MoveTool>(split[2]);
+    }
+}
+ItemPickupEvent::~ItemPickupEvent() {}
+std::string ItemPickupEvent::make_packet() const {
+    std::string result = "ItemPickupEvent " + player_ + " (" + item_->to_string() + ")";
+    return result;
+}
+bool ItemPickupEvent::reliable() const {
+    return true;
+}
+void ItemPickupEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+    world->get_player(player_)->set_item(item_);
+    if (network->is_host())
+        network->send_packet_excluding(make_packet(), reliable(), player_);
+}
+
+ItemDropEvent::ItemDropEvent(const std::shared_ptr<Player>& player) : player_(player->get_username()) {}
+ItemDropEvent::ItemDropEvent(std::string packet) {
+    std::vector<std::string> split = split_string(packet);
+    player_ = split[1];
+}
+ItemDropEvent::~ItemDropEvent() {}
+std::string ItemDropEvent::make_packet() const {
+    std::string result = "ItemDropEvent " + player_;
+    return result;
+}
+bool ItemDropEvent::reliable() const {
+    return true;
+}
+void ItemDropEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+    world->get_player(player_)->drop_item(world);
+    if (network->is_host())
+        network->send_packet_excluding(make_packet(), reliable(), player_);
 }
