@@ -45,7 +45,9 @@ void ConnectEvent::receive(std::string receiving_user, std::shared_ptr<World> wo
         world->get_player(username_)->on_join();
         SyncEvent sync {world};
         IAmHostEvent server_connect (receiving_user);
+        WeatherUpdateEvent weather_update (world->get_weather()->get_weather_id(), world->get_weather()->get_sunrise(), world->get_weather()->get_sunset());
         network->send_packet(sync.make_packet(), sync.reliable(), username_);
+        network->send_packet(weather_update.make_packet(), weather_update.reliable(), username_);
         network->send_packet_excluding(make_packet(),reliable(),username_);
         network->send_packet(server_connect.make_packet(),server_connect.reliable(),username_);
     } else {
@@ -259,4 +261,25 @@ void ItemDropEvent::receive(std::string receiving_user, std::shared_ptr<World> w
     world->get_player(player_)->drop_item(world);
     if (network->is_host())
         network->send_packet_excluding(make_packet(), reliable(), player_);
+}
+
+WeatherUpdateEvent::WeatherUpdateEvent(int id, int64_t sunrise, int64_t sunset) : weather_id_(id), sunrise_(sunrise), sunset_(sunset) {}
+WeatherUpdateEvent::WeatherUpdateEvent(std::string packet) {
+    std::vector<std::string> split = split_string(packet);
+    weather_id_ = std::stoi(split[1]);
+    sunrise_ = std::stoi(split[2]);
+    sunset_ = std::stoi(split[3]);
+}
+WeatherUpdateEvent::~WeatherUpdateEvent() {}
+std::string WeatherUpdateEvent::make_packet() const {
+    return "WeatherUpdateEvent " + std::to_string(weather_id_) + " " + std::to_string(sunrise_) + " " + std::to_string(sunset_);
+}
+bool WeatherUpdateEvent::reliable() const {
+    return true;
+}
+void WeatherUpdateEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+    if (!network->is_host()) {
+        game.get_world()->get_weather()->set_weather_id(weather_id_);
+        game.get_world()->get_weather()->set_suntimes(sunrise_, sunset_);
+    }
 }

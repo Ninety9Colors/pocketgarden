@@ -67,6 +67,8 @@ std::unique_ptr<Event> Network::poll_events() {
                 result = std::make_unique<ItemPickupEvent>(data); 
             } else if (split[0] == "ItemDropEvent") {
                 result = std::make_unique<ItemDropEvent>(data);
+            } else if (split[0] == "WeatherUpdateEvent") {
+                result = std::make_unique<WeatherUpdateEvent>(data);
             }
             enet_packet_destroy (event.packet);
             break;

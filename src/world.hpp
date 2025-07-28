@@ -8,6 +8,7 @@
 
 #include "object3d.hpp"
 #include "player.hpp"
+#include "weather.hpp"
 
 class World {
 public:
@@ -28,12 +29,17 @@ public:
     void update_object(uint32_t id, Vector3 position);
     uint32_t get_object_id(std::shared_ptr<Object3d> object);
     void remove_object(uint32_t id);
+
     const std::map<uint32_t, std::shared_ptr<Object3d>>& get_objects() const;
     const std::vector<std::shared_ptr<Player>>& get_players() const;
     const std::shared_ptr<Player> get_player(std::string username) const;
+    std::shared_ptr<Weather> get_weather();
+    std::shared_ptr<Object3d> get_sun();
 private:
     uint32_t next_id_;
+    std::shared_ptr<Weather> weather_;
     std::map<uint32_t, std::shared_ptr<Object3d>> objects_;
     std::vector<std::shared_ptr<Player>> players_;
+    std::shared_ptr<Object3d> sun_;
     Vector3 spawn_point_;
 };

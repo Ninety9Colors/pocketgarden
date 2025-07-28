@@ -47,7 +47,7 @@ void Player::draw(std::string current_user, const MainCamera& camera) const {
             object->draw_offset(get_position().x, get_position().y, get_position().z);
         hitbox_.draw_outline();
     }
-    if (selected_item_ != nullptr) {
+    if (selected_item_ != nullptr && online_) {
         selected_item_->draw_offset(get_position().x, get_position().y + 2.0f, get_position().z);
     }
 }

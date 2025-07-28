@@ -147,3 +147,17 @@ public:
 private:
     std::string player_;
 };
+
+class WeatherUpdateEvent : public Event {
+public:
+    WeatherUpdateEvent(int id, int64_t sunrise, int64_t sunset);
+    WeatherUpdateEvent(std::string packet);
+    ~WeatherUpdateEvent();
+    std::string make_packet() const override;
+    bool reliable() const override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) override;
+private:
+    int weather_id_;
+    int64_t sunrise_;
+    int64_t sunset_;
+};

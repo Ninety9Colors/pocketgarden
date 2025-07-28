@@ -9,6 +9,8 @@
 World::World() {
     spawn_point_ = Vector3{0.0f,0.0f,0.0f};
     next_id_ = 1;
+    weather_ = std::make_shared<Weather>(30.2672f, 97.7431f);
+    sun_ = std::make_shared<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,1.0f}, 100.0f, YELLOW);
 };
 
 void World::load_world(std::string save_file) {
@@ -52,7 +54,7 @@ std::string World::to_string() const{
         const auto& player = players_[i];
         result += "(" + player->to_string() + ")";
     }
-    result += ")";
+    result += ") " + std::to_string(weather_->get_latitude()) + " " + std::to_string(weather_->get_longitude());
     return result;
 }
 
@@ -75,6 +77,7 @@ void World::from_string(std::string data) {
     for (const std::string& data : player_data) {
         load_player(std::make_shared<Player>(data));
     }
+    weather_->set_location(std::stof(split[4]), std::stof(split[5]));
 }
 
 uint32_t World::load_object(std::shared_ptr<Object3d> object) {
@@ -135,4 +138,12 @@ const std::shared_ptr<Player> World::get_player(std::string username) const {
             return player;
     }
     return nullptr;
+}
+
+std::shared_ptr<Weather> World::get_weather() {
+    return weather_;
+}
+
+std::shared_ptr<Object3d> World::get_sun() {
+    return sun_;
 }

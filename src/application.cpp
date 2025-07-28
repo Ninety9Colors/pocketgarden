@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -38,10 +39,14 @@ void Application::run(Game& game) {
     char port[6] = {0};
     bool ip_focus = false;
     bool port_focus = false;
+
     float tps = 20.0f;
     float dt_tick = 0;
+    int weather_update_interval = 300; // seconds
+    int64_t last_weather_update = 0;
     uint32_t total_ticks = 0;
     while (!WindowShouldClose()) {
+        int64_t current_timestamp = std::time(nullptr);
         game.poll_events();
         if (!game.in_world()) {
             display_menu(game, ip, port, ip_focus, port_focus);
@@ -57,6 +62,15 @@ void Application::run(Game& game) {
             continue;
         player->update(event_buffer_, main_camera, game.get_world(), keybinds, dt);
         if (dt_tick >= 1/tps) {
+            if (current_timestamp-last_weather_update >= weather_update_interval && game.get_network()->is_host()) {
+                bool updated = game.get_world()->get_weather()->update();
+                if (updated) {
+                    event_buffer_["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(game.get_world()->get_weather()->get_weather_id(), 
+                                                                                                game.get_world()->get_weather()->get_sunrise(), 
+                                                                                                game.get_world()->get_weather()->get_sunset());
+                }
+                last_weather_update = current_timestamp;
+            }
             tick(event_buffer_, game);
             dt_tick = 0;
             total_ticks++;
@@ -65,7 +79,7 @@ void Application::run(Game& game) {
         BeginDrawing();
 
         BeginMode3D(main_camera.get_camera());
-        ClearBackground(BLACK);
+        draw_sky(game.get_world(), current_timestamp);
         draw_players(game.get_current_user(), game.get_world()->get_players(), main_camera);
         draw_objects(game.get_world()->get_objects());
         EndMode3D();
@@ -130,6 +144,35 @@ void Application::display_scoreboard(const std::vector<std::shared_ptr<Player>>&
             y_pos += lineHeight;
         }
     }
+}
+
+void Application::draw_sky(std::shared_ptr<World> world, int64_t current_timestamp) {
+    Color background = SKYBLUE;
+    constexpr float sun_distance = 1000.0f;
+    int64_t a = world->get_weather()->get_sunrise();
+    int64_t b = world->get_weather()->get_sunset();
+    int64_t c = current_timestamp;
+    int64_t sun_arc_period = b-a;
+    float sun_arc_angle = (((c-a)*1.0f)/(1.0f*sun_arc_period))*PI;
+
+    // std::cout << std::to_string(a) << "\n";
+    // std::cout << std::to_string(b) << "\n";
+    // std::cout << std::to_string(c) << "\n";
+    // std::cout << std::to_string(sun_arc_angle/PI) << " * PI radians\n";
+
+    float y = std::sinf(sun_arc_angle);
+    float x = std::cosf(sun_arc_angle);
+    float m = std::sqrt(x*x + y*y);
+    Vector3 sun_direction = Vector3{x/m, y/m, 0.0f};
+    world->get_sun()->set_x(sun_direction.x * sun_distance);
+    world->get_sun()->set_y(sun_direction.y * sun_distance);
+    world->get_sun()->set_z(0.0f);
+
+    background.r *= std::max(y, 0.0f);
+    background.g *= std::max(y, 0.0f);
+    background.b *= std::max(y, 0.0f);
+    ClearBackground(background);
+    world->get_sun()->draw();
 }
 
 void Application::draw_objects(const std::map<uint32_t, std::shared_ptr<Object3d>>& objects) {
