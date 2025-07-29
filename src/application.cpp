@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -47,7 +48,7 @@ void Application::run(Game& game) {
     uint32_t total_ticks = 0;
     while (!WindowShouldClose()) {
         int64_t current_timestamp = std::time(nullptr);
-        game.poll_events();
+        game.poll_events(current_timestamp);
         if (!game.in_world()) {
             display_menu(game, ip, port, ip_focus, port_focus);
             continue;
@@ -65,11 +66,10 @@ void Application::run(Game& game) {
             if (current_timestamp-last_weather_update >= weather_update_interval && game.get_network()->is_host()) {
                 bool updated = game.get_world()->get_weather()->update();
                 if (updated) {
-                    event_buffer_["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(game.get_world()->get_weather()->get_weather_id(), 
-                                                                                                game.get_world()->get_weather()->get_sunrise(), 
-                                                                                                game.get_world()->get_weather()->get_sunset());
+                    event_buffer_["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(game.get_world()->get_weather()->get_weather_id());
+                    last_weather_update = current_timestamp;
+                    game.get_world()->get_weather()->update_sun(current_timestamp);
                 }
-                last_weather_update = current_timestamp;
             }
             tick(event_buffer_, game);
             dt_tick = 0;
@@ -149,29 +149,17 @@ void Application::display_scoreboard(const std::vector<std::shared_ptr<Player>>&
 void Application::draw_sky(std::shared_ptr<World> world, int64_t current_timestamp) {
     Color background = SKYBLUE;
     constexpr float sun_distance = 1000.0f;
-    int64_t a = world->get_weather()->get_sunrise();
-    int64_t b = world->get_weather()->get_sunset();
-    int64_t c = current_timestamp;
-    int64_t sun_arc_period = b-a;
-    float sun_arc_angle = (((c-a)*1.0f)/(1.0f*sun_arc_period))*PI;
-
-    // std::cout << std::to_string(a) << "\n";
-    // std::cout << std::to_string(b) << "\n";
-    // std::cout << std::to_string(c) << "\n";
-    // std::cout << std::to_string(sun_arc_angle/PI) << " * PI radians\n";
-
-    float y = std::sinf(sun_arc_angle);
-    float x = std::cosf(sun_arc_angle);
-    float m = std::sqrt(x*x + y*y);
-    Vector3 sun_direction = Vector3{x/m, y/m, 0.0f};
-    world->get_sun()->set_x(sun_direction.x * sun_distance);
-    world->get_sun()->set_y(sun_direction.y * sun_distance);
-    world->get_sun()->set_z(0.0f);
-
-    background.r *= std::max(y, 0.0f);
-    background.g *= std::max(y, 0.0f);
-    background.b *= std::max(y, 0.0f);
+    double azimuth = world->get_weather()->get_azimuth();
+    double altitude = world->get_weather()->get_altitude();
+    double x = std::sin(azimuth) * std::cos(altitude);
+    double y = std::sin(altitude);
+    double z = -std::cos(azimuth) * std::cos(altitude);
+    double magnitude = std::sqrt(x*x + y*y + z*z);
     ClearBackground(background);
+
+    world->get_sun()->set_x((float)(x/magnitude)*sun_distance);
+    world->get_sun()->set_y((float)(y/magnitude)*sun_distance);
+    world->get_sun()->set_z((float)(z/magnitude)*sun_distance);
     world->get_sun()->draw();
 }
 

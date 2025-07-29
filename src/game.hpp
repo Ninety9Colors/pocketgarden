@@ -13,7 +13,7 @@ public:
     Game();
 
     bool in_world() const;
-    void poll_events();
+    void poll_events(uint64_t current_timestamp);
     bool host(std::string current_user, std::string save_file, char* ip, char* port);
     bool join(std::string current_user, char* ip, char* port);
 

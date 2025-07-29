@@ -21,7 +21,7 @@ bool IAmHostEvent::reliable() const {
     return true;
 };
 
-void IAmHostEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void IAmHostEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     if (network->is_host()) {
     } else {
         assert(world->get_player(username_) != nullptr);
@@ -39,13 +39,13 @@ std::string ConnectEvent::make_packet() const {
 bool ConnectEvent::reliable() const {
     return true;
 };
-void ConnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void ConnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     if (network->is_host()) {
         world->load_player(username_);
         world->get_player(username_)->on_join();
         SyncEvent sync {world};
         IAmHostEvent server_connect (receiving_user);
-        WeatherUpdateEvent weather_update (world->get_weather()->get_weather_id(), world->get_weather()->get_sunrise(), world->get_weather()->get_sunset());
+        WeatherUpdateEvent weather_update (world->get_weather()->get_weather_id());
         network->send_packet(sync.make_packet(), sync.reliable(), username_);
         network->send_packet(weather_update.make_packet(), weather_update.reliable(), username_);
         network->send_packet_excluding(make_packet(),reliable(),username_);
@@ -66,7 +66,7 @@ std::string DisconnectEvent::make_packet() const {
 bool DisconnectEvent::reliable() const {
     return true;
 };
-void DisconnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void DisconnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     assert(world->get_player(username_) != nullptr);
     if (network->is_host()) {
         world->get_player(username_)->on_disconnect();
@@ -95,7 +95,7 @@ bool SyncEvent::reliable() const {
     return true;
 };
 
-void SyncEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void SyncEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     world->reset_world();
     world->from_string(world_string_);
 };
@@ -120,7 +120,7 @@ std::string PlayerMoveEvent::make_packet() const {
 bool PlayerMoveEvent::reliable() const {
     return false;
 };
-void PlayerMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void PlayerMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     world->get_player(username_)->set_position(x_,y_,z_);
     if (network->is_host()) {
         network->send_packet_excluding(make_packet(), reliable(), username_);
@@ -146,7 +146,7 @@ std::string ObjectMoveEvent::make_packet() const {
 }
 bool ObjectMoveEvent::reliable() const {return false;}
 
-void ObjectMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void ObjectMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     for (const auto& p : objects_)
         world->update_object(p.first, p.second);
     if (network->is_host()) {
@@ -173,7 +173,7 @@ std::string ObjectRemoveEvent::make_packet() const {
 }
 bool ObjectRemoveEvent::reliable() const {return true;}
 
-void ObjectRemoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void ObjectRemoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     for (uint32_t index : indices_)
         world->remove_object(index);
     if (network->is_host())
@@ -210,7 +210,7 @@ std::string ObjectLoadEvent::make_packet() const {
 bool ObjectLoadEvent::reliable() const {
     return true;
 }
-void ObjectLoadEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void ObjectLoadEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     for (const auto& p : objects_)
         world->load_object(p.second, p.first);
     if (network->is_host())
@@ -238,7 +238,7 @@ std::string ItemPickupEvent::make_packet() const {
 bool ItemPickupEvent::reliable() const {
     return true;
 }
-void ItemPickupEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void ItemPickupEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     world->get_player(player_)->set_item(item_);
     if (network->is_host())
         network->send_packet_excluding(make_packet(), reliable(), player_);
@@ -257,29 +257,27 @@ std::string ItemDropEvent::make_packet() const {
 bool ItemDropEvent::reliable() const {
     return true;
 }
-void ItemDropEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void ItemDropEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     world->get_player(player_)->drop_item(world);
     if (network->is_host())
         network->send_packet_excluding(make_packet(), reliable(), player_);
 }
 
-WeatherUpdateEvent::WeatherUpdateEvent(int id, int64_t sunrise, int64_t sunset) : weather_id_(id), sunrise_(sunrise), sunset_(sunset) {}
+WeatherUpdateEvent::WeatherUpdateEvent(int id) : weather_id_(id) {}
 WeatherUpdateEvent::WeatherUpdateEvent(std::string packet) {
     std::vector<std::string> split = split_string(packet);
     weather_id_ = std::stoi(split[1]);
-    sunrise_ = std::stoi(split[2]);
-    sunset_ = std::stoi(split[3]);
 }
 WeatherUpdateEvent::~WeatherUpdateEvent() {}
 std::string WeatherUpdateEvent::make_packet() const {
-    return "WeatherUpdateEvent " + std::to_string(weather_id_) + " " + std::to_string(sunrise_) + " " + std::to_string(sunset_);
+    return "WeatherUpdateEvent " + std::to_string(weather_id_);
 }
 bool WeatherUpdateEvent::reliable() const {
     return true;
 }
-void WeatherUpdateEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game) {
+void WeatherUpdateEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
     if (!network->is_host()) {
         game.get_world()->get_weather()->set_weather_id(weather_id_);
-        game.get_world()->get_weather()->set_suntimes(sunrise_, sunset_);
+        game.get_world()->get_weather()->update_sun(current_timestamp);
     }
 }

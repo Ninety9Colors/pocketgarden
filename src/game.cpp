@@ -12,11 +12,11 @@ bool Game::in_world() const {
     return in_world_;
 }
 
-void Game::poll_events() {
+void Game::poll_events(uint64_t current_timestamp) {
     std::unique_ptr<Event> event = network_->poll_events();
     if (event == nullptr)
         return;
-    event->receive(get_current_user(), world_, network_, *this);
+    event->receive(get_current_user(), world_, network_, *this, current_timestamp);
 }
 
 bool Game::host(std::string current_user, std::string save_file, char* ip, char* port) {

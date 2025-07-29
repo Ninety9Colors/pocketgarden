@@ -9,7 +9,7 @@
 World::World() {
     spawn_point_ = Vector3{0.0f,0.0f,0.0f};
     next_id_ = 1;
-    weather_ = std::make_shared<Weather>(30.2672f, 97.7431f);
+    weather_ = std::make_shared<Weather>(30.2672f, -97.7431f);
     sun_ = std::make_shared<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,1.0f}, 100.0f, YELLOW);
 };
 
