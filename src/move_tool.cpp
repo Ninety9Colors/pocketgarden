@@ -15,6 +15,7 @@ MoveTool::MoveTool() : position_{0.0f, 0.0f, 0.0f}, scale_(1.0f), holding_distan
     model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
+    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 
 MoveTool::MoveTool(std::string data) {
@@ -31,6 +32,7 @@ MoveTool::MoveTool(std::string data) {
     }
     held_id_ = 0;
     speed_ = 2.0f;
+    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 
 MoveTool::MoveTool(Vector3 position, float scale) : position_(position), scale_(scale), holding_distance_(2.0f) {
@@ -38,42 +40,47 @@ MoveTool::MoveTool(Vector3 position, float scale) : position_(position), scale_(
     model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f*scale_, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
+    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 
 void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
     constexpr float epsilon = 0.02f;
     if (in_use()) {
-        std::shared_ptr<Object3d> held_item = world->get_objects().at(held_id_);
-        if (keybinds[7])
-            holding_distance_ += 0.5f;
-        else if (keybinds[8])
-            holding_distance_ -= 0.5f;
-        float x = held_item->get_x();
-        float y = held_item->get_y();
-        float z = held_item->get_z();
-        float target_x = camera.get_position().x + camera.get_direction().x * holding_distance_;
-        float target_y = std::max(0.0f,camera.get_position().y + camera.get_direction().y * holding_distance_);
-        float target_z = camera.get_position().z + camera.get_direction().z * holding_distance_;
-        if ((x <= (target_x-epsilon) || x >= (target_x+epsilon)) || (y <= (target_y-epsilon) || y >= (target_y+epsilon)) || (z <= (target_z-epsilon) || z >= (target_z+epsilon))) {
-            float move_magnitude = std::sqrt(std::pow(x - target_x,2) + std::pow(y - target_y,2) + std::pow(z - target_z,2));
-            Vector3 move_direction = {(target_x-x)/move_magnitude, (target_y-y)/move_magnitude, (target_z-z)/move_magnitude};
-            float move_distance = speed_*dt*(move_magnitude);
+        if (world->get_objects().find(held_id_) == world->get_objects().end()) {
+            held_id_ = 0;
+        } else {
+            std::shared_ptr<Object3d> held_item = world->get_objects().at(held_id_);
+            if (keybinds[7])
+                holding_distance_ += 0.5f;
+            else if (keybinds[8])
+                holding_distance_ -= 0.5f;
+            float x = held_item->get_x();
+            float y = held_item->get_y();
+            float z = held_item->get_z();
+            float target_x = camera.get_position().x + camera.get_direction().x * holding_distance_;
+            float target_y = std::max(0.0f,camera.get_position().y + camera.get_direction().y * holding_distance_);
+            float target_z = camera.get_position().z + camera.get_direction().z * holding_distance_;
+            if ((x <= (target_x-epsilon) || x >= (target_x+epsilon)) || (y <= (target_y-epsilon) || y >= (target_y+epsilon)) || (z <= (target_z-epsilon) || z >= (target_z+epsilon))) {
+                float move_magnitude = std::sqrt(std::pow(x - target_x,2) + std::pow(y - target_y,2) + std::pow(z - target_z,2));
+                Vector3 move_direction = {(target_x-x)/move_magnitude, (target_y-y)/move_magnitude, (target_z-z)/move_magnitude};
+                float move_distance = speed_*dt*(move_magnitude);
 
-            if (move_magnitude <= epsilon) {
-                held_item->set_x(target_x);
-                held_item->set_y(target_y);
-                held_item->set_z(target_z);
-            } else {
-                held_item->set_x(held_item->get_x() + move_direction.x*move_distance);
-                held_item->set_y(held_item->get_y() + move_direction.y*move_distance);
-                held_item->set_z(held_item->get_z() + move_direction.z*move_distance);
-            }
-            if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
-                std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
-            } else {
-                ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{}, user->get_username());
-                move_event.add(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
-                event_buffer["ObjectMoveEvent"] = std::make_shared<ObjectMoveEvent>(move_event);
+                if (move_magnitude <= epsilon) {
+                    held_item->set_x(target_x);
+                    held_item->set_y(target_y);
+                    held_item->set_z(target_z);
+                } else {
+                    held_item->set_x(held_item->get_x() + move_direction.x*move_distance);
+                    held_item->set_y(held_item->get_y() + move_direction.y*move_distance);
+                    held_item->set_z(held_item->get_z() + move_direction.z*move_distance);
+                }
+                if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
+                    std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
+                } else {
+                    ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{}, user->get_username());
+                    move_event.add(held_id_,Vector3{held_item->get_x(), held_item->get_y(), held_item->get_z()});
+                    event_buffer["ObjectMoveEvent"] = std::make_shared<ObjectMoveEvent>(move_event);
+                }
             }
         }
     }
@@ -137,13 +144,21 @@ void MoveTool::draw() const {
     for (const auto& object : model_)
         object->draw_offset(position_.x, position_.y, position_.z);
 }
-void MoveTool::draw_outline() const {};
 
 void MoveTool::draw_offset(float x, float y, float z) const {
     for (const auto& object : model_)
         object->draw_offset(position_.x+x, position_.y+y, position_.z+z);
 }
-void MoveTool::draw_outline_offset(float x, float y, float z) const {};
+
+void MoveTool::set_shader(std::shared_ptr<Shader> shader) {
+    for (auto& object : model_) {
+        object->set_shader(shader);
+    }
+}
+
+void MoveTool::prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
+    held_id_ = 0;
+}
 
 void MoveTool::set_x(float new_x) {
     position_.x = new_x;

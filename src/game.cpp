@@ -12,17 +12,17 @@ bool Game::in_world() const {
     return in_world_;
 }
 
-void Game::poll_events(uint64_t current_timestamp) {
+void Game::poll_events(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     std::unique_ptr<Event> event = network_->poll_events();
     if (event == nullptr)
         return;
-    event->receive(get_current_user(), world_, network_, *this, current_timestamp);
+    event->receive(receiving_user,world,network,game,current_timestamp,event_buffer,camera,keybinds,dt,shader);
 }
 
-bool Game::host(std::string current_user, std::string save_file, char* ip, char* port) {
+bool Game::host(std::string current_user, std::string save_file, char* ip, char* port, std::shared_ptr<Shader> shader) {
     current_user_ = current_user;
-    world_->load_world(save_file);
-    world_->load_player(current_user);
+    world_->load_world(save_file, shader);
+    world_->load_player(current_user, shader);
     world_->set_alone(current_user);
     bool success = network_->host_server(ip, port);
     if (success) {

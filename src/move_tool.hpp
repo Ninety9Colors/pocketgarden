@@ -20,9 +20,9 @@ public:
     void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
 
     void draw() const override;
-    void draw_outline() const override;
     void draw_offset(float x, float y, float z) const override;
-    void draw_outline_offset(float x, float y, float z) const override;
+    void prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
+    void set_shader(std::shared_ptr<Shader> shader) override;
 
     void set_x(float new_x) override;
     void set_y(float new_y) override;

@@ -2,8 +2,10 @@
 #include <cmath>
 #include <iostream>
 
+
 #include "maincamera.hpp"
 #include "move_tool.hpp"
+#include "sun_tool.hpp"
 #include "player.hpp"
 #include "util.hpp"
 #include "world.hpp"
@@ -17,6 +19,7 @@ Player::Player(std::string username, Vector3 position) : username_(username) {
     auto head = std::make_unique<Cube>(Vector3{0, 1.0f, 0}, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK);
     model_.push_back(std::move(head));
     selected_item_ = nullptr;
+    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 };
 
 Player::Player(std::string data) {
@@ -31,6 +34,8 @@ Player::Player(std::string data) {
     if (split[6] != "null_item") {
         if (get_first_word(split[6]) == "MoveTool") {
             selected_item_ = std::make_shared<MoveTool>(split[6]);
+        } else if (get_first_word(split[6]) == "SunTool") {
+            selected_item_ = std::make_shared<SunTool>(split[6]);
         }
     }
     std::vector<std::string> model_objects = split_string(split[7]);
@@ -39,13 +44,13 @@ Player::Player(std::string data) {
             add_to_model(std::make_unique<Cube>(object_data));
         }
     }
+    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 };
 
 void Player::draw(std::string current_user, const MainCamera& camera) const {
     if ((camera.get_mode() != CAMERA_CUSTOM || username_ != current_user) && online_) {
         for (const auto& object : model_)
             object->draw_offset(get_position().x, get_position().y, get_position().z);
-        hitbox_.draw_outline();
     }
     if (selected_item_ != nullptr && online_) {
         selected_item_->draw_offset(get_position().x, get_position().y + 2.0f, get_position().z);
@@ -104,6 +109,16 @@ void Player::add_to_model(std::unique_ptr<Object3d>&& object) {
     model_.push_back(std::move(object));
 }
 
+void Player::set_shader(std::shared_ptr<Shader> shader) {
+    for (auto& object : model_) {
+        object->set_shader(shader);
+    }
+}
+
+std::shared_ptr<Shader> Player::get_shader() const {
+    return shader_;
+}
+
 void Player::update(std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
     bool moved = move(camera, keybinds, dt);
     uint32_t pickup_id = try_pickup(camera, world, keybinds);
@@ -112,9 +127,9 @@ void Player::update(std::map<std::string, std::shared_ptr<Event>>& event_buffer,
         event_buffer["PlayerMoveEvent"] = std::make_shared<PlayerMoveEvent>(shared_from_this());
     }
     if (pickup_id != 0) {
-        std::shared_ptr<Item> dropped = drop_item(world);
+        std::shared_ptr<Item> dropped = drop_item(event_buffer,camera,world,keybinds,dt);
         if (dropped != nullptr) {
-            uint32_t id = world->load_object(dropped);
+            uint32_t id = world->load_object(dropped, dropped->get_shader());
             event_buffer["ItemDropEvent"] = std::make_shared<ItemDropEvent>(shared_from_this());
             if (event_buffer.find("ObjectLoadEvent") == event_buffer.end()) {
                 std::shared_ptr<ObjectLoadEvent> load_event = std::make_shared<ObjectLoadEvent>(std::map<uint32_t,std::shared_ptr<Object3d>>{}, get_username());
@@ -136,11 +151,11 @@ void Player::update(std::map<std::string, std::shared_ptr<Event>>& event_buffer,
             std::dynamic_pointer_cast<ObjectRemoveEvent>(event_buffer["ObjectRemoveEvent"])->add(pickup_id);
         }
     } else if (keybinds[9]) {
-        std::shared_ptr<Item> dropped = drop_item(world);
+        std::shared_ptr<Item> dropped = drop_item(event_buffer,camera,world,keybinds,dt);
         if (dropped == nullptr)
             return;
         event_buffer["ItemDropEvent"] = std::make_shared<ItemDropEvent>(shared_from_this());
-        uint32_t id = world->load_object(dropped);
+        uint32_t id = world->load_object(dropped, dropped->get_shader());
         if (event_buffer.find("ObjectLoadEvent") == event_buffer.end()) {
             std::shared_ptr<ObjectLoadEvent> load_event = std::make_shared<ObjectLoadEvent>(std::map<uint32_t,std::shared_ptr<Object3d>>{}, get_username());
             load_event->add(id, dropped);
@@ -159,11 +174,12 @@ void Player::set_item(std::shared_ptr<Item> item) {
     selected_item_->set_y(0.0f);
     selected_item_->set_z(0.0f);
 }
-std::shared_ptr<Item> Player::drop_item(std::shared_ptr<World> world) {
+std::shared_ptr<Item> Player::drop_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
     if (selected_item_ == nullptr)
         return nullptr;
     std::shared_ptr<Item> item = selected_item_;
     selected_item_ = nullptr;
+    item->prepare_drop(event_buffer,camera,shared_from_this(),world,keybinds,dt);
     item->set_x(get_position().x);
     item->set_y(get_position().y);
     item->set_z(get_position().z);

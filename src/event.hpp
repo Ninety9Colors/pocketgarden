@@ -9,6 +9,7 @@ class Network;
 class Player;
 class World;
 class Vector3;
+class MainCamera;
 
 #include "object3d.hpp"
 
@@ -16,7 +17,7 @@ class Event {
 public:
     virtual std::string make_packet() const = 0;
     virtual bool reliable() const = 0;
-    virtual void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) = 0;
+    virtual void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) = 0;
     virtual ~Event() {};
 };
 
@@ -26,7 +27,7 @@ public:
     ~IAmHostEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
 private:
     std::string username_;
 };
@@ -37,7 +38,7 @@ public:
     ~ConnectEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
 private:
     std::string username_;
 };
@@ -48,7 +49,7 @@ public:
     ~DisconnectEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
 private:
     std::string username_;
 };
@@ -60,7 +61,7 @@ public:
     ~SyncEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
 private:
     std::string world_string_;
 };
@@ -72,7 +73,7 @@ public:
     ~PlayerMoveEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
 private:
     std::shared_ptr<Player> player_;
     std::string username_;
@@ -88,7 +89,7 @@ public:
     ~ObjectMoveEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
     void add(uint32_t id, Vector3 position);
 private:
     std::map<uint32_t, Vector3> objects_;
@@ -102,7 +103,7 @@ public:
     ~ObjectRemoveEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
     void add(uint32_t id);
 private:
     std::vector<uint32_t> indices_;
@@ -116,7 +117,7 @@ public:
     ~ObjectLoadEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
     void add(uint32_t id, std::shared_ptr<Object3d> object);
 private:
     std::map<uint32_t, std::shared_ptr<Object3d>> objects_;
@@ -130,7 +131,7 @@ public:
     ~ItemPickupEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
 private:
     std::shared_ptr<Item> item_;
     std::string player_;
@@ -143,7 +144,7 @@ public:
     ~ItemDropEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
 private:
     std::string player_;
 };
@@ -151,11 +152,13 @@ private:
 class WeatherUpdateEvent : public Event {
 public:
     WeatherUpdateEvent(int id);
+    WeatherUpdateEvent(int id, int timestamp_offset);
     WeatherUpdateEvent(std::string packet);
     ~WeatherUpdateEvent();
     std::string make_packet() const override;
     bool reliable() const override;
-    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
 private:
     int weather_id_;
+    int timestamp_offset_;
 };

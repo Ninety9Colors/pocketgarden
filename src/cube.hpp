@@ -11,9 +11,8 @@ public:
     Cube(Vector3 position, Vector3 size, float scale, Color color);
 
     void draw() const override;
-    void draw_outline() const override;
     void draw_offset(float x, float y, float z) const override;
-    void draw_outline_offset(float x, float y, float z) const override;
+    void set_shader(std::shared_ptr<Shader> shader) override;
 
     void set_x(float new_x) override;
     void set_y(float new_y) override;

@@ -5,7 +5,9 @@
 
 #include "event.hpp"
 #include "game.hpp"
+#include "maincamera.hpp"
 #include "move_tool.hpp"
+#include "sun_tool.hpp"
 #include "player.hpp"
 #include "util.hpp"
 
@@ -21,7 +23,7 @@ bool IAmHostEvent::reliable() const {
     return true;
 };
 
-void IAmHostEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void IAmHostEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     if (network->is_host()) {
     } else {
         assert(world->get_player(username_) != nullptr);
@@ -39,9 +41,9 @@ std::string ConnectEvent::make_packet() const {
 bool ConnectEvent::reliable() const {
     return true;
 };
-void ConnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void ConnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     if (network->is_host()) {
-        world->load_player(username_);
+        world->load_player(username_, shader);
         world->get_player(username_)->on_join();
         SyncEvent sync {world};
         IAmHostEvent server_connect (receiving_user);
@@ -51,7 +53,7 @@ void ConnectEvent::receive(std::string receiving_user, std::shared_ptr<World> wo
         network->send_packet_excluding(make_packet(),reliable(),username_);
         network->send_packet(server_connect.make_packet(),server_connect.reliable(),username_);
     } else {
-        world->load_player(username_);
+        world->load_player(username_, shader);
         world->get_player(username_)->on_join();
     }
 }
@@ -66,7 +68,7 @@ std::string DisconnectEvent::make_packet() const {
 bool DisconnectEvent::reliable() const {
     return true;
 };
-void DisconnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void DisconnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     assert(world->get_player(username_) != nullptr);
     if (network->is_host()) {
         world->get_player(username_)->on_disconnect();
@@ -95,9 +97,9 @@ bool SyncEvent::reliable() const {
     return true;
 };
 
-void SyncEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void SyncEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     world->reset_world();
-    world->from_string(world_string_);
+    world->from_string(world_string_, shader);
 };
 
 PlayerMoveEvent::PlayerMoveEvent(std::shared_ptr<Player> player) : username_(""), x_(), y_(), z_(), player_(player) {}
@@ -120,7 +122,7 @@ std::string PlayerMoveEvent::make_packet() const {
 bool PlayerMoveEvent::reliable() const {
     return false;
 };
-void PlayerMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void PlayerMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     world->get_player(username_)->set_position(x_,y_,z_);
     if (network->is_host()) {
         network->send_packet_excluding(make_packet(), reliable(), username_);
@@ -146,7 +148,7 @@ std::string ObjectMoveEvent::make_packet() const {
 }
 bool ObjectMoveEvent::reliable() const {return false;}
 
-void ObjectMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void ObjectMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     for (const auto& p : objects_)
         world->update_object(p.first, p.second);
     if (network->is_host()) {
@@ -173,7 +175,7 @@ std::string ObjectRemoveEvent::make_packet() const {
 }
 bool ObjectRemoveEvent::reliable() const {return true;}
 
-void ObjectRemoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void ObjectRemoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     for (uint32_t index : indices_)
         world->remove_object(index);
     if (network->is_host())
@@ -196,6 +198,8 @@ ObjectLoadEvent::ObjectLoadEvent(std::string packet) {
             object = std::make_shared<Cube>(a[1]);
         } else if (type == "MoveTool") {
             object = std::make_shared<MoveTool>(a[1]);
+        } else if (type=="SunTool") {
+            object = std::make_shared<SunTool>(a[1]);
         }
         add((uint32_t) std::stoi(a[0]), std::move(object));
     }
@@ -210,9 +214,9 @@ std::string ObjectLoadEvent::make_packet() const {
 bool ObjectLoadEvent::reliable() const {
     return true;
 }
-void ObjectLoadEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void ObjectLoadEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     for (const auto& p : objects_)
-        world->load_object(p.second, p.first);
+        world->load_object(p.second, p.first, p.second->get_shader());
     if (network->is_host())
         network->send_packet_excluding(make_packet(), reliable(), sender_);
 }
@@ -228,6 +232,8 @@ ItemPickupEvent::ItemPickupEvent(std::string packet) {
     player_ = split[1];
     if (type == "MoveTool") {
         item_ = std::make_shared<MoveTool>(split[2]);
+    } else if (type == "SunTool") {
+        item_ = std::make_shared<SunTool>(split[2]);
     }
 }
 ItemPickupEvent::~ItemPickupEvent() {}
@@ -238,7 +244,7 @@ std::string ItemPickupEvent::make_packet() const {
 bool ItemPickupEvent::reliable() const {
     return true;
 }
-void ItemPickupEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void ItemPickupEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     world->get_player(player_)->set_item(item_);
     if (network->is_host())
         network->send_packet_excluding(make_packet(), reliable(), player_);
@@ -257,27 +263,33 @@ std::string ItemDropEvent::make_packet() const {
 bool ItemDropEvent::reliable() const {
     return true;
 }
-void ItemDropEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
-    world->get_player(player_)->drop_item(world);
+void ItemDropEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
+    world->get_player(player_)->drop_item(event_buffer, camera, world, keybinds, dt);
     if (network->is_host())
         network->send_packet_excluding(make_packet(), reliable(), player_);
 }
 
-WeatherUpdateEvent::WeatherUpdateEvent(int id) : weather_id_(id) {}
+WeatherUpdateEvent::WeatherUpdateEvent(int id) : weather_id_(id), timestamp_offset_(0) {}
+WeatherUpdateEvent::WeatherUpdateEvent(int id, int timestamp_offset) : weather_id_(id), timestamp_offset_(timestamp_offset) {}
 WeatherUpdateEvent::WeatherUpdateEvent(std::string packet) {
     std::vector<std::string> split = split_string(packet);
     weather_id_ = std::stoi(split[1]);
+    timestamp_offset_ = std::stoi(split[2]);
 }
 WeatherUpdateEvent::~WeatherUpdateEvent() {}
 std::string WeatherUpdateEvent::make_packet() const {
-    return "WeatherUpdateEvent " + std::to_string(weather_id_);
+    return "WeatherUpdateEvent " + std::to_string(weather_id_) + " " + std::to_string(timestamp_offset_);
 }
 bool WeatherUpdateEvent::reliable() const {
     return true;
 }
-void WeatherUpdateEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp) {
+void WeatherUpdateEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     if (!network->is_host()) {
         game.get_world()->get_weather()->set_weather_id(weather_id_);
-        game.get_world()->get_weather()->update_sun(current_timestamp);
+        game.get_world()->get_weather()->update_sun(current_timestamp+timestamp_offset_);
+        game.get_world()->update_sun();
+    } else {
+        game.get_world()->get_weather()->update_sun(current_timestamp+timestamp_offset_);
+        game.get_world()->update_sun();
     }
 }

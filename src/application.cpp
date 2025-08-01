@@ -24,6 +24,9 @@ Application::Application() {
     SetWindowSize(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
     SetExitKey(KEY_NULL);
     event_buffer_ = {};
+    shader_default_ = std::make_shared<Shader>(LoadShader("shaders/default.vs","shaders/default.fs"));
+    shader_default_->locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(*shader_default_, "colorDiffuse");
+    shader_light_source_ = std::make_shared<Shader>(LoadShader("shaders/default.vs","shaders/light_source.fs"));
 }
 
 void Application::tick(std::map<std::string, std::shared_ptr<Event>>& event_buffer, Game& game) {
@@ -46,9 +49,12 @@ void Application::run(Game& game) {
     int weather_update_interval = 300; // seconds
     int64_t last_weather_update = 0;
     uint32_t total_ticks = 0;
+
+    int sunPosLoc = GetShaderLocation(*shader_default_,"sunPos");
+    int sunColorLoc = GetShaderLocation(*shader_default_,"sunColor");
+    int ambientLoc = GetShaderLocation(*shader_default_,"ambient");
     while (!WindowShouldClose()) {
         int64_t current_timestamp = std::time(nullptr);
-        game.poll_events(current_timestamp);
         if (!game.in_world()) {
             display_menu(game, ip, port, ip_focus, port_focus);
             continue;
@@ -58,6 +64,7 @@ void Application::run(Game& game) {
         std::string fps = std::to_string((int)round(1.0/dt));
         std::vector<bool> keybinds = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB), IsKeyDown(KEY_ESCAPE),
                                         IsMouseButtonPressed(MOUSE_LEFT_BUTTON), (GetMouseWheelMoveV().y > 0), (GetMouseWheelMoveV().y < 0), IsKeyPressed(KEY_SPACE)};
+        game.poll_events(game.get_current_user(), game.get_world(), game.get_network(), game, current_timestamp, event_buffer_, main_camera, keybinds,dt,shader_default_);
         const auto player = game.get_current_player();
         if (player == nullptr)
             continue;
@@ -69,6 +76,7 @@ void Application::run(Game& game) {
                     event_buffer_["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(game.get_world()->get_weather()->get_weather_id());
                     last_weather_update = current_timestamp;
                     game.get_world()->get_weather()->update_sun(current_timestamp);
+                    game.get_world()->update_sun();
                 }
             }
             tick(event_buffer_, game);
@@ -76,10 +84,21 @@ void Application::run(Game& game) {
             total_ticks++;
         }
         main_camera.update(player, GetMouseDelta());
+
+        float cameraPos[3] = {main_camera.get_position().x, main_camera.get_position().y, main_camera.get_position().z};
+        SetShaderValue(*shader_default_, shader_default_->locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+        float sunPos[3] = {game.get_world()->get_sun()->get_x(), game.get_world()->get_sun()->get_y(), game.get_world()->get_sun()->get_z()};
+        SetShaderValue(*shader_default_, sunPosLoc, sunPos, SHADER_UNIFORM_VEC3);
+        float sunColor[4] = {1.0f,1.0f,(std::pow(std::max(game.get_world()->get_sun()->get_y(),0.0f),2)/100)*0.8,1.0f};
+        SetShaderValue(*shader_default_, sunColorLoc, sunColor, SHADER_UNIFORM_VEC4);
+        float ambient[4] = {0.25f,0.25f,0.25f,1.0f};
+        SetShaderValue(*shader_default_, ambientLoc, ambient, SHADER_UNIFORM_VEC4);
+
         BeginDrawing();
 
         BeginMode3D(main_camera.get_camera());
-        draw_sky(game.get_world(), current_timestamp);
+        ClearBackground(SKYBLUE);
+        game.get_world()->get_sun()->draw();
         draw_players(game.get_current_user(), game.get_world()->get_players(), main_camera);
         draw_objects(game.get_world()->get_objects());
         EndMode3D();
@@ -117,7 +136,7 @@ void Application::display_menu(Game& game, char* ip, char* port, bool& ip_focus,
     GuiTextBox(port_box, port, 5+1, port_focus);
     if (GuiButton((Rectangle){width/2-text_width/2, height/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Host")) {
         if (ip[0] == '\0' || port[0] == '\0') {
-        } else if (game.host("darek","test world.data",ip,port)) {
+        } else if (game.host("darek","test world.data",ip,port,shader_default_)) {
             DisableCursor();
         }
     } else if (GuiButton((Rectangle){width/2+text_width*0.1, height/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Join")) {
@@ -146,31 +165,16 @@ void Application::display_scoreboard(const std::vector<std::shared_ptr<Player>>&
     }
 }
 
-void Application::draw_sky(std::shared_ptr<World> world, int64_t current_timestamp) {
-    Color background = SKYBLUE;
-    constexpr float sun_distance = 1000.0f;
-    double azimuth = world->get_weather()->get_azimuth();
-    double altitude = world->get_weather()->get_altitude();
-    double x = std::sin(azimuth) * std::cos(altitude);
-    double y = std::sin(altitude);
-    double z = -std::cos(azimuth) * std::cos(altitude);
-    double magnitude = std::sqrt(x*x + y*y + z*z);
-    ClearBackground(background);
-
-    world->get_sun()->set_x((float)(x/magnitude)*sun_distance);
-    world->get_sun()->set_y((float)(y/magnitude)*sun_distance);
-    world->get_sun()->set_z((float)(z/magnitude)*sun_distance);
-    world->get_sun()->draw();
-}
-
 void Application::draw_objects(const std::map<uint32_t, std::shared_ptr<Object3d>>& objects) {
-    for (const auto& p : objects)
+    for (const auto& p : objects) {
         p.second->draw();
+    }
 }
 
 void Application::draw_players(std::string current_user, const std::vector<std::shared_ptr<Player>>& players, const MainCamera& main_camera) {
-    for (const auto &player : players)
+    for (const auto &player : players) {
         player->draw(current_user, main_camera);
+    }
 }
 
 void Application::exit() {

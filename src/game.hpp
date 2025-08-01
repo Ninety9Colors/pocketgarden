@@ -13,8 +13,8 @@ public:
     Game();
 
     bool in_world() const;
-    void poll_events(uint64_t current_timestamp);
-    bool host(std::string current_user, std::string save_file, char* ip, char* port);
+    void poll_events(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader);
+    bool host(std::string current_user, std::string save_file, char* ip, char* port, std::shared_ptr<Shader> shader);
     bool join(std::string current_user, char* ip, char* port);
 
     void disconnect();

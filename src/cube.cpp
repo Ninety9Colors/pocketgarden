@@ -4,6 +4,8 @@
 #include "cube.hpp"
 #include "util.hpp"
 
+#include <iostream>
+
 Cube::Cube() : position_{0.0f,0.0f,0.0f}, size_{0.0f,0.0f,0.0f}, color_(WHITE){};
 Cube::Cube(std::string data) {
     std::vector<std::string> split = split_string(data);
@@ -13,27 +15,25 @@ Cube::Cube(std::string data) {
     scale_ = std::stof(split[7]);
     color_ = Color{(unsigned char)std::stoi(split[8]), (unsigned char)std::stoi(split[9]), (unsigned char)std::stoi(split[10]), (unsigned char)std::stoi(split[11])};
     model_ = LoadModelFromMesh(GenMeshCube(size_.x, size_.y, size_.z));
+    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 Cube::Cube(Vector3 position, Vector3 size, float scale, Color color) : position_(position), size_(size), scale_(scale), color_(color) {
     model_ = LoadModelFromMesh(GenMeshCube(size_.x, size_.y, size_.z));
+    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 };
 
 void Cube::draw() const {
     DrawModel(model_, position_, scale_, color_);
-    draw_outline();
-};
-
-void Cube::draw_outline() const {
-    //TODO
 };
 
 void Cube::draw_offset(float x, float y, float z) const {
     DrawModel(model_, Vector3{position_.x+x, position_.y+y, position_.z+z}, scale_, color_);
-    draw_outline_offset(x,y,z);
 };
-void Cube::draw_outline_offset(float x, float y, float z) const {
-    //TODO
-};
+
+void Cube::set_shader(std::shared_ptr<Shader> shader) {
+    shader_ = shader;
+    model_.materials[MATERIAL_MAP_DIFFUSE].shader = *shader_;
+}
 
 void Cube::set_x(float new_x) {
     position_.x = new_x;
