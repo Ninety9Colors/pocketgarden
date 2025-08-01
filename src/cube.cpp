@@ -6,7 +6,6 @@
 
 #include <iostream>
 
-Cube::Cube() : position_{0.0f,0.0f,0.0f}, size_{0.0f,0.0f,0.0f}, color_(WHITE){};
 Cube::Cube(std::string data) {
     std::vector<std::string> split = split_string(data);
     assert(split[0] == "Cube" && split.size() == 12);
@@ -15,12 +14,13 @@ Cube::Cube(std::string data) {
     scale_ = std::stof(split[7]);
     color_ = Color{(unsigned char)std::stoi(split[8]), (unsigned char)std::stoi(split[9]), (unsigned char)std::stoi(split[10]), (unsigned char)std::stoi(split[11])};
     model_ = LoadModelFromMesh(GenMeshCube(size_.x, size_.y, size_.z));
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 Cube::Cube(Vector3 position, Vector3 size, float scale, Color color) : position_(position), size_(size), scale_(scale), color_(color) {
     model_ = LoadModelFromMesh(GenMeshCube(size_.x, size_.y, size_.z));
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 };
+Cube::~Cube() {
+    UnloadModel(model_);
+}
 
 void Cube::draw() const {
     DrawModel(model_, position_, scale_, color_);

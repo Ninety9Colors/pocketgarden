@@ -16,6 +16,7 @@ public:
     SunTool();
     SunTool(std::string data);
     SunTool(Vector3 position, float scale);
+    ~SunTool();
 
     void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
 

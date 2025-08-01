@@ -216,7 +216,7 @@ bool ObjectLoadEvent::reliable() const {
 }
 void ObjectLoadEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
     for (const auto& p : objects_)
-        world->load_object(p.second, p.first, p.second->get_shader());
+        world->load_object(p.second, p.first, shader);
     if (network->is_host())
         network->send_packet_excluding(make_packet(), reliable(), sender_);
 }
@@ -245,6 +245,7 @@ bool ItemPickupEvent::reliable() const {
     return true;
 }
 void ItemPickupEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
+    item_->set_shader(shader);
     world->get_player(player_)->set_item(item_);
     if (network->is_host())
         network->send_packet_excluding(make_packet(), reliable(), player_);

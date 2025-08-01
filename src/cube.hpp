@@ -6,9 +6,11 @@
 
 class Cube : public Object3d {
 public:
-    Cube();
     Cube(std::string data);
     Cube(Vector3 position, Vector3 size, float scale, Color color);
+    Cube(const Cube&) = delete;
+    Cube& operator=(const Cube&) = delete;
+    ~Cube();
 
     void draw() const override;
     void draw_offset(float x, float y, float z) const override;

@@ -12,12 +12,10 @@
 #include <ctime>
 
 SunTool::SunTool() : position_{0.0f, 0.0f, 0.0f}, scale_(1.0f) {
-    Mesh mesh = GenMeshSphere(0.5f,1,1);
-    model_ = LoadModelFromMesh(GenMeshCube(0.25f,0.25f,0.25f));
+    model_ = LoadModelFromMesh(GenMeshSphere(0.25f,8,8));
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
     time_offset_ = 0;
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 
 SunTool::SunTool(std::string data) {
@@ -26,12 +24,10 @@ SunTool::SunTool(std::string data) {
     position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
     time_offset_ = std::stof(split[4]);
     scale_ = std::stof(split[5]);
-    Mesh mesh = GenMeshSphere(0.5f,1,1);
-    model_ = LoadModelFromMesh(GenMeshCube(0.25f,0.25f,0.25f));
+    model_ = LoadModelFromMesh(GenMeshSphere(0.25f,8,8));
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
     time_offset_ = 0;
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 
 SunTool::SunTool(Vector3 position, float scale) : position_(position), scale_(scale) {
@@ -39,7 +35,10 @@ SunTool::SunTool(Vector3 position, float scale) : position_(position), scale_(sc
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
     time_offset_ = 0;
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
+}
+
+SunTool::~SunTool() {
+    UnloadModel(model_);
 }
 
 void SunTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {

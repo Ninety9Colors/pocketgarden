@@ -24,9 +24,21 @@ Application::Application() {
     SetWindowSize(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
     SetExitKey(KEY_NULL);
     event_buffer_ = {};
-    shader_default_ = std::make_shared<Shader>(LoadShader("shaders/default.vs","shaders/default.fs"));
+    shader_default_ = std::shared_ptr<Shader>(
+        new Shader(LoadShader("shaders/default.vs","shaders/default.fs")),
+        [](Shader* s) {
+            UnloadShader(*s);
+            delete s;
+        }
+    );
     shader_default_->locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(*shader_default_, "colorDiffuse");
-    shader_light_source_ = std::make_shared<Shader>(LoadShader("shaders/default.vs","shaders/light_source.fs"));
+    shader_light_source_ = std::shared_ptr<Shader>(
+        new Shader(LoadShader("shaders/default.vs","shaders/light_source.fs")),
+        [](Shader* s) {
+            UnloadShader(*s);
+            delete s;
+        }
+    );
 }
 
 void Application::tick(std::map<std::string, std::shared_ptr<Event>>& event_buffer, Game& game) {
@@ -89,9 +101,10 @@ void Application::run(Game& game) {
         SetShaderValue(*shader_default_, shader_default_->locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
         float sunPos[3] = {game.get_world()->get_sun()->get_x(), game.get_world()->get_sun()->get_y(), game.get_world()->get_sun()->get_z()};
         SetShaderValue(*shader_default_, sunPosLoc, sunPos, SHADER_UNIFORM_VEC3);
-        float sunColor[4] = {1.0f,1.0f,(std::pow(std::max(game.get_world()->get_sun()->get_y(),0.0f),2)/100)*0.8,1.0f};
+        float sunColor[4] = {1.0f,1.0f,(std::pow(std::max(game.get_world()->get_sun()->get_y(),0.0f),2)/10000.0f),1.0f};
         SetShaderValue(*shader_default_, sunColorLoc, sunColor, SHADER_UNIFORM_VEC4);
-        float ambient[4] = {0.25f,0.25f,0.25f,1.0f};
+        float ambient_level = (std::pow(std::max(game.get_world()->get_sun()->get_y(),0.0f),2)/10000.0f)*0.5f + 0.25f;
+        float ambient[4] = {ambient_level,ambient_level,ambient_level,1.0f};
         SetShaderValue(*shader_default_, ambientLoc, ambient, SHADER_UNIFORM_VEC4);
 
         BeginDrawing();
@@ -138,11 +151,13 @@ void Application::display_menu(Game& game, char* ip, char* port, bool& ip_focus,
         if (ip[0] == '\0' || port[0] == '\0') {
         } else if (game.host("darek","test world.data",ip,port,shader_default_)) {
             DisableCursor();
+            event_buffer_.clear();
         }
     } else if (GuiButton((Rectangle){width/2+text_width*0.1, height/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Join")) {
         if (ip[0] == '\0' || port[0] == '\0') {
         } else if (game.join("isabella",ip,port)) {
             DisableCursor();
+            event_buffer_.clear();
         }
     }
     EndDrawing();

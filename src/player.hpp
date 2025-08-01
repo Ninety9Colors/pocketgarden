@@ -17,6 +17,7 @@ class Player : public std::enable_shared_from_this<Player> {
 public:
     Player(std::string username, Vector3 position);
     Player(std::string data);
+    ~Player();
 
     void draw(std::string current_user, const MainCamera& camera) const;
     bool move(MainCamera& camera, const std::vector<bool>& keybinds, float dt);
@@ -52,4 +53,5 @@ private:
     std::shared_ptr<Shader> shader_;
     std::vector<std::unique_ptr<Object3d>> model_;
     std::shared_ptr<Item> selected_item_;
+    std::shared_ptr<Shader> selected_item_previous_shader_;
 };

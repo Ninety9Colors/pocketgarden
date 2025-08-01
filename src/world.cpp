@@ -7,6 +7,7 @@
 #include "util.hpp"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 constexpr float SUN_RADIUS = 100.0f;
 
@@ -40,6 +41,7 @@ void World::save_world(std::string save_file) const {
 void World::reset_world() {
     objects_.clear();
     players_.clear();
+    next_id_ = 0;
 }
 
 void World::set_alone(std::string current_user) {

@@ -2,7 +2,6 @@
 #include <cmath>
 #include <iostream>
 
-
 #include "maincamera.hpp"
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
@@ -10,25 +9,22 @@
 #include "util.hpp"
 #include "world.hpp"
 
-Player::Player(std::string username, Vector3 position) : username_(username) {
+Player::Player(std::string username, Vector3 position) : username_(username), hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE) {
     speed_ = 4.0f;
     pickup_range_ = 3.0f;
     online_ = false;
-    hitbox_ = Cube(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f, 2.0f, 1.0f}, 1.0f, WHITE);
     set_position(position.x, position.y, position.z);
     auto head = std::make_unique<Cube>(Vector3{0, 1.0f, 0}, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK);
-    model_.push_back(std::move(head));
+    add_to_model(std::move(head));
     selected_item_ = nullptr;
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 };
 
-Player::Player(std::string data) {
+Player::Player(std::string data) : hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE) {
     speed_ = 4.0f;
     pickup_range_ = 3.0f;
     std::vector<std::string> split = split_string(data);
     assert(split[0] == "Player" && split.size() == 8);
     username_ = split[1];
-    hitbox_ = Cube(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f, 2.0f, 1.0f}, 1.0f, WHITE);
     set_position(std::stof(split[2]), std::stof(split[3]), std::stof(split[4]));
     online_ = std::stoi(split[5]) == 1;
     if (split[6] != "null_item") {
@@ -44,8 +40,13 @@ Player::Player(std::string data) {
             add_to_model(std::make_unique<Cube>(object_data));
         }
     }
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 };
+
+Player::~Player() {
+    shader_.reset();
+    selected_item_.reset();
+    selected_item_previous_shader_.reset();
+}
 
 void Player::draw(std::string current_user, const MainCamera& camera) const {
     if ((camera.get_mode() != CAMERA_CUSTOM || username_ != current_user) && online_) {
@@ -110,8 +111,12 @@ void Player::add_to_model(std::unique_ptr<Object3d>&& object) {
 }
 
 void Player::set_shader(std::shared_ptr<Shader> shader) {
+    shader_ = shader;
     for (auto& object : model_) {
-        object->set_shader(shader);
+        object->set_shader(shader_);
+    }
+    if (selected_item_ != nullptr) {
+        selected_item_->set_shader(shader_);
     }
 }
 
@@ -169,11 +174,13 @@ void Player::update(std::map<std::string, std::shared_ptr<Event>>& event_buffer,
 void Player::set_item(std::shared_ptr<Item> item) {
     if (selected_item_ != nullptr && item.get() == selected_item_.get())
         return;
+    selected_item_previous_shader_ = item->get_shader();
     selected_item_ = item;
     selected_item_->set_x(0.0f);
     selected_item_->set_y(0.0f);
     selected_item_->set_z(0.0f);
 }
+
 std::shared_ptr<Item> Player::drop_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
     if (selected_item_ == nullptr)
         return nullptr;
@@ -183,6 +190,7 @@ std::shared_ptr<Item> Player::drop_item(std::map<std::string, std::shared_ptr<Ev
     item->set_x(get_position().x);
     item->set_y(get_position().y);
     item->set_z(get_position().z);
+    item->set_shader(selected_item_previous_shader_ == nullptr ? shader_ : selected_item_previous_shader_);
     return item;
 }
 void Player::use_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {

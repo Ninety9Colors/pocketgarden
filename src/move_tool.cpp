@@ -15,7 +15,6 @@ MoveTool::MoveTool() : position_{0.0f, 0.0f, 0.0f}, scale_(1.0f), holding_distan
     model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 
 MoveTool::MoveTool(std::string data) {
@@ -32,7 +31,6 @@ MoveTool::MoveTool(std::string data) {
     }
     held_id_ = 0;
     speed_ = 2.0f;
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 
 MoveTool::MoveTool(Vector3 position, float scale) : position_(position), scale_(scale), holding_distance_(2.0f) {
@@ -40,7 +38,6 @@ MoveTool::MoveTool(Vector3 position, float scale) : position_(position), scale_(
     model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f*scale_, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
-    shader_ = std::make_shared<Shader>(LoadShader(0,0));
 }
 
 void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
@@ -151,6 +148,7 @@ void MoveTool::draw_offset(float x, float y, float z) const {
 }
 
 void MoveTool::set_shader(std::shared_ptr<Shader> shader) {
+    shader_ = shader;
     for (auto& object : model_) {
         object->set_shader(shader);
     }
