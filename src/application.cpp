@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <map>
 #include <memory>

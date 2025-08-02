@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <iostream>
 #include <limits>
+#include <cstdint>
 #include <cmath>
 #include "move_tool.hpp"
 
@@ -95,6 +96,7 @@ void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, 
             }
             RayCollision c = GetRayCollisionBox(ray, p.second->get_bounding_box());
             if (c.hit) {
+                std::cout << "Hitting object " << p.second->to_string() << "\n";
                 float d = c.distance;
                 if (d < min_distance) {
                     nearest = p.first;

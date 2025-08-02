@@ -2,6 +2,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <cstdint>
 #include <vector>
 
 #include "raylib.h"

@@ -31,7 +31,7 @@ SunTool::SunTool(std::string data) {
 }
 
 SunTool::SunTool(Vector3 position, float scale) : position_(position), scale_(scale) {
-    model_ = LoadModelFromMesh(GenMeshCube(0.25f,0.25f,0.25f));
+    model_ = LoadModelFromMesh(GenMeshSphere(0.25f,8,8));
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
     time_offset_ = 0;

@@ -4,6 +4,7 @@
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
 #include "world.hpp"
+#include <cstdint>
 #include "util.hpp"
 #include <algorithm>
 #include <cmath>
@@ -41,7 +42,7 @@ void World::save_world(std::string save_file) const {
 void World::reset_world() {
     objects_.clear();
     players_.clear();
-    next_id_ = 0;
+    next_id_ = 1;
 }
 
 void World::set_alone(std::string current_user) {
