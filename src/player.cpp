@@ -14,7 +14,7 @@ Player::Player(std::string username, Vector3 position) : username_(username), hi
     speed_ = 4.0f;
     pickup_range_ = 3.0f;
     online_ = false;
-    set_position(position.x, position.y, position.z);
+    set_position(position);
     auto head = std::make_unique<Cube>(Vector3{0, 1.0f, 0}, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK);
     add_to_model(std::move(head));
     selected_item_ = nullptr;
@@ -26,7 +26,7 @@ Player::Player(std::string data) : hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f},
     std::vector<std::string> split = split_string(data);
     assert(split[0] == "Player" && split.size() == 8);
     username_ = split[1];
-    set_position(std::stof(split[2]), std::stof(split[3]), std::stof(split[4]));
+    set_position(Vector3{std::stof(split[2]), std::stof(split[3]), std::stof(split[4])});
     online_ = std::stoi(split[5]) == 1;
     if (split[6] != "null_item") {
         if (get_first_word(split[6]) == "MoveTool") {
@@ -73,8 +73,7 @@ bool Player::move(MainCamera& camera, const std::vector<bool>& keybinds, float d
     dx = dx/magnitude*dt*speed_;
     dz = dz/magnitude*dt*speed_;
 
-    hitbox_.set_x(hitbox_.get_x()+dx);
-    hitbox_.set_z(hitbox_.get_z()+dz);
+    hitbox_.set_position(Vector3{hitbox_.get_position().x + dx, hitbox_.get_position().y, hitbox_.get_position().z + dz});
     return true;
 }
 
@@ -101,10 +100,8 @@ uint32_t Player::try_pickup(MainCamera& camera, std::shared_ptr<World> world, co
     return id;
 }
 
-void Player::set_position(float x, float y, float z) {
-    hitbox_.set_x(x);
-    hitbox_.set_y(y+0.5f);
-    hitbox_.set_z(z);
+void Player::set_position(Vector3 position) {
+    hitbox_.set_position(Vector3{position.x, position.y+0.5f, position.z});
 }
 
 void Player::add_to_model(std::unique_ptr<Object3d>&& object) {
@@ -177,9 +174,7 @@ void Player::set_item(std::shared_ptr<Item> item) {
         return;
     selected_item_previous_shader_ = item->get_shader();
     selected_item_ = item;
-    selected_item_->set_x(0.0f);
-    selected_item_->set_y(0.0f);
-    selected_item_->set_z(0.0f);
+    selected_item_->set_position(Vector3{0.0f,0.0f,0.0f});
 }
 
 std::shared_ptr<Item> Player::drop_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
@@ -188,9 +183,7 @@ std::shared_ptr<Item> Player::drop_item(std::map<std::string, std::shared_ptr<Ev
     std::shared_ptr<Item> item = selected_item_;
     selected_item_ = nullptr;
     item->prepare_drop(event_buffer,camera,shared_from_this(),world,keybinds,dt);
-    item->set_x(get_position().x);
-    item->set_y(get_position().y);
-    item->set_z(get_position().z);
+    item->set_position(get_position());
     item->set_shader(selected_item_previous_shader_ == nullptr ? shader_ : selected_item_previous_shader_);
     return item;
 }
@@ -221,7 +214,7 @@ std::string Player::get_username() {
 }
 
 Vector3 Player::get_position() const {
-    return Vector3{hitbox_.get_x(), hitbox_.get_y()-0.5f, hitbox_.get_z()};
+    return Vector3{hitbox_.get_position().x, hitbox_.get_position().y - 0.5f, hitbox_.get_position().z};
 }
 
 std::string Player::to_string() const {

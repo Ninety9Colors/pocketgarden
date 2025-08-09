@@ -11,7 +11,8 @@
 #include "util.hpp"
 #include <ctime>
 
-SunTool::SunTool() : position_{0.0f, 0.0f, 0.0f}, scale_(1.0f) {
+SunTool::SunTool() : scale_(1.0f) {
+    position_ = Vector3{0.0f,0.0f,0.0f};
     model_ = LoadModelFromMesh(GenMeshSphere(0.25f,8,8));
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
@@ -30,7 +31,8 @@ SunTool::SunTool(std::string data) {
     time_offset_ = 0;
 }
 
-SunTool::SunTool(Vector3 position, float scale) : position_(position), scale_(scale) {
+SunTool::SunTool(Vector3 position, float scale) : scale_(scale) {
+    position_ = std::move(position);
     model_ = LoadModelFromMesh(GenMeshSphere(0.25f,8,8));
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
@@ -76,25 +78,6 @@ void SunTool::prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_
     world->get_weather()->update_sun(timestamp);
     world->update_sun();
     event_buffer["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(world->get_weather()->get_weather_id());
-}
-
-void SunTool::set_x(float new_x) {
-    position_.x = new_x;
-}
-void SunTool::set_y(float new_y) {
-    position_.y = new_y;
-}
-void SunTool::set_z(float new_z) {
-    position_.z = new_z;
-}
-float SunTool::get_x() const {
-    return position_.x;
-}
-float SunTool::get_y() const {
-    return position_.y;
-}
-float SunTool::get_z() const {
-    return position_.z;
 }
 
 BoundingBox SunTool::get_bounding_box() const {

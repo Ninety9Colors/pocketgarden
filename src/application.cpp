@@ -20,7 +20,7 @@ constexpr int DEFAULT_SCREEN_WIDTH = 1280;
 constexpr int DEFAULT_SCREEN_HEIGHT = 720;
 constexpr int FONT_SIZE = 40;
 
-Application::Application() {
+Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(false), port_focus_(false), username_focus_(false) {
     InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "PocketLife");
     SetWindowSize(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
     SetExitKey(KEY_NULL);
@@ -52,10 +52,6 @@ void Application::tick(std::map<std::string, std::shared_ptr<Event>>& event_buff
 
 void Application::run(Game& game) {
     MainCamera main_camera {};
-    char ip[16] = {0};
-    char port[6] = {0};
-    bool ip_focus = false;
-    bool port_focus = false;
 
     float tps = 20.0f;
     float dt_tick = 0;
@@ -69,7 +65,7 @@ void Application::run(Game& game) {
     while (!WindowShouldClose()) {
         int64_t current_timestamp = std::time(nullptr);
         if (!game.in_world()) {
-            display_menu(game, ip, port, ip_focus, port_focus);
+            display_menu(game);
             continue;
         }
         float dt = GetFrameTime(); // seconds
@@ -100,11 +96,14 @@ void Application::run(Game& game) {
 
         float cameraPos[3] = {main_camera.get_position().x, main_camera.get_position().y, main_camera.get_position().z};
         SetShaderValue(*shader_default_, shader_default_->locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
-        float sunPos[3] = {game.get_world()->get_sun()->get_x(), game.get_world()->get_sun()->get_y(), game.get_world()->get_sun()->get_z()};
+
+        Vector3 sun_position = game.get_world()->get_sun()->get_position();
+        float sunPos[3] = {sun_position.x, sun_position.y, sun_position.z};
         SetShaderValue(*shader_default_, sunPosLoc, sunPos, SHADER_UNIFORM_VEC3);
-        float sunColor[4] = {1.0f,1.0f,(std::pow(std::max(game.get_world()->get_sun()->get_y(),0.0f),2)/10000.0f),1.0f};
+        float sunColor[4] = {1.0f,1.0f,(std::pow(std::max(sun_position.y,0.0f),2)/10000.0f),1.0f};
         SetShaderValue(*shader_default_, sunColorLoc, sunColor, SHADER_UNIFORM_VEC4);
-        float ambient_level = (std::pow(std::max(game.get_world()->get_sun()->get_y(),0.0f),2)/10000.0f)*0.5f + 0.25f;
+
+        float ambient_level = (std::pow(std::max(sun_position.y,0.0f),2)/10000.0f)*0.5f + 0.25f;
         float ambient[4] = {ambient_level,ambient_level,ambient_level,1.0f};
         SetShaderValue(*shader_default_, ambientLoc, ambient, SHADER_UNIFORM_VEC4);
 
@@ -126,7 +125,7 @@ void Application::run(Game& game) {
     game.disconnect();
 }
 
-void Application::display_menu(Game& game, char* ip, char* port, bool& ip_focus, bool& port_focus) {
+void Application::display_menu(Game& game) {
     int width = GetScreenWidth();
     int height = GetScreenHeight();
     BeginDrawing();
@@ -134,29 +133,39 @@ void Application::display_menu(Game& game, char* ip, char* port, bool& ip_focus,
     int text_width = MeasureText("1234567891233456", FONT_SIZE);
     Rectangle ip_box = (Rectangle) {width/2-text_width/2, height/2-FONT_SIZE/2-(FONT_SIZE*2), text_width*1, FONT_SIZE};
     Rectangle port_box = (Rectangle){width/2-text_width/2, height/2-FONT_SIZE/2, text_width*1, FONT_SIZE};
+    Rectangle username_box = (Rectangle){width/2-text_width/2, height/2-FONT_SIZE/2-(FONT_SIZE*2)*2, text_width*1, FONT_SIZE};
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), ip_box)) {
-        ip_focus = true;
-        port_focus = false;
+        ip_focus_ = true;
+        port_focus_ = false;
+        username_focus_ = false;
     }
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), port_box)) {
-        ip_focus = false;
-        port_focus = true;
+        ip_focus_ = false;
+        port_focus_ = true;
+        username_focus_ = false;
+    }
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), username_box)) {
+        ip_focus_ = false;
+        port_focus_ = false;
+        username_focus_ = true;
     }
 
     GuiSetStyle(DEFAULT, TEXT_SIZE, FONT_SIZE);
-    GuiTextBox(ip_box, ip, 15+1, ip_focus);
-    GuiTextBox(port_box, port, 5+1, port_focus);
+    GuiTextBox(ip_box, ip_, 15+1, ip_focus_);
+    GuiTextBox(port_box, port_, 5+1, port_focus_);
+    GuiTextBox(username_box, username_, 15+1, username_focus_);
     if (GuiButton((Rectangle){width/2-text_width/2, height/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Host")) {
-        if (ip[0] == '\0' || port[0] == '\0') {
-        } else if (game.host("darek","test world.data",ip,port,shader_default_)) {
+        if (ip_[0] == '\0' || port_[0] == '\0' || username_[0] == '\0') {
+        } else if (game.host((const char*)username_,"test world.data",ip_,port_,shader_default_)) {
             DisableCursor();
             event_buffer_.clear();
         }
     } else if (GuiButton((Rectangle){width/2+text_width*0.1, height/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Join")) {
-        if (ip[0] == '\0' || port[0] == '\0') {
-        } else if (game.join("isabella",ip,port)) {
+        if (ip_[0] == '\0' || port_[0] == '\0' || username_[0] == '\0') {
+        } else if (game.join((const char*)username_,ip_,port_)) {
             DisableCursor();
             event_buffer_.clear();
         }

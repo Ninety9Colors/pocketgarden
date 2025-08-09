@@ -11,6 +11,7 @@
 #include "sun_tool.hpp"
 #include "player.hpp"
 #include "util.hpp"
+#include "object3d.hpp"
 
 IAmHostEvent::IAmHostEvent(std::string username) : username_(username) {}
 IAmHostEvent::~IAmHostEvent() {}
@@ -75,8 +76,7 @@ void DisconnectEvent::receive(std::string receiving_user, std::shared_ptr<World>
         world->get_player(username_)->on_disconnect();
         network->send_packet(make_packet(), reliable());
     } else {
-        network->delete_server();
-        game.disconnect();
+        world->get_player(username_)->on_disconnect();
     }
 }
 
@@ -124,7 +124,7 @@ bool PlayerMoveEvent::reliable() const {
     return false;
 };
 void PlayerMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    world->get_player(username_)->set_position(x_,y_,z_);
+    world->get_player(username_)->set_position(Vector3{x_,y_,z_});
     if (network->is_host()) {
         network->send_packet_excluding(make_packet(), reliable(), username_);
     }

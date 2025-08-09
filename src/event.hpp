@@ -11,8 +11,9 @@ class Player;
 class World;
 class Vector3;
 class MainCamera;
-
-#include "object3d.hpp"
+class Object3d;
+class Item;
+class Shader;
 
 class Event {
 public:

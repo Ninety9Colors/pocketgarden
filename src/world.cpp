@@ -120,9 +120,7 @@ void World::load_player(std::shared_ptr<Player> player, std::shared_ptr<Shader> 
 
 void World::update_object(uint32_t id, Vector3 position) {
     assert(objects_.find(id) != objects_.end());
-    objects_[id]->set_x(position.x);
-    objects_[id]->set_y(position.y);
-    objects_[id]->set_z(position.z);
+    objects_[id]->set_position(position);
 }
 
 uint32_t World::get_object_id(std::shared_ptr<Object3d> object) {
@@ -171,7 +169,5 @@ void World::update_sun() {
     double z = -std::cos(azimuth) * std::cos(altitude);
     double magnitude = std::sqrt(x*x + y*y + z*z);
 
-    sun_->set_x((float)(x/magnitude)*SUN_RADIUS);
-    sun_->set_y((float)(y/magnitude)*SUN_RADIUS);
-    sun_->set_z((float)(z/magnitude)*SUN_RADIUS);
+    sun_->set_position(Vector3{(float)(x/magnitude)*SUN_RADIUS,(float)(y/magnitude)*SUN_RADIUS,(float)(z/magnitude)*SUN_RADIUS});
 }

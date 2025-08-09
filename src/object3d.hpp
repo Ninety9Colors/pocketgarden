@@ -5,12 +5,12 @@
 #include <cstdint>
 #include <vector>
 
+#include "raylib.h"
+
 class Player;
 class World;
 class MainCamera;
-class BoundingBox;
 class Event;
-struct Shader;
 
 class Object3d {
 public:
@@ -20,14 +20,13 @@ public:
     virtual void draw() const = 0;
     virtual void draw_offset(float x, float y, float z) const = 0;
     virtual void set_shader(std::shared_ptr<Shader> shader) = 0;
-    std::shared_ptr<Shader> get_shader();
+    virtual std::shared_ptr<Shader> get_shader();
 
-    virtual void set_x(float new_x) = 0;
-    virtual void set_y(float new_y) = 0;
-    virtual void set_z(float new_z) = 0;
-    virtual float get_x() const = 0;
-    virtual float get_y() const = 0;
-    virtual float get_z() const = 0;
+    virtual void set_quaternion(Quaternion quaternion);
+    virtual Quaternion get_quaternion();
+
+    virtual void set_position(Vector3 position);
+    virtual Vector3 get_position() const;
 
     virtual BoundingBox get_bounding_box() const = 0;
 
@@ -36,6 +35,8 @@ public:
     virtual ~Object3d() {};
 protected:
     std::shared_ptr<Shader> shader_;
+    Quaternion quaternion_;
+    Vector3 position_;
 private:
     uint32_t id_ = 0;
 };

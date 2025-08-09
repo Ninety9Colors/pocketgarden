@@ -22,7 +22,7 @@ public:
 
     void draw(std::string current_user, const MainCamera& camera) const;
     bool move(MainCamera& camera, const std::vector<bool>& keybinds, float dt);
-    void set_position(float x, float y, float z);
+    void set_position(Vector3 position);
     void add_to_model(std::unique_ptr<Object3d>&& object);
     void set_shader(std::shared_ptr<Shader> shader);
     std::shared_ptr<Shader> get_shader() const;
