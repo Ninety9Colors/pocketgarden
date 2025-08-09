@@ -39,11 +39,12 @@ void Cube::draw() const {
 
 void Cube::draw_offset(float x, float y, float z) const {
     Matrix offset = MatrixAdd(transform_,Matrix{
-        0,0,0,0,
-        0,0,0,0,
-        0,0,0,0,
-        x,y,z,0
+        0,0,0,x,
+        0,0,0,y,
+        0,0,0,z,
+        0,0,0,0
     });
+    std::cout << "\n";
     std::cout << std::to_string(offset.m0) << " " << std::to_string(offset.m4) << " " << std::to_string(offset.m8) << " " << std::to_string(offset.m12) << "\n";
     std::cout << std::to_string(offset.m1) << " " << std::to_string(offset.m5) << " " << std::to_string(offset.m9) << " " << std::to_string(offset.m13) << "\n";
     std::cout << std::to_string(offset.m2) << " " << std::to_string(offset.m6) << " " << std::to_string(offset.m10) << " " << std::to_string(offset.m14) << "\n";
