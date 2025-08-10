@@ -225,6 +225,7 @@ void Network::disconnect() {
                 if (disconnects == players_.size()) {
                     enet_host_destroy(host_);
                     mode_ = 0;
+                    players_.clear();
                     return;
                 }
                 break;
@@ -234,6 +235,7 @@ void Network::disconnect() {
             assert(pair.second != nullptr);
             enet_peer_reset(pair.second);
         }
+        players_.clear();
     }
     mode_ = 0;
     enet_host_destroy(host_);

@@ -2,6 +2,7 @@
 
 #include "event.hpp"
 #include "game.hpp"
+#include <cassert>
 
 Game::Game() : in_world_(false), current_user_("") {
     world_ = std::make_shared<World>();

@@ -11,36 +11,39 @@
 #include "util.hpp"
 #include <ctime>
 
-SunTool::SunTool() : scale_(1.0f) {
-    position_ = Vector3{0.0f,0.0f,0.0f};
-    model_ = LoadModelFromMesh(GenMeshSphere(0.25f,8,8));
+SunTool::SunTool() : Item() {
+    UnloadMesh(mesh_);
+    mesh_ = GenMeshSphere(0.25f,8,8);
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
     time_offset_ = 0;
+    material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
+    update_matrix();
 }
 
-SunTool::SunTool(std::string data) {
+SunTool::SunTool(std::string data) : Item() {
     std::vector<std::string> split = split_string(data);
     assert(split[0] == "SunTool" && split.size() == 6);
     position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
     time_offset_ = std::stof(split[4]);
     scale_ = std::stof(split[5]);
-    model_ = LoadModelFromMesh(GenMeshSphere(0.25f,8,8));
+    UnloadMesh(mesh_);
+    mesh_ = GenMeshSphere(0.25f,8,8);
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
     time_offset_ = 0;
+    material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
+    update_matrix();
 }
 
-SunTool::SunTool(Vector3 position, float scale) : scale_(scale) {
-    position_ = std::move(position);
-    model_ = LoadModelFromMesh(GenMeshSphere(0.25f,8,8));
+SunTool::SunTool(Vector3 position, float scale) : Item(position,scale) {
+    UnloadMesh(mesh_);
+    mesh_ = GenMeshSphere(0.25f,8,8);
     speed_ = 1.0f;
     color_ = Color{200,200,0,255};
     time_offset_ = 0;
-}
-
-SunTool::~SunTool() {
-    UnloadModel(model_);
+    material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
+    update_matrix();
 }
 
 void SunTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
@@ -59,32 +62,12 @@ void SunTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, c
     }
 }
 
-void SunTool::draw() const {
-    DrawModel(model_,position_,scale_,color_);
-}
-
-void SunTool::draw_offset(float x, float y, float z) const {
-    DrawModel(model_,Vector3{position_.x+x,position_.y+y,position_.z+z},scale_,color_);
-}
-
-void SunTool::set_shader(std::shared_ptr<Shader> shader) {
-    shader_ = shader;
-    model_.materials[MATERIAL_MAP_DIFFUSE].shader = *shader_;
-}
-
 void SunTool::prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
     time_offset_ = 0;
     uint64_t timestamp = std::time(nullptr);
     world->get_weather()->update_sun(timestamp);
     world->update_sun();
     event_buffer["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(world->get_weather()->get_weather_id());
-}
-
-BoundingBox SunTool::get_bounding_box() const {
-    BoundingBox box = GetModelBoundingBox(model_);
-    box.max = Vector3{box.max.x*scale_ + position_.x, box.max.y*scale_ + position_.y, box.max.z*scale_ + position_.z};
-    box.min = Vector3{box.min.x*scale_ + position_.x, box.min.y*scale_ + position_.y, box.min.z*scale_ + position_.z};
-    return box;
 }
 
 std::string SunTool::to_string() const {
