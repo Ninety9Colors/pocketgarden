@@ -35,6 +35,5 @@ private:
     float holding_distance_;
 
     std::vector<std::unique_ptr<Object3d>> model_;
-    float scale_;
     float speed_;
 };

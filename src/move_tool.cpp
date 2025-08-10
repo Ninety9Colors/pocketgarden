@@ -11,15 +11,15 @@
 #include "maincamera.hpp"
 #include "util.hpp"
 
-MoveTool::MoveTool() : scale_(1.0f), holding_distance_(2.0f) {
-    position_ = Vector3{0.0f,0.0f,0.0f};
+MoveTool::MoveTool() : Item(), holding_distance_(2.0f) {
     model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,2.0f}, 0.2f, YELLOW));
     model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
+    update_matrix();
 }
 
-MoveTool::MoveTool(std::string data) {
+MoveTool::MoveTool(std::string data) : Item() {
     std::vector<std::string> split = split_string(data);
     assert(split[0] == "MoveTool" && split.size() == 7);
     position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
@@ -33,14 +33,15 @@ MoveTool::MoveTool(std::string data) {
     }
     held_id_ = 0;
     speed_ = 2.0f;
+    update_matrix();
 }
 
-MoveTool::MoveTool(Vector3 position, float scale) : scale_(scale), holding_distance_(2.0f) {
-    position_ = std::move(position);
+MoveTool::MoveTool(Vector3 position, float scale) : Item(position,scale), holding_distance_(2.0f) {
     model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,2.0f}, 0.2f*scale_, YELLOW));
     model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f*scale_, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
+    update_matrix();
 }
 
 void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
@@ -69,7 +70,7 @@ void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, 
                 if (move_magnitude <= epsilon) {
                     held_item->set_position(Vector3{target_x, target_y, target_z});
                 } else {
-                    held_item->set_position(Vector3{x + move_direction.x*move_distance, y + move_direction.y, z + move_direction.z});
+                    held_item->set_position(Vector3{x + move_direction.x*move_distance, y + move_direction.y*move_distance, z + move_direction.z*move_distance});
                 }
                 if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
                     std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,held_item->get_position());
@@ -122,7 +123,7 @@ void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, 
             if (move_magnitude <= epsilon) {
                 held_item->set_position(Vector3{target_x, target_y, target_z});
             } else {
-                held_item->set_position(Vector3{x + move_direction.x*move_distance, y + move_direction.y, z + move_direction.z});
+                held_item->set_position(Vector3{x + move_direction.x*move_distance, y + move_direction.y*move_distance, z + move_direction.z*move_distance});
             }
             if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
                 std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,held_item->get_position());
