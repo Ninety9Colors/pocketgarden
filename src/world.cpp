@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <fstream>
 
+#include "tapered_petal.hpp"
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
 #include "rotate_tool.hpp"
@@ -29,6 +30,9 @@ void World::load_world(std::string save_file, std::shared_ptr<Shader> shader) {
         from_string(data,shader);
     } else {
         load_object(std::make_shared<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,1.0f}, 1.0f, RED), shader);
+        auto petal = std::make_shared<TaperedPetal>(Vector3{0.0f,0.0f,7.0f}, 1.0f);
+        petal->generate_mesh();
+        load_object(petal, shader);
         load_object(std::make_shared<MoveTool>(Vector3{0.0f, 2.0f, 0.0f}, 1.0f), shader);
         load_object(std::make_shared<SunTool>(Vector3{0.0f, 2.0f, 3.0f}, 1.0f), shader);
         load_object(std::make_shared<RotateTool>(Vector3{0.0f, 2.0f, 4.0f}, 1.0f), shader);

@@ -7,6 +7,8 @@
 
 #include "raylib.h"
 
+#include "parameter.hpp"
+
 class Player;
 class World;
 class MainCamera;
@@ -58,4 +60,21 @@ public:
     virtual void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) = 0;
     virtual void prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) = 0;
     virtual ~Item() {};
+};
+
+class ParameterObject : public Object3d {
+public:
+    ParameterObject();
+    ParameterObject(float scale);
+    ParameterObject(Vector3 position, float scale);
+
+    virtual void generate_mesh() = 0;
+    void set_parameter(std::string name, float value);
+    const Parameter get_parameter(std::string name) const;
+
+    virtual ~ParameterObject() {};
+protected:
+    virtual void initialize_parameters() = 0;
+
+    ParameterMap parameter_map_; 
 };

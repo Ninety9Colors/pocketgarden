@@ -95,3 +95,14 @@ BoundingBox Object3d::get_bounding_box() const {
 Item::Item() : Object3d() {}
 Item::Item(float scale) : Object3d(scale) {}
 Item::Item(Vector3 position, float scale) : Object3d(position, scale) {}
+
+ParameterObject::ParameterObject() : Object3d() {};
+ParameterObject::ParameterObject(float scale) : Object3d(scale) {}
+ParameterObject::ParameterObject(Vector3 position, float scale) : Object3d(position, scale) {}
+
+void ParameterObject::set_parameter(std::string name, float value) {
+    parameter_map_.set_parameter(name,value);
+}
+const Parameter ParameterObject::get_parameter(std::string name) const {
+    return parameter_map_.get_parameter(name);
+}

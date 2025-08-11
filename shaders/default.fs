@@ -19,5 +19,5 @@ void main() {
     float diff = max(dot(normalize(sunPos-fragPosition),fragNormal),0.0);
     vec4 diffuse = vec4(diff*sunColor.xyz,sunColor.w);
 
-    finalColor = (ambient+diffuse)*colorDiffuse;
+    finalColor = (ambient+diffuse)*colorDiffuse*fragColor;
 }
