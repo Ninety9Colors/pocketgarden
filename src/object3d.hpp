@@ -29,6 +29,7 @@ public:
 
     virtual void set_quaternion(Quaternion quaternion);
     virtual Quaternion get_quaternion();
+    virtual void rotate_axis(Vector3 axis, float radians);
     virtual void update_matrix();
 
     virtual void set_position(Vector3 position);

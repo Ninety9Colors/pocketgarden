@@ -72,7 +72,7 @@ void Application::run(Game& game) {
         dt_tick += dt;
         std::string fps = std::to_string((int)round(1.0/dt));
         std::vector<bool> keybinds = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB), IsKeyDown(KEY_ESCAPE),
-                                        IsMouseButtonPressed(MOUSE_LEFT_BUTTON), (GetMouseWheelMoveV().y > 0), (GetMouseWheelMoveV().y < 0), IsKeyPressed(KEY_SPACE)};
+                                        IsMouseButtonPressed(MOUSE_LEFT_BUTTON), (GetMouseWheelMoveV().y > 0), (GetMouseWheelMoveV().y < 0), IsKeyPressed(KEY_SPACE), IsKeyDown(KEY_Q), IsKeyDown(KEY_E)};
         game.poll_events(game.get_current_user(), game.get_world(), game.get_network(), game, current_timestamp, event_buffer_, main_camera, keybinds,dt,shader_default_);
         const auto player = game.get_current_player();
         if (player == nullptr)
@@ -115,6 +115,8 @@ void Application::run(Game& game) {
         draw_players(game.get_current_user(), game.get_world()->get_players(), main_camera);
         draw_objects(game.get_world()->get_objects());
         EndMode3D();
+        // Crosshair
+        DrawCircle(GetScreenWidth()/2,GetScreenHeight()/2,3,WHITE);
 
         int fps_size = MeasureText(fps.c_str(),FONT_SIZE);
         GuiLabel((Rectangle){0,0,fps_size,FONT_SIZE},fps.c_str());

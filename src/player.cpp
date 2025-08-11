@@ -6,6 +6,7 @@
 #include "maincamera.hpp"
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
+#include "rotate_tool.hpp"
 #include "player.hpp"
 #include "util.hpp"
 #include "world.hpp"
@@ -33,6 +34,8 @@ Player::Player(std::string data) : hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f},
             selected_item_ = std::make_shared<MoveTool>(split[6]);
         } else if (get_first_word(split[6]) == "SunTool") {
             selected_item_ = std::make_shared<SunTool>(split[6]);
+        } else if (get_first_word(split[6]) == "SunTool") {
+            selected_item_ = std::make_shared<RotateTool>(split[6]);
         }
     }
     std::vector<std::string> model_objects = split_string(split[7]);

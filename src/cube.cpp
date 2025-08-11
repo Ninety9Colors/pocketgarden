@@ -28,11 +28,6 @@ Cube::Cube(Vector3 position, Vector3 size, float scale, Color color) : Object3d(
     update_matrix();
 }
 
-BoundingBox Cube::get_bounding_box() const {
-    return BoundingBox{Vector3{position_.x - size_.x/2*scale_, position_.y - size_.y/2*scale_, position_.z - size_.z/2*scale_},
-                        Vector3{position_.x + size_.x/2*scale_, position_.y + size_.y/2*scale_, position_.z + size_.z/2*scale_}};
-}
-
 std::string Cube::to_string() const {
     return "Cube " + 
         std::to_string(position_.x) + " " + std::to_string(position_.y) + " " + std::to_string(position_.z) + " " +

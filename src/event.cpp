@@ -9,6 +9,7 @@
 #include "maincamera.hpp"
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
+#include "rotate_tool.hpp"
 #include "player.hpp"
 #include "util.hpp"
 #include "object3d.hpp"
@@ -201,6 +202,8 @@ ObjectLoadEvent::ObjectLoadEvent(std::string packet) {
             object = std::make_shared<MoveTool>(a[1]);
         } else if (type=="SunTool") {
             object = std::make_shared<SunTool>(a[1]);
+        } else if (type=="RotateTool") {
+            object = std::make_shared<RotateTool>(a[1]);
         }
         add((uint32_t) std::stoi(a[0]), std::move(object));
     }
@@ -235,6 +238,8 @@ ItemPickupEvent::ItemPickupEvent(std::string packet) {
         item_ = std::make_shared<MoveTool>(split[2]);
     } else if (type == "SunTool") {
         item_ = std::make_shared<SunTool>(split[2]);
+    } else if (type == "RotateTool") {
+        item_ = std::make_shared<RotateTool>(split[2]);
     }
 }
 ItemPickupEvent::~ItemPickupEvent() {}

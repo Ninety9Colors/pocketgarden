@@ -12,35 +12,35 @@
 #include "util.hpp"
 
 MoveTool::MoveTool() : Item(), holding_distance_(2.0f) {
-    model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,2.0f}, 0.2f, YELLOW));
-    model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
+    material_.maps[MATERIAL_MAP_DIFFUSE].color = GREEN;
+    UnloadMesh(mesh_);
+    mesh_ = GenMeshCylinder(0.25f,0.5f,10);
     update_matrix();
 }
 
 MoveTool::MoveTool(std::string data) : Item() {
     std::vector<std::string> split = split_string(data);
-    assert(split[0] == "MoveTool" && split.size() == 7);
+    assert(split[0] == "MoveTool" && split.size() == 10);
     position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
     holding_distance_ = std::stof(split[4]);
     scale_ = std::stof(split[5]);
-    std::vector<std::string> model_objects = split_string(split[6]);
-    for (std::string object_data : model_objects) {
-        if (get_first_word(object_data) == "Cube") {
-            model_.push_back(std::make_unique<Cube>(object_data));
-        }
-    }
+    quaternion_ = Quaternion{std::stof(split[6]),std::stof(split[7]),std::stof(split[8]),std::stof(split[9])};
     held_id_ = 0;
     speed_ = 2.0f;
+    material_.maps[MATERIAL_MAP_DIFFUSE].color = GREEN;
+    UnloadMesh(mesh_);
+    mesh_ = GenMeshCylinder(0.25f,0.5f,10);
     update_matrix();
 }
 
 MoveTool::MoveTool(Vector3 position, float scale) : Item(position,scale), holding_distance_(2.0f) {
-    model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,2.0f}, 0.2f*scale_, YELLOW));
-    model_.push_back(std::make_unique<Cube>(Vector3{0.0f,0.0f,1.5f*0.2f}, Vector3{1.0f,1.0f,1.0f}, 0.2f*scale_, LIGHTGRAY));
     held_id_ = 0;
     speed_ = 2.0f;
+    material_.maps[MATERIAL_MAP_DIFFUSE].color = GREEN;
+    UnloadMesh(mesh_);
+    mesh_ = GenMeshCylinder(0.25f,0.5f,10);
     update_matrix();
 }
 
@@ -136,44 +136,8 @@ void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, 
     }
 }
 
-void MoveTool::draw() const {
-    for (const auto& object : model_)
-        object->draw_offset(position_.x, position_.y, position_.z);
-}
-
-void MoveTool::draw_offset(float x, float y, float z) const {
-    for (const auto& object : model_)
-        object->draw_offset(position_.x+x, position_.y+y, position_.z+z);
-}
-
-void MoveTool::set_shader(std::shared_ptr<Shader> shader) {
-    shader_ = shader;
-    for (auto& object : model_) {
-        object->set_shader(shader);
-    }
-}
-
 void MoveTool::prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
     held_id_ = 0;
-}
-
-BoundingBox MoveTool::get_bounding_box() const {
-    float max_x = -std::numeric_limits<float>::infinity();
-    float min_x = std::numeric_limits<float>::infinity();
-    float max_y = -std::numeric_limits<float>::infinity();
-    float min_y = std::numeric_limits<float>::infinity();
-    float max_z = -std::numeric_limits<float>::infinity();
-    float min_z = std::numeric_limits<float>::infinity();
-    for (const auto& object : model_) {
-        BoundingBox box = object->get_bounding_box();
-        max_x = std::max(max_x, box.max.x);
-        max_y = std::max(max_y, box.max.y);
-        max_z = std::max(max_z, box.max.z);
-        min_x = std::min(min_x, box.min.x);
-        min_y = std::min(min_y, box.min.y);
-        min_z = std::min(min_z, box.min.z);
-    }
-    return BoundingBox{Vector3{position_.x+min_x, position_.y+min_y, position_.z+min_z}, Vector3{position_.x+max_x, position_.y+max_y, position_.z+max_z}};
 }
 
 bool MoveTool::in_use() const {
@@ -184,10 +148,7 @@ std::string MoveTool::to_string() const {
     std::string result = "MoveTool " + 
         std::to_string(position_.x) + " " + std::to_string(position_.y) + " " + std::to_string(position_.z) + " " +
         std::to_string(holding_distance_) + " " +
-        std::to_string(scale_) + " (";
-    for (const auto& object : model_) {
-        result += "(" + object->to_string() + ")";
-    }
-    result += ")";
+        std::to_string(scale_) + " " +
+        std::to_string(quaternion_.x) + " " + std::to_string(quaternion_.y) + " " + std::to_string(quaternion_.z) + " " + std::to_string(quaternion_.w);
     return result;
 }
