@@ -11,8 +11,6 @@ public:
     Cube(const Cube&) = delete;
     Cube& operator=(const Cube&) = delete;
 
-    BoundingBox get_bounding_box() const override;
-
     std::string to_string() const override;
 private:
     Vector3 size_;
