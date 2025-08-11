@@ -10,6 +10,8 @@ class Network;
 class Player;
 class World;
 class Vector3;
+class Vector4;
+typedef Vector4 Quaternion;
 class MainCamera;
 class Object3d;
 class Item;
@@ -95,6 +97,20 @@ public:
     void add(uint32_t id, Vector3 position);
 private:
     std::map<uint32_t, Vector3> objects_;
+    std::string sender_;
+};
+
+class ObjectRotateEvent : public Event {
+public:
+    ObjectRotateEvent(std::map<uint32_t, Quaternion> objects, std::string sender);
+    ObjectRotateEvent(std::string packet);
+    ~ObjectRotateEvent();
+    std::string make_packet() const override;
+    bool reliable() const override;
+    void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) override;
+    void add(uint32_t id, Quaternion rotation);
+private:
+    std::map<uint32_t, Quaternion> objects_;
     std::string sender_;
 };
 

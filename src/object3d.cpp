@@ -42,6 +42,7 @@ void Object3d::set_shader(std::shared_ptr<Shader> shader) {
 
 void Object3d::set_quaternion(Quaternion quaternion) {
     quaternion_ = quaternion;
+    update_matrix();
 }
 
 Quaternion Object3d::get_quaternion() {

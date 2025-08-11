@@ -123,8 +123,13 @@ void World::load_player(std::shared_ptr<Player> player, std::shared_ptr<Shader> 
 }
 
 void World::update_object(uint32_t id, Vector3 position) {
-    assert(objects_.find(id) != objects_.end());
+    if(objects_.find(id) == objects_.end()) return;
     objects_[id]->set_position(position);
+}
+
+void World::update_object(uint32_t id, Quaternion quaternion) {
+    if(objects_.find(id) == objects_.end()) return;
+    objects_[id]->set_quaternion(quaternion);
 }
 
 uint32_t World::get_object_id(std::shared_ptr<Object3d> object) {

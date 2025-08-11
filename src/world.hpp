@@ -28,6 +28,7 @@ public:
     void load_player(std::string username, std::shared_ptr<Shader> shader);
     void load_player(std::shared_ptr<Player> player, std::shared_ptr<Shader> shader);
     void update_object(uint32_t id, Vector3 position);
+    void update_object(uint32_t id, Quaternion quaternion);
     uint32_t get_object_id(std::shared_ptr<Object3d> object);
     void remove_object(uint32_t id);
 

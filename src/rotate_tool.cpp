@@ -6,6 +6,7 @@
 #include "rotate_tool.hpp"
 
 #include "raylib.h"
+#include "raymath.h"
 
 #include "cube.hpp"
 #include "maincamera.hpp"
@@ -13,6 +14,7 @@
 
 RotateTool::RotateTool() : Item(), rotate_speed_(PI/2), axis_{1.0f,0.0f,0.0f} {
     held_id_ = 0;
+    held_item_ = nullptr;
     material_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
     UnloadMesh(mesh_);
     mesh_ = GenMeshCube(0.25f,0.25f,0.25f);
@@ -28,6 +30,7 @@ RotateTool::RotateTool(std::string data) : Item() {
     scale_ = std::stof(split[8]);
     quaternion_ = Quaternion{std::stof(split[9]),std::stof(split[10]),std::stof(split[11]),std::stof(split[12])};
     held_id_ = 0;
+    held_item_ = nullptr;
     material_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
     UnloadMesh(mesh_);
     mesh_ = GenMeshCube(0.25f,0.25f,0.25f);
@@ -36,6 +39,7 @@ RotateTool::RotateTool(std::string data) : Item() {
 
 RotateTool::RotateTool(Vector3 position, float scale) : Item(position,scale), rotate_speed_(PI/2), axis_{1.0f,0.0f,0.0f} {
     held_id_ = 0;
+    held_item_ = nullptr;
     material_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
     UnloadMesh(mesh_);
     mesh_ = GenMeshCube(0.25f,0.25f,0.25f);
@@ -46,60 +50,103 @@ void RotateTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer
     if (in_use()) {
         if (world->get_objects().find(held_id_) == world->get_objects().end()) {
             held_id_ = 0;
+            held_item_ = nullptr;
         } else {
-            std::shared_ptr<Object3d> held_item = world->get_objects().at(held_id_);
+            if (keybinds[12]) {
+                float a = axis_.x;
+                axis_.x = axis_.z;
+                axis_.z = axis_.y;
+                axis_.y = a;
+            }
             if (keybinds[10])
-                held_item->rotate_axis(axis_,rotate_speed_*dt);
+                held_item_->rotate_axis(axis_,rotate_speed_*dt);
             else if (keybinds[11])
-                held_item->rotate_axis(axis_,-rotate_speed_*dt);
-            // if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
-            //     std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,held_item->get_position());
-            // } else {
-            //     ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{}, user->get_username());
-            //     move_event.add(held_id_,held_item->get_position());
-            //     event_buffer["ObjectMoveEvent"] = std::make_shared<ObjectMoveEvent>(move_event);
-            // }
+                held_item_->rotate_axis(axis_,-rotate_speed_*dt);
+            if (!keybinds[10] && !keybinds[11]) {
+            } else {
+                if (event_buffer.find("ObjectRotateEvent") != event_buffer.end()) {
+                    std::dynamic_pointer_cast<ObjectRotateEvent>(event_buffer["ObjectRotateEvent"])->add(held_id_,held_item_->get_quaternion());
+                } else {
+                    ObjectRotateEvent move_event = ObjectRotateEvent(std::map<uint32_t, Quaternion>{}, user->get_username());
+                    move_event.add(held_id_,held_item_->get_quaternion());
+                    event_buffer["ObjectRotateEvent"] = std::make_shared<ObjectRotateEvent>(move_event);
+                }
+            }
         }
     }
     if (!keybinds[6])
         return;
-    if (in_use()) {
-        held_id_ = 0;
+    Ray ray = Ray{camera.get_position(), camera.get_direction()};
+    uint32_t nearest = 0;
+    float min_distance = std::numeric_limits<float>::infinity();
+    for (const auto& p : world->get_objects()) {
+        if (p.second.get() == this) {
+            continue;
+        }
+        RayCollision c = GetRayCollisionBox(ray, p.second->get_bounding_box());
+        if (c.hit) {
+            std::cout << "Hitting object " << p.second->to_string() << "\n";
+            float d = c.distance;
+            if (d < min_distance) {
+                nearest = p.first;
+                min_distance = d;
+            }
+        }
+    }
+    if (nearest != 0) {
+        held_id_ = nearest;
+        held_item_ = world->get_objects().at(held_id_);
+        if (keybinds[12]) {
+            float a = axis_.x;
+            axis_.x = axis_.z;
+            axis_.z = axis_.y;
+            axis_.y = a;
+        }
+        if (keybinds[10])
+            held_item_->rotate_axis(axis_,rotate_speed_*dt);
+        else if (keybinds[11])
+            held_item_->rotate_axis(axis_,-rotate_speed_*dt);
+        if (!keybinds[10] && !keybinds[11])
+            return;
+        if (event_buffer.find("ObjectRotateEvent") != event_buffer.end()) {
+            std::dynamic_pointer_cast<ObjectRotateEvent>(event_buffer["ObjectRotateEvent"])->add(held_id_,held_item_->get_quaternion());
+        } else {
+            ObjectRotateEvent move_event = ObjectRotateEvent(std::map<uint32_t, Quaternion>{}, user->get_username());
+            move_event.add(held_id_,held_item_->get_quaternion());
+            event_buffer["ObjectRotateEvent"] = std::make_shared<ObjectRotateEvent>(move_event);
+        }
     } else {
-        Ray ray = Ray{camera.get_position(), camera.get_direction()};
-        uint32_t nearest = 0;
-        float min_distance = std::numeric_limits<float>::infinity();
-        for (const auto& p : world->get_objects()) {
-            if (p.second.get() == this) {
-                continue;
-            }
-            RayCollision c = GetRayCollisionBox(ray, p.second->get_bounding_box());
-            if (c.hit) {
-                std::cout << "Hitting object " << p.second->to_string() << "\n";
-                float d = c.distance;
-                if (d < min_distance) {
-                    nearest = p.first;
-                    min_distance = d;
-                }
-            }
-        }
-        if (nearest != 0) {
-            held_id_ = nearest;
-            std::shared_ptr<Object3d> held_item = world->get_objects().at(held_id_);
-            if (keybinds[10])
-                held_item->rotate_axis(axis_,rotate_speed_*dt);
-            else if (keybinds[11])
-                held_item->rotate_axis(axis_,-rotate_speed_*dt);
-        }
+        held_id_ = 0;
+        held_item_ = nullptr;
     }
 }
 
 void RotateTool::prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
     held_id_ = 0;
+    held_item_ = nullptr;
 }
 
 bool RotateTool::in_use() const {
     return held_id_ != 0;
+}
+
+void RotateTool::draw() const {
+    DrawMesh(mesh_, material_, transform_);
+    DrawBoundingBox(get_bounding_box(),WHITE);
+    if (!in_use()) return;
+    DrawLine3D(held_item_->get_position(), Vector3Add(held_item_->get_position(),axis_*Vector3Distance(held_item_->get_bounding_box().max, held_item_->get_bounding_box().min)*2), WHITE);
+}
+void RotateTool::draw_offset(float x, float y, float z) const {
+    Matrix offset = MatrixAdd(transform_,Matrix{
+        0,0,0,x,
+        0,0,0,y,
+        0,0,0,z,
+        0,0,0,0
+    });
+    DrawMesh(mesh_, material_, offset);
+    DrawBoundingBox(BoundingBox{Vector3Add(get_bounding_box().min, Vector3{x,y,z}),Vector3Add(get_bounding_box().max, Vector3{x,y,z})},WHITE);
+    if (!in_use()) return;
+    DrawLine3D(held_item_->get_position(), Vector3Add(held_item_->get_position(),axis_*Vector3Distance(held_item_->get_bounding_box().max, held_item_->get_bounding_box().min)*2), WHITE);
 }
 
 std::string RotateTool::to_string() const {

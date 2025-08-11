@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "raylib.h"
+#include "raymath.h"
 
 #include "event.hpp"
 #include "game.hpp"
@@ -159,6 +160,36 @@ void ObjectMoveEvent::receive(std::string receiving_user, std::shared_ptr<World>
 }
 void ObjectMoveEvent::add(uint32_t id, Vector3 position){
     objects_[id] = position;
+}
+
+ObjectRotateEvent::ObjectRotateEvent(std::map<uint32_t, Quaternion> objects, std::string sender) : objects_(std::move(objects)), sender_(sender) {};
+ObjectRotateEvent::ObjectRotateEvent(std::string packet){
+    std::vector<std::string> split = split_string(packet);
+    sender_ = split[1];
+    for (int i = 2; i < split.size(); i++) {
+        std::vector<std::string> update = split_string(split[i]);
+        objects_[std::stoi(update[0])] = Quaternion{std::stof(update[1]), std::stof(update[2]), std::stof(update[3]), std::stof(update[4])};
+    }
+}
+ObjectRotateEvent::~ObjectRotateEvent() {};
+
+std::string ObjectRotateEvent::make_packet() const {
+    std::string result = "ObjectRotateEvent " + sender_ + " ";
+    for (const auto& p : objects_)
+        result += "(" + std::to_string(p.first) + " " + std::to_string(p.second.x) + " " + std::to_string(p.second.y) + " " + std::to_string(p.second.z) + " " + std::to_string(p.second.w) +")";
+    return result;
+}
+bool ObjectRotateEvent::reliable() const {return false;}
+
+void ObjectRotateEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
+    for (const auto& p : objects_)
+        world->update_object(p.first, p.second);
+    if (network->is_host()) {
+        network->send_packet_excluding(make_packet(), reliable(), sender_);
+    }
+}
+void ObjectRotateEvent::add(uint32_t id, Quaternion quaternion){
+    objects_[id] = quaternion;
 }
 
 ObjectRemoveEvent::ObjectRemoveEvent(std::vector<uint32_t> indices, std::string sender) : indices_(std::move(indices)), sender_(sender) {}

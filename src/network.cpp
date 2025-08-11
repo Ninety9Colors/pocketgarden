@@ -59,6 +59,8 @@ std::unique_ptr<Event> Network::poll_events() {
                 result = std::make_unique<PlayerMoveEvent>(data);
             } else if (split[0] == "ObjectMoveEvent") {
                 result = std::make_unique<ObjectMoveEvent>(data);
+            } else if (split[0] == "ObjectRotateEvent") {
+                result = std::make_unique<ObjectRotateEvent>(data);
             } else if (split[0] == "ObjectRemoveEvent") {
                 result = std::make_unique<ObjectRemoveEvent>(data); 
             } else if (split[0] == "ObjectLoadEvent") {

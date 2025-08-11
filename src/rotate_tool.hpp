@@ -19,6 +19,8 @@ public:
     RotateTool(Vector3 position, float scale);
 
     void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
+    void draw() const override;
+    void draw_offset(float x, float y, float z) const override;
 
     void prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
 
@@ -27,6 +29,8 @@ public:
     std::string to_string() const override;
 private:
     uint32_t held_id_;
+    std::shared_ptr<Object3d> held_item_;
+
     Vector3 axis_;
 
     float rotate_speed_; // radians per second
