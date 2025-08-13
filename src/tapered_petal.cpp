@@ -385,6 +385,9 @@ void TaperedPetal::initialize_parameters() {
     parameter_map_.set_parameter("FreckleSize", Parameter{0.1f,1.5f,3.0f});
     parameter_map_.set_parameter("FreckleCoverage", Parameter{0.0f,0.6f,0.9f});
     parameter_map_.set_parameter("FreckleColor", Parameter{0.0f,0.0f,0.0f});
+    
+    parameter_map_.set_parameter("CreaseBoolean", Parameter{0.0f,0.0f,1.0f});
+    parameter_map_.set_parameter("ConcaveBoolean", Parameter{0.0f,0.0f,1.0f});
 }
 
 float TaperedPetal::X(float u, float v) const {
@@ -392,18 +395,22 @@ float TaperedPetal::X(float u, float v) const {
 }
 
 float TaperedPetal::Y(float u, float v) const {
+    bool crease = parameter_map_.get_parameter("CreaseBoolean").value > 0.5f;
+    bool concave = parameter_map_.get_parameter("ConcaveBoolean").value > 0.5f;
     float length = parameter_map_.get_parameter("Length").value;
     float height = parameter_map_.get_parameter("Height").value;
     float width = parameter_map_.get_parameter("Width").value;
     float curvature = parameter_map_.get_parameter("Curvature").value;
+    if (crease)
+        curvature = std::powf(curvature,2.0f);
     float curl = parameter_map_.get_parameter("Curl").value;
     float z = Z(u,v);
     float midpoint = length*curl/3.0f;
     float a = std::sqrt(height)/midpoint;
     float t1 = std::powf((a*(u-midpoint)),2);
-    float t2 = std::powf(curvature*z/width,2);
+    float t2 = std::abs(std::powf(curvature*z/width,(float)(2-crease)));
     float t3 = std::powf(midpoint*a,2);
-    return -t1 + t2 + t3;
+    return -t1 + (1.0f-2.0f*concave)*t2 + t3;
 }
 
 float TaperedPetal::Z(float u, float v) const {

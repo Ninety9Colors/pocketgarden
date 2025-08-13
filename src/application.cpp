@@ -13,8 +13,8 @@
 #include "application.hpp"
 #include "cube.hpp"
 #include "maincamera.hpp"
-
 #include "move_tool.hpp"
+#include "spline.hpp"
 
 constexpr int DEFAULT_SCREEN_WIDTH = 1280;
 constexpr int DEFAULT_SCREEN_HEIGHT = 720;
@@ -62,6 +62,9 @@ void Application::run(Game& game) {
     int sunPosLoc = GetShaderLocation(*shader_default_,"sunPos");
     int sunColorLoc = GetShaderLocation(*shader_default_,"sunColor");
     int ambientLoc = GetShaderLocation(*shader_default_,"ambient");
+
+    Spline spline_test {};
+
     while (!WindowShouldClose()) {
         int64_t current_timestamp = std::time(nullptr);
         if (!game.in_world()) {
@@ -114,6 +117,8 @@ void Application::run(Game& game) {
         game.get_world()->get_sun()->draw();
         draw_players(game.get_current_user(), game.get_world()->get_players(), main_camera);
         draw_objects(game.get_world()->get_objects());
+        for (float t = 0; t <= spline_test.size(); t+=0.1f)
+            DrawSphere(spline_test.get(t),0.1f,ORANGE);
         EndMode3D();
         // Crosshair
         DrawCircle(GetScreenWidth()/2,GetScreenHeight()/2,3,WHITE);
@@ -123,6 +128,8 @@ void Application::run(Game& game) {
         if (keybinds[4]) {display_scoreboard(game.get_world()->get_players());}
         EndDrawing();
         if (keybinds[5]) {game.disconnect();}
+        if (IsKeyPressed(KEY_G))
+            spline_test.add(player->get_position());
     }
     game.disconnect();
 }
