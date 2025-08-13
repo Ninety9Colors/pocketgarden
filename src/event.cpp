@@ -11,6 +11,7 @@
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
 #include "rotate_tool.hpp"
+#include "tapered_petal.hpp"
 #include "player.hpp"
 #include "util.hpp"
 #include "object3d.hpp"
@@ -235,6 +236,8 @@ ObjectLoadEvent::ObjectLoadEvent(std::string packet) {
             object = std::make_shared<SunTool>(a[1]);
         } else if (type=="RotateTool") {
             object = std::make_shared<RotateTool>(a[1]);
+        } else if (type=="TaperedPetal") {
+            object = std::make_shared<TaperedPetal>(a[1]);
         }
         add((uint32_t) std::stoi(a[0]), std::move(object));
     }

@@ -1,3 +1,4 @@
+#pragma once
 #include "object3d.hpp"
 
 #include "raylib.h"
@@ -9,7 +10,6 @@ public:
     TaperedPetal(Vector3 position, float scale);
     TaperedPetal(std::string data);
 
-    void draw() const override;
     void generate_mesh() override;
     std::string to_string() const override;
 
@@ -20,5 +20,4 @@ private:
     float Z(float u, float v) const;
     void initialize_parameters() override;
     std::pair<int,int> slices_;
-    float grid_[10][5][3];
 };

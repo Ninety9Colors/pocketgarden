@@ -7,6 +7,7 @@
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
 #include "rotate_tool.hpp"
+#include "tapered_petal.hpp"
 #include "player.hpp"
 #include "util.hpp"
 #include "world.hpp"
@@ -42,6 +43,8 @@ Player::Player(std::string data) : hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f},
     for (std::string object_data : model_objects) {
         if (get_first_word(object_data) == "Cube") {
             add_to_model(std::make_unique<Cube>(object_data));
+        } else if (get_first_word(object_data) == "TaperedPetal") {
+            add_to_model(std::make_unique<TaperedPetal>(object_data));
         }
     }
 };

@@ -29,7 +29,7 @@ public:
     std::string to_string() const override;
 private:
     uint32_t held_id_;
-    std::shared_ptr<Object3d> held_item_;
+    std::weak_ptr<Object3d> held_item_;
 
     Vector3 axis_;
 

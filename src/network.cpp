@@ -80,6 +80,9 @@ std::unique_ptr<Event> Network::poll_events() {
             result = std::make_unique<DisconnectEvent>(*username);
             if (is_host()) {
                 players_.erase(*username);
+            } else {
+                enet_host_destroy(host_);
+                mode_ = 0;
             }
             delete (std::string*)event.peer->data;
         }

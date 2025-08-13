@@ -12,7 +12,7 @@ ParameterMap::ParameterMap(std::string data) {
     for (std::string s : parameter_split) {
         std::vector<std::string> a = split_string(s);
         Parameter p {std::stof(a[1]), std::stof(a[2]), std::stof(a[3])};
-        parameters_[a[1]] = p;
+        parameters_[a[0]] = p;
     }
 }
 
@@ -29,7 +29,7 @@ const Parameter ParameterMap::get_parameter(std::string name) const {
 }
 
 std::string ParameterMap::to_string() const {
-    std::string result = "ParameterMap ( ";
+    std::string result = "ParameterMap (";
     for (const auto& p : parameters_) {
         result += "(" + p.first + " " +
         std::to_string(p.second.min) + " " + std::to_string(p.second.value) + " " + std::to_string(p.second.max) + ")";

@@ -14,7 +14,6 @@
 
 RotateTool::RotateTool() : Item(), rotate_speed_(PI/2), axis_{1.0f,0.0f,0.0f} {
     held_id_ = 0;
-    held_item_ = nullptr;
     material_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
     UnloadMesh(mesh_);
     mesh_ = GenMeshCube(0.25f,0.25f,0.25f);
@@ -30,7 +29,6 @@ RotateTool::RotateTool(std::string data) : Item() {
     scale_ = std::stof(split[8]);
     quaternion_ = Quaternion{std::stof(split[9]),std::stof(split[10]),std::stof(split[11]),std::stof(split[12])};
     held_id_ = 0;
-    held_item_ = nullptr;
     material_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
     UnloadMesh(mesh_);
     mesh_ = GenMeshCube(0.25f,0.25f,0.25f);
@@ -39,7 +37,6 @@ RotateTool::RotateTool(std::string data) : Item() {
 
 RotateTool::RotateTool(Vector3 position, float scale) : Item(position,scale), rotate_speed_(PI/2), axis_{1.0f,0.0f,0.0f} {
     held_id_ = 0;
-    held_item_ = nullptr;
     material_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
     UnloadMesh(mesh_);
     mesh_ = GenMeshCube(0.25f,0.25f,0.25f);
@@ -50,7 +47,6 @@ void RotateTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer
     if (in_use()) {
         if (world->get_objects().find(held_id_) == world->get_objects().end()) {
             held_id_ = 0;
-            held_item_ = nullptr;
         } else {
             if (keybinds[12]) {
                 float a = axis_.x;
@@ -58,17 +54,18 @@ void RotateTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer
                 axis_.z = axis_.y;
                 axis_.y = a;
             }
+            auto held_item = held_item_.lock();
             if (keybinds[10])
-                held_item_->rotate_axis(axis_,rotate_speed_*dt);
+                held_item->rotate_axis(axis_,rotate_speed_*dt);
             else if (keybinds[11])
-                held_item_->rotate_axis(axis_,-rotate_speed_*dt);
+                held_item->rotate_axis(axis_,-rotate_speed_*dt);
             if (!keybinds[10] && !keybinds[11]) {
             } else {
                 if (event_buffer.find("ObjectRotateEvent") != event_buffer.end()) {
-                    std::dynamic_pointer_cast<ObjectRotateEvent>(event_buffer["ObjectRotateEvent"])->add(held_id_,held_item_->get_quaternion());
+                    std::dynamic_pointer_cast<ObjectRotateEvent>(event_buffer["ObjectRotateEvent"])->add(held_id_,held_item->get_quaternion());
                 } else {
                     ObjectRotateEvent move_event = ObjectRotateEvent(std::map<uint32_t, Quaternion>{}, user->get_username());
-                    move_event.add(held_id_,held_item_->get_quaternion());
+                    move_event.add(held_id_,held_item->get_quaternion());
                     event_buffer["ObjectRotateEvent"] = std::make_shared<ObjectRotateEvent>(move_event);
                 }
             }
@@ -102,28 +99,29 @@ void RotateTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer
             axis_.z = axis_.y;
             axis_.y = a;
         }
+        auto held_item = held_item_.lock();
         if (keybinds[10])
-            held_item_->rotate_axis(axis_,rotate_speed_*dt);
+            held_item->rotate_axis(axis_,rotate_speed_*dt);
         else if (keybinds[11])
-            held_item_->rotate_axis(axis_,-rotate_speed_*dt);
+            held_item->rotate_axis(axis_,-rotate_speed_*dt);
         if (!keybinds[10] && !keybinds[11])
             return;
         if (event_buffer.find("ObjectRotateEvent") != event_buffer.end()) {
-            std::dynamic_pointer_cast<ObjectRotateEvent>(event_buffer["ObjectRotateEvent"])->add(held_id_,held_item_->get_quaternion());
+            std::dynamic_pointer_cast<ObjectRotateEvent>(event_buffer["ObjectRotateEvent"])->add(held_id_,held_item->get_quaternion());
         } else {
             ObjectRotateEvent move_event = ObjectRotateEvent(std::map<uint32_t, Quaternion>{}, user->get_username());
-            move_event.add(held_id_,held_item_->get_quaternion());
+            move_event.add(held_id_,held_item->get_quaternion());
             event_buffer["ObjectRotateEvent"] = std::make_shared<ObjectRotateEvent>(move_event);
         }
     } else {
         held_id_ = 0;
-        held_item_ = nullptr;
+        held_item_.reset();
     }
 }
 
 void RotateTool::prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
     held_id_ = 0;
-    held_item_ = nullptr;
+    held_item_.reset();
 }
 
 bool RotateTool::in_use() const {
@@ -134,7 +132,9 @@ void RotateTool::draw() const {
     DrawMesh(mesh_, material_, transform_);
     DrawBoundingBox(get_bounding_box(),WHITE);
     if (!in_use()) return;
-    DrawLine3D(held_item_->get_position(), Vector3Add(held_item_->get_position(),axis_*Vector3Distance(held_item_->get_bounding_box().max, held_item_->get_bounding_box().min)*2), WHITE);
+    if (auto held_item = held_item_.lock()) {
+        DrawLine3D(held_item->get_position(), Vector3Add(held_item->get_position(),axis_*Vector3Distance(held_item->get_bounding_box().max, held_item->get_bounding_box().min)*2), WHITE);
+    }
 }
 void RotateTool::draw_offset(float x, float y, float z) const {
     Matrix offset = MatrixAdd(transform_,Matrix{
@@ -146,7 +146,9 @@ void RotateTool::draw_offset(float x, float y, float z) const {
     DrawMesh(mesh_, material_, offset);
     DrawBoundingBox(BoundingBox{Vector3Add(get_bounding_box().min, Vector3{x,y,z}),Vector3Add(get_bounding_box().max, Vector3{x,y,z})},WHITE);
     if (!in_use()) return;
-    DrawLine3D(held_item_->get_position(), Vector3Add(held_item_->get_position(),axis_*Vector3Distance(held_item_->get_bounding_box().max, held_item_->get_bounding_box().min)*2), WHITE);
+    if (auto held_item = held_item_.lock()) {
+        DrawLine3D(held_item->get_position(), Vector3Add(held_item->get_position(),axis_*Vector3Distance(held_item->get_bounding_box().max, held_item->get_bounding_box().min)*2), WHITE);
+    }
 }
 
 std::string RotateTool::to_string() const {

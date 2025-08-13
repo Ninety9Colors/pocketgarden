@@ -5,6 +5,7 @@
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
 #include "rotate_tool.hpp"
+#include "tapered_petal.hpp"
 #include "world.hpp"
 #include <cstdint>
 #include "util.hpp"
@@ -30,7 +31,7 @@ void World::load_world(std::string save_file, std::shared_ptr<Shader> shader) {
         from_string(data,shader);
     } else {
         load_object(std::make_shared<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,1.0f}, 1.0f, RED), shader);
-        auto petal = std::make_shared<TaperedPetal>(Vector3{0.0f,0.0f,7.0f}, 1.0f);
+        auto petal = std::make_shared<TaperedPetal>(Vector3{0.0f,0.0f,0.0f}, 1.0f);
         petal->generate_mesh();
         load_object(petal, shader);
         load_object(std::make_shared<MoveTool>(Vector3{0.0f, 2.0f, 0.0f}, 1.0f), shader);
@@ -89,6 +90,8 @@ void World::from_string(std::string data, std::shared_ptr<Shader> shader) {
             object = std::make_shared<SunTool>(object_split[1]);
         } else if (type == "RotateTool") {
             object = std::make_shared<RotateTool>(object_split[1]);
+        } else if (type == "TaperedPetal") {
+            object = std::make_shared<TaperedPetal>(object_split[1]);
         }
         object->set_shader(shader);
         objects_[std::stoi(object_split[0])] = object;
