@@ -1,4 +1,5 @@
 #pragma once
+#include <random>
 #include "object3d.hpp"
 
 #include "raylib.h"
@@ -21,5 +22,5 @@ private:
     float Z(float u, float v) const;
     void initialize_parameters() override;
     std::pair<int,int> slices_;
-    std::mt19937_64 rng_;
+    uint64_t seed_;
 };

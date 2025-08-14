@@ -20,16 +20,29 @@ static float lerp(float a, float b, float amount) {
     return (1-amount)*a + amount*b;
 }
 
-TaperedPetal::TaperedPetal() : ParameterObject(), slices_{40,20} {initialize_parameters();generate_mesh();}
-TaperedPetal::TaperedPetal(float scale) : ParameterObject(scale), slices_{40,20} {initialize_parameters();generate_mesh();}
-TaperedPetal::TaperedPetal(Vector3 position, float scale) : ParameterObject(position, scale), slices_{40,20} {initialize_parameters();generate_mesh();}
+TaperedPetal::TaperedPetal() : ParameterObject(), slices_{40,20} {
+    initialize_parameters();
+    std::random_device rd;
+    seed_ = rd();
+}
+TaperedPetal::TaperedPetal(float scale) : ParameterObject(scale), slices_{40,20} {
+    initialize_parameters();
+    std::random_device rd;
+    seed_ = rd();
+}
+TaperedPetal::TaperedPetal(Vector3 position, float scale) : ParameterObject(position, scale), slices_{40,20} {
+    initialize_parameters();
+    std::random_device rd;
+    seed_ = rd();
+}
 TaperedPetal::TaperedPetal(std::string data) : slices_{40,20} {
     std::vector<std::string> split = split_string(data);
     assert(split[0] == "TaperedPetal");
     position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
     scale_ = std::stof(split[4]);
     quaternion_ = Quaternion{std::stof(split[5]),std::stof(split[6]),std::stof(split[7]),std::stof(split[8])};
-    parameter_map_ = ParameterMap(split[9]);
+    seed_ = std::stoull(split[9]);
+    parameter_map_ = ParameterMap(split[10]);
     generate_mesh();
 }
 
@@ -44,15 +57,16 @@ void TaperedPetal::generate_mesh() {
 
     // Generate Freckle Positions
     std::vector<unsigned short> freckle_positions {};
-    std::uniform_real_distribution<> dist(0.0f,1.0f);
+    std::mt19937_64 rng(seed_);
+    std::uniform_real_distribution<double> dist(0.0f,1.0f);
     for (int i = 0; i <= slices_.first; i++) {
         for (int j = 0; j <= slices_.second; j++) {
             float u = i*u_step;
             int index_top = vertex_index(i,j,slices_,false);
-            float roll = dist(rng_);
+            float roll = dist(rng);
             float freckle_coverage = parameter_map_.get_parameter("FreckleCoverage").value;
             float freckle_chance = parameter_map_.get_parameter("FreckleAmount").value*std::powf(1.0f-u/(length*freckle_coverage),parameter_map_.get_parameter("FreckleCentrality").value);
-            if (i > 1 && j > 1 && j < slices_.second-1 && u/length < freckle_coverage && roll < freckle_chance*10000.0f)
+            if (i > 1 && j > 1 && j < slices_.second-1 && u/length < freckle_coverage && roll < freckle_chance)
                 freckle_positions.emplace_back(index_top);
         }
     }
@@ -134,9 +148,9 @@ void TaperedPetal::generate_mesh() {
             mesh_.colors[4*index_top/3+2] = (unsigned short) b;
             mesh_.colors[4*index_top/3+3] = 255;
 
-            mesh_.colors[4*index_bottom/3] = (unsigned short) base_r;
-            mesh_.colors[4*index_bottom/3+1] = (unsigned short) base_g;
-            mesh_.colors[4*index_bottom/3+2] = (unsigned short) base_b;
+            mesh_.colors[4*index_bottom/3] = (unsigned short) r;
+            mesh_.colors[4*index_bottom/3+1] = (unsigned short) g;
+            mesh_.colors[4*index_bottom/3+2] = (unsigned short) b;
             mesh_.colors[4*index_bottom/3+3] = 255;
         }
     }
@@ -353,7 +367,7 @@ void TaperedPetal::generate_mesh() {
 }
 
 void TaperedPetal::generate_mesh(uint64_t seed) {
-    rng_ = std::mt19937_64(seed);
+    seed_ = seed;
     generate_mesh();
 }
 
@@ -361,7 +375,8 @@ std::string TaperedPetal::to_string() const {
     return "TaperedPetal " +
     std::to_string(position_.x) + " " + std::to_string(position_.y) + " " + std::to_string(position_.z) + " " +
     std::to_string(scale_) + " " +
-    std::to_string(quaternion_.x) + " " + std::to_string(quaternion_.y) + " " + std::to_string(quaternion_.z) + " " + std::to_string(quaternion_.w) + " (" + 
+    std::to_string(quaternion_.x) + " " + std::to_string(quaternion_.y) + " " + std::to_string(quaternion_.z) + " " + std::to_string(quaternion_.w) + " " +
+    std::to_string(seed_) + " (" + 
     parameter_map_.to_string() + ")";
 }
 

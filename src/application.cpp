@@ -117,7 +117,7 @@ void Application::run(Game& game) {
         game.get_world()->get_sun()->draw();
         draw_players(game.get_current_user(), game.get_world()->get_players(), main_camera);
         draw_objects(game.get_world()->get_objects());
-        for (float t = 0; t <= spline_test.size(); t+=0.1f)
+        for (float t = 0; t <= spline_test.size()-1; t+=0.1f)
             DrawSphere(spline_test.get(t),0.1f,ORANGE);
         EndMode3D();
         // Crosshair
