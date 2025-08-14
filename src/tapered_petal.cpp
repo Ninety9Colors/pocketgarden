@@ -3,6 +3,7 @@
 #include <cstring>
 #include <vector>
 #include <iostream>
+#include <random>
 
 #include "raylib.h"
 #include "raymath.h"
@@ -41,16 +42,14 @@ void TaperedPetal::generate_mesh() {
     float u_step = length/(1.0f*slices_.first);
     float v_step = 2.0f*width/(1.0f*slices_.second);
 
-    constexpr int seed = 1232141241;
-    SetRandomSeed(seed);
-
     // Generate Freckle Positions
     std::vector<unsigned short> freckle_positions {};
+    std::uniform_real_distribution<> dist(0.0f,1.0f);
     for (int i = 0; i <= slices_.first; i++) {
         for (int j = 0; j <= slices_.second; j++) {
             float u = i*u_step;
             int index_top = vertex_index(i,j,slices_,false);
-            float roll = 1.0f*GetRandomValue(0,10000);
+            float roll = dist(rng_);
             float freckle_coverage = parameter_map_.get_parameter("FreckleCoverage").value;
             float freckle_chance = parameter_map_.get_parameter("FreckleAmount").value*std::powf(1.0f-u/(length*freckle_coverage),parameter_map_.get_parameter("FreckleCentrality").value);
             if (i > 1 && j > 1 && j < slices_.second-1 && u/length < freckle_coverage && roll < freckle_chance*10000.0f)
@@ -351,6 +350,11 @@ void TaperedPetal::generate_mesh() {
 
     UploadMesh(&mesh_,false);
     update_matrix();
+}
+
+void TaperedPetal::generate_mesh(uint64_t seed) {
+    rng_ = std::mt19937_64(seed);
+    generate_mesh();
 }
 
 std::string TaperedPetal::to_string() const {

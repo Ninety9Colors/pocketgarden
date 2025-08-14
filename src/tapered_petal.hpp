@@ -11,6 +11,7 @@ public:
     TaperedPetal(std::string data);
 
     void generate_mesh() override;
+    void generate_mesh(uint64_t seed);
     std::string to_string() const override;
 
     void set_slices(std::pair<int,int> slices);
@@ -20,4 +21,5 @@ private:
     float Z(float u, float v) const;
     void initialize_parameters() override;
     std::pair<int,int> slices_;
+    std::mt19937_64 rng_;
 };
