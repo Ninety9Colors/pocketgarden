@@ -12,7 +12,7 @@
 #include "util.hpp"
 
 // Returns the true float index offset, not the triplet offset
-static int vertex_index(int i, int j, std::pair<int,int> slices, bool bottom) {
+static int vertex_index(int i, int j, const std::pair<int,int>& slices, bool bottom) {
     return ((slices.second+1)*i + j)*3 + ((slices.first+1)*(slices.second+1)*3*bottom);
 }
 
@@ -34,6 +34,10 @@ TaperedPetal::TaperedPetal(Vector3 position, float scale) : ParameterObject(posi
     initialize_parameters();
     std::random_device rd;
     seed_ = rd();
+}
+TaperedPetal::TaperedPetal(ParameterMap map, uint64_t seed, Quaternion quaternion, Vector3 position, float scale) : ParameterObject(quaternion, position,scale), slices_(40,20), seed_(seed) {
+    parameter_map_ = map;
+    generate_mesh();
 }
 TaperedPetal::TaperedPetal(std::string data) : slices_{40,20} {
     std::vector<std::string> split = split_string(data);
@@ -407,6 +411,23 @@ void TaperedPetal::initialize_parameters() {
     
     parameter_map_.set_parameter("CreaseBoolean", Parameter{0.0f,0.0f,1.0f});
     parameter_map_.set_parameter("ConcaveBoolean", Parameter{0.0f,0.0f,1.0f});
+}
+
+Vector3 TaperedPetal::tip_vector() const {
+    float curl = parameter_map_.get_parameter("Curl").value;
+    float height = parameter_map_.get_parameter("Height").value;
+    float length = parameter_map_.get_parameter("Length").value;
+
+    float mid_x = length*curl/3.0f;
+    float a = std::sqrtf(height)/mid_x;
+
+    return Vector3{length,2.0f*curl*a*a*length*length/3.0f-a*a*length*length};
+}
+
+float TaperedPetal::base_width() const {
+    int index_one = vertex_index(1,0,slices_,false);
+    int index_two = vertex_index(1,slices_.second-1,slices_,false);
+    return mesh_.vertices[index_two+2] - mesh_.vertices[index_one+2];
 }
 
 float TaperedPetal::X(float u, float v) const {

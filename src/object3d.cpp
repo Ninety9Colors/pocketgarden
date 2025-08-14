@@ -7,6 +7,7 @@
 Object3d::Object3d() : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(std::move(LoadMaterialDefault())), position_{0.0f,0.0f,0.0f}, scale_(1.0f), quaternion_{0.0f,0.0f,0.0f,1.0f} {};
 Object3d::Object3d(float scale) : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(std::move(LoadMaterialDefault())), position_{0.0f,0.0f,0.0f}, scale_(scale), quaternion_{0.0f,0.0f,0.0f,1.0f} {};
 Object3d::Object3d(Vector3 position, float scale) : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(std::move(LoadMaterialDefault())), position_(position), scale_(scale), quaternion_{0.0f,0.0f,0.0f,1.0f} {};
+Object3d::Object3d(Quaternion quaternion, Vector3 position, float scale) : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(std::move(LoadMaterialDefault())), position_(position), scale_(scale), quaternion_{quaternion} {};
 Object3d::~Object3d() {
     UnloadMesh(mesh_);
     if (material_.maps != NULL){
@@ -95,10 +96,12 @@ BoundingBox Object3d::get_bounding_box() const {
 Item::Item() : Object3d() {}
 Item::Item(float scale) : Object3d(scale) {}
 Item::Item(Vector3 position, float scale) : Object3d(position, scale) {}
+Item::Item(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {}
 
 ParameterObject::ParameterObject() : Object3d() {};
 ParameterObject::ParameterObject(float scale) : Object3d(scale) {}
 ParameterObject::ParameterObject(Vector3 position, float scale) : Object3d(position, scale) {}
+ParameterObject::ParameterObject(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {}
 
 void ParameterObject::set_parameter(std::string name, float value) {
     parameter_map_.set_parameter(name,value);

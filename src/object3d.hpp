@@ -19,6 +19,7 @@ public:
     Object3d();
     Object3d(float scale);
     Object3d(Vector3 position, float scale);
+    Object3d(Quaternion quaternion, Vector3 position, float scale);
     virtual ~Object3d();
 
     void set_id(uint32_t id) {id_ = id;}
@@ -57,6 +58,7 @@ public:
     Item();
     Item(float scale);
     Item(Vector3 position, float scale);
+    Item(Quaternion quaternion, Vector3 position, float scale);
     virtual void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) = 0;
     virtual void prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) = 0;
     virtual ~Item() {};
@@ -67,6 +69,7 @@ public:
     ParameterObject();
     ParameterObject(float scale);
     ParameterObject(Vector3 position, float scale);
+    ParameterObject(Quaternion quaternion, Vector3 position, float scale);
 
     virtual void generate_mesh() = 0;
     void set_parameter(std::string name, float value);
