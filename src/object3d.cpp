@@ -21,6 +21,10 @@ void Object3d::draw() const {
     DrawMesh(mesh_, material_, transform_);
     DrawBoundingBox(get_bounding_box(),WHITE);
 }
+void Object3d::draw(Matrix transform) const {
+    DrawMesh(mesh_, material_, transform);
+    DrawBoundingBox(get_bounding_box(transform),WHITE);
+}
 void Object3d::draw_offset(float x, float y, float z) const {
     Matrix offset = MatrixAdd(transform_,Matrix{
         0,0,0,x,
@@ -60,6 +64,10 @@ void Object3d::update_matrix() {
     transform_ = MatrixMultiply(MatrixScale(scale_, scale_, scale_),MatrixMultiply(QuaternionToMatrix(quaternion_), MatrixTranslate(position_.x, position_.y, position_.z)));
 }
 
+const Matrix& Object3d::get_matrix() const {
+    return transform_;
+}
+
 void Object3d::set_position(Vector3 position) {
     position_ = position;
     update_matrix();
@@ -67,6 +75,15 @@ void Object3d::set_position(Vector3 position) {
 
 Vector3 Object3d::get_position() const {
     return position_;
+}
+
+void Object3d::set_scale(float scale) {
+    scale_ = scale;
+    update_matrix();
+}
+
+float Object3d::get_scale() const {
+    return scale_;
 }
 
 BoundingBox Object3d::get_bounding_box() const {
@@ -93,6 +110,30 @@ BoundingBox Object3d::get_bounding_box() const {
     return box;
 }
 
+BoundingBox Object3d::get_bounding_box(Matrix transform) const {
+    Vector3 minVertex = { 0 };
+    Vector3 maxVertex = { 0 };
+
+    if (mesh_.vertices != NULL)
+    {
+        minVertex = Vector3Transform(Vector3{ mesh_.vertices[0], mesh_.vertices[1], mesh_.vertices[2]},transform);
+        maxVertex = Vector3Transform(Vector3{ mesh_.vertices[0], mesh_.vertices[1], mesh_.vertices[2]},transform);
+
+        for (int i = 1; i < mesh_.vertexCount; i++)
+        {
+            minVertex = Vector3Min(minVertex, Vector3Transform(Vector3{mesh_.vertices[i*3], mesh_.vertices[i*3 + 1], mesh_.vertices[i*3 + 2] },transform));
+            maxVertex = Vector3Max(maxVertex, Vector3Transform(Vector3{mesh_.vertices[i*3], mesh_.vertices[i*3 + 1], mesh_.vertices[i*3 + 2] },transform));
+        }
+    }
+
+    // Create the bounding box
+    BoundingBox box = { 0 };
+    box.min = minVertex;
+    box.max = maxVertex;
+
+    return box;
+}
+
 Item::Item() : Object3d() {}
 Item::Item(float scale) : Object3d(scale) {}
 Item::Item(Vector3 position, float scale) : Object3d(position, scale) {}
@@ -103,6 +144,9 @@ ParameterObject::ParameterObject(float scale) : Object3d(scale) {}
 ParameterObject::ParameterObject(Vector3 position, float scale) : Object3d(position, scale) {}
 ParameterObject::ParameterObject(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {}
 
+void ParameterObject::set_parameters(ParameterMap map) {
+    parameter_map_ = map;
+}
 void ParameterObject::set_parameter(std::string name, float value) {
     parameter_map_.set_parameter(name,value);
 }

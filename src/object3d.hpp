@@ -26,6 +26,7 @@ public:
     uint32_t get_id() const {return id_;}
 
     virtual void draw() const;
+    virtual void draw(Matrix transform) const;
     virtual void draw_offset(float x, float y, float z) const;
     virtual void set_shader(std::shared_ptr<Shader> shader);
     virtual std::shared_ptr<Shader> get_shader();
@@ -33,12 +34,18 @@ public:
     virtual void set_quaternion(Quaternion quaternion);
     virtual Quaternion get_quaternion();
     virtual void rotate_axis(Vector3 axis, float radians);
+
     virtual void update_matrix();
+    virtual const Matrix& get_matrix() const;
 
     virtual void set_position(Vector3 position);
     virtual Vector3 get_position() const;
 
+    virtual void set_scale(float scale);
+    virtual float get_scale() const;
+
     virtual BoundingBox get_bounding_box() const;
+    virtual BoundingBox get_bounding_box(Matrix transform) const;
 
     virtual std::string to_string() const = 0;
 protected:
@@ -72,6 +79,8 @@ public:
     ParameterObject(Quaternion quaternion, Vector3 position, float scale);
 
     virtual void generate_mesh() = 0;
+    
+    void set_parameters(ParameterMap map);
     void set_parameter(std::string name, float value);
     const Parameter get_parameter(std::string name) const;
 
