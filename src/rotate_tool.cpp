@@ -130,7 +130,6 @@ bool RotateTool::in_use() const {
 
 void RotateTool::draw() const {
     DrawMesh(mesh_, material_, transform_);
-    DrawBoundingBox(get_bounding_box(),WHITE);
     if (!in_use()) return;
     if (auto held_item = held_item_.lock()) {
         DrawLine3D(held_item->get_position(), Vector3Add(held_item->get_position(),axis_*Vector3Distance(held_item->get_bounding_box().max, held_item->get_bounding_box().min)*2), WHITE);
@@ -144,7 +143,6 @@ void RotateTool::draw_offset(float x, float y, float z) const {
         0,0,0,0
     });
     DrawMesh(mesh_, material_, offset);
-    DrawBoundingBox(BoundingBox{Vector3Add(get_bounding_box().min, Vector3{x,y,z}),Vector3Add(get_bounding_box().max, Vector3{x,y,z})},WHITE);
     if (!in_use()) return;
     if (auto held_item = held_item_.lock()) {
         DrawLine3D(held_item->get_position(), Vector3Add(held_item->get_position(),axis_*Vector3Distance(held_item->get_bounding_box().max, held_item->get_bounding_box().min)*2), WHITE);

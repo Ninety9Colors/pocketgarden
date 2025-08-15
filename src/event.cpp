@@ -15,6 +15,7 @@
 #include "player.hpp"
 #include "util.hpp"
 #include "object3d.hpp"
+#include "lily_flower.hpp"
 
 IAmHostEvent::IAmHostEvent(std::string username) : username_(username) {}
 IAmHostEvent::~IAmHostEvent() {}
@@ -238,6 +239,8 @@ ObjectLoadEvent::ObjectLoadEvent(std::string packet) {
             object = std::make_shared<RotateTool>(a[1]);
         } else if (type=="TaperedPetal") {
             object = std::make_shared<TaperedPetal>(a[1]);
+        } else if (type=="LilyFlower") {
+            object = std::make_shared<LilyFlower>(a[1]);
         }
         add((uint32_t) std::stoi(a[0]), std::move(object));
     }

@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 #include <array>
+#include <memory>
 #include "object3d.hpp"
 #include "tapered_petal.hpp"
 #include "parameter.hpp"
@@ -33,8 +34,8 @@ public:
 private:
     void initialize_parameters() override;
 
-    TaperedPetal upper_petal_;
-    TaperedPetal lower_petal_;
+    std::unique_ptr<TaperedPetal> upper_petal_;
+    std::unique_ptr<TaperedPetal> lower_petal_;
 
     std::array<Matrix,3> upper_transforms_;
     std::array<Matrix,3> lower_transforms_;

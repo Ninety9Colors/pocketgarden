@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <fstream>
 
-#include "tapered_petal.hpp"
+#include "lily_flower.hpp"
 #include "move_tool.hpp"
 #include "sun_tool.hpp"
 #include "rotate_tool.hpp"
@@ -31,9 +31,9 @@ void World::load_world(std::string save_file, std::shared_ptr<Shader> shader) {
         from_string(data,shader);
     } else {
         load_object(std::make_shared<Cube>(Vector3{0.0f,0.0f,0.0f}, Vector3{1.0f,1.0f,1.0f}, 1.0f, RED), shader);
-        auto petal = std::make_shared<TaperedPetal>(Vector3{0.0f,0.0f,0.0f}, 1.0f);
-        petal->generate_mesh();
-        load_object(petal, shader);
+        auto flower = std::make_shared<LilyFlower>(Vector3{0.0f,0.0f,0.0f}, 1.0f);
+        flower->generate_mesh();
+        load_object(flower,shader);
         load_object(std::make_shared<MoveTool>(Vector3{0.0f, 2.0f, 0.0f}, 1.0f), shader);
         load_object(std::make_shared<SunTool>(Vector3{0.0f, 2.0f, 3.0f}, 1.0f), shader);
         load_object(std::make_shared<RotateTool>(Vector3{0.0f, 2.0f, 4.0f}, 1.0f), shader);
@@ -93,6 +93,9 @@ void World::from_string(std::string data, std::shared_ptr<Shader> shader) {
         } else if (type == "TaperedPetal") {
             object = std::make_shared<TaperedPetal>(object_split[1]);
             std::dynamic_pointer_cast<TaperedPetal>(object)->generate_mesh();
+        } else if (type == "LilyFlower") {
+            object = std::make_shared<LilyFlower>(object_split[1]);
+            std::dynamic_pointer_cast<LilyFlower>(object)->generate_mesh();
         }
         object->set_shader(shader);
         objects_[std::stoi(object_split[0])] = object;

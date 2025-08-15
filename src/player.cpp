@@ -11,6 +11,7 @@
 #include "player.hpp"
 #include "util.hpp"
 #include "world.hpp"
+#include "lily_flower.hpp"
 
 Player::Player(std::string username, Vector3 position) : username_(username), hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE) {
     speed_ = 4.0f;
@@ -45,6 +46,8 @@ Player::Player(std::string data) : hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f},
             add_to_model(std::make_unique<Cube>(object_data));
         } else if (get_first_word(object_data) == "TaperedPetal") {
             add_to_model(std::make_unique<TaperedPetal>(object_data));
+        } else if (get_first_word(object_data) == "LilyFlower") {
+            add_to_model(std::make_unique<LilyFlower>(object_data));
         }
     }
 };

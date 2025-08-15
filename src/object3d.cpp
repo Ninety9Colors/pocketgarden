@@ -19,11 +19,9 @@ Object3d::~Object3d() {
 
 void Object3d::draw() const {
     DrawMesh(mesh_, material_, transform_);
-    DrawBoundingBox(get_bounding_box(),WHITE);
 }
 void Object3d::draw(Matrix transform) const {
     DrawMesh(mesh_, material_, transform);
-    DrawBoundingBox(get_bounding_box(transform),WHITE);
 }
 void Object3d::draw_offset(float x, float y, float z) const {
     Matrix offset = MatrixAdd(transform_,Matrix{
@@ -33,7 +31,6 @@ void Object3d::draw_offset(float x, float y, float z) const {
         0,0,0,0
     });
     DrawMesh(mesh_, material_, offset);
-    DrawBoundingBox(BoundingBox{Vector3Add(get_bounding_box().min, Vector3{x,y,z}),Vector3Add(get_bounding_box().max, Vector3{x,y,z})},WHITE);
 }
 
 std::shared_ptr<Shader> Object3d::get_shader() {
