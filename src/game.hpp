@@ -3,10 +3,10 @@
 #include <string>
 #include <vector>
 
-#include "network.hpp"
-#include "object3d.hpp"
-#include "player.hpp"
-#include "world.hpp"
+#include "network/network.hpp"
+#include "object/object3d.hpp"
+#include "player/player.hpp"
+#include "world/world.hpp"
 
 class Game {
 public:

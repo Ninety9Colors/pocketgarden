@@ -3,9 +3,9 @@
 #include <vector>
 
 #include "game.hpp"
-#include "maincamera.hpp"
-#include "object3d.hpp"
-#include "world.hpp"
+#include "player/maincamera.hpp"
+#include "object/object3d.hpp"
+#include "world/world.hpp"
 
 class Application {
 public:

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "event.hpp"
+#include "event/event.hpp"
 #include "game.hpp"
 #include <cassert>
 

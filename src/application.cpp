@@ -11,10 +11,10 @@
 #include "raylib.h"
 
 #include "application.hpp"
-#include "cube.hpp"
-#include "maincamera.hpp"
-#include "move_tool.hpp"
-#include "spline.hpp"
+#include "object/consistent/cube.hpp"
+#include "player/maincamera.hpp"
+#include "object/consistent/move_tool.hpp"
+#include "object/procedural/spline.hpp"
 
 constexpr int DEFAULT_SCREEN_WIDTH = 1280;
 constexpr int DEFAULT_SCREEN_HEIGHT = 720;
