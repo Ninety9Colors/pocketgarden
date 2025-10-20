@@ -1,13 +1,13 @@
 #include <assert.h>
-#include <iostream>
 #include <limits>
 #include <cstdint>
 #include <cmath>
-#include "object/consistent/move_tool.hpp"
 
 #include "raylib.h"
 
+#include "logging.hpp"
 #include "object/consistent/cube.hpp"
+#include "object/consistent/move_tool.hpp"
 #include "player/maincamera.hpp"
 #include "util.hpp"
 
@@ -96,7 +96,7 @@ void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, 
             }
             RayCollision c = GetRayCollisionBox(ray, p.second->get_bounding_box());
             if (c.hit) {
-                std::cout << "Hitting object " << p.second->to_string() << "\n";
+                INFO("Hitting object " + p.second->to_string());
                 float d = c.distance;
                 if (d < min_distance) {
                     nearest = p.first;

@@ -96,5 +96,6 @@
         "syncstream": "cpp",
         "thread": "cpp",
         "typeindex": "cpp"
-    }
+    },
+    "C_Cpp.default.cppStandard": "c++20"
 }

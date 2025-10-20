@@ -11,6 +11,7 @@
 #include "raylib.h"
 
 #include "application.hpp"
+#include "logging.hpp"
 #include "object/consistent/cube.hpp"
 #include "player/maincamera.hpp"
 #include "object/consistent/move_tool.hpp"
@@ -51,6 +52,7 @@ void Application::tick(std::map<std::string, std::shared_ptr<Event>>& event_buff
 }
 
 void Application::run(Game& game) {
+    DEBUG("Starting application...");
     MainCamera main_camera {};
 
     float tps = 20.0f;
@@ -131,6 +133,7 @@ void Application::run(Game& game) {
         if (IsKeyPressed(KEY_G))
             spline_test.add(player->get_position());
     }
+    DEBUG("Closing application...");
     game.disconnect();
 }
 

@@ -1,16 +1,16 @@
 #include <assert.h>
-#include <iostream>
 #include <string>
 
 #include "enet/enet.h"
 
+#include "logging.hpp"
 #include "network/network.hpp"
 #include "util.hpp"
 
 Network::Network() {
     mode_ = 0;
     initialized_ = !enet_initialize();
-    std::cout << "ENet Initialized: " << initialized_ << "\n";
+    DEBUG("Enet Initialized?: " + std::to_string(initialized_));
     host_ = nullptr;
     server_ = nullptr;
 }
@@ -33,11 +33,11 @@ std::unique_ptr<Event> Network::poll_events() {
         std::string data;
         switch (event.type) {
         case ENET_EVENT_TYPE_CONNECT:
-            std::cout << "New connection: " << event.peer->address.host << ", " << event.peer->address.port << "\n";
+            DEBUG("New connection: " + std::to_string(event.peer->address.host) + ", " + std::to_string(event.peer->address.port));
             break;
         case ENET_EVENT_TYPE_RECEIVE:
             data = std::string((char*)event.packet->data, event.packet->dataLength-1);
-            std::cout << "Packet of length " << event.packet->dataLength << " containing " << data << " received from " << event.peer->data << "\n";
+            INFO("Packet of length " + std::to_string(event.packet->dataLength) + " containing {" + data + "} received from " + (char*)event.peer->data);
             split = split_string(data);
             if (split[0] == "IAmHostEvent") {
                 result = std::make_unique<IAmHostEvent>(split[1]);
@@ -76,7 +76,7 @@ std::unique_ptr<Event> Network::poll_events() {
             break;
         case ENET_EVENT_TYPE_DISCONNECT:
             username = (std::string*)event.peer->data;
-            std::cout << "Disconnection: " << event.peer->address.host << "," << event.peer->address.port << ", data: " << *username << "\n";
+            DEBUG("Disconnection: " + std::to_string(event.peer->address.host) + "," + std::to_string(event.peer->address.port) + ", data: " + *username);
             result = std::make_unique<DisconnectEvent>(*username);
             if (is_host()) {
                 players_.erase(*username);
@@ -103,7 +103,7 @@ void Network::send_packet(std::string data, bool reliable) const {
         assert(server_ != nullptr);
         enet_peer_send(server_, 0, packet);
     }
-    std::cout << "Sent packet with: " << data << "\n";
+    INFO("Sent packet with: " + data);
 }
 
 void Network::send_packet_excluding(std::string data, bool reliable, std::string exclude) const {
@@ -141,10 +141,10 @@ bool Network::host_server(std::string ip, std::string port) {
     host_ = enet_host_create(&address,32,1,0,0);
     if (host_ != nullptr) {
         mode_ = 1;
-        std::cout << "Hosting server with address " << address.host << ", port " << address.port << "\n";
+        DEBUG("Hosting server with address " + std::to_string(address.host) + ", port " + std::to_string(address.port));
         return true;
     }
-    std::cout << "Failed to host server with address " << address.host << ", port " << address.port << "\n";
+    WARN("Failed to host server with address " + std::to_string(address.host) + ", port " + std::to_string(address.port));
     return false;
 };
 
@@ -156,14 +156,14 @@ bool Network::join_server(std::string ip, std::string port) {
     host_ = enet_host_create(NULL,1,1,0,0);
     server_ = enet_host_connect(host_, &address, 1, 0);    
     if (server_ == nullptr) {
-        std::cout << "Failed to find peer " << address.host << "," << address.port << "\n";
+        WARN("Failed to find peer " + std::to_string(address.host) + "," + std::to_string(address.port));
         return false;
     }
     
     ENetEvent event;
     /* Wait up to 5 seconds for the connection attempt to succeed. */
     if (enet_host_service(host_, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
-        std::cout << "Connection to server " << address.host << "," << address.port << " succeeded\n";
+        DEBUG("Connection to server " + std::to_string(address.host) + "," + std::to_string(address.port) + " succeeded");
         mode_ = 2;
         return true;
     } else {
@@ -171,7 +171,7 @@ bool Network::join_server(std::string ip, std::string port) {
         /* received. Reset the peer in the event the 5 seconds   */
         /* had run out without any significant event.            */
         enet_peer_reset(server_);
-        std::cout << "Connection to server " << address.host << "," << address.port << " failed\n";
+        WARN("Connection to server " + std::to_string(address.host) + "," + std::to_string(address.port) + " failed");
         return false;
     }
 };
@@ -225,7 +225,7 @@ void Network::disconnect() {
                 enet_packet_destroy (event.packet);
                 break;
             case ENET_EVENT_TYPE_DISCONNECT:
-                std::cout << "Disconnection succeeded.\n";
+                DEBUG("Disconnection succeeded");
                 disconnects++;
                 if (disconnects == players_.size()) {
                     enet_host_destroy(host_);

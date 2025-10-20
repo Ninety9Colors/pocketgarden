@@ -1,0 +1,19 @@
+15:44:40 DEBUG Enet Initialized?: 1
+15:44:40 DEBUG Starting application...
+15:44:41 DEBUG Hosting server with address 0, port 2
+15:44:41 DEBUG Updating weather...
+15:44:41 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":307.02,"feels_like":308.87,"temp_min":305.9,"temp_max":308.4,"pressure":1012,"humidity":42,"sea_level":1012,"grnd_level":988},"visibility":10000,"wind":{"speed":8.23,"deg":200,"gust":12.86},"clouds":{"all":0},"dt":1760992876,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1760963786,"sunset":1761004479},"timezone":-18000,"id":4671654,"name":"Austin","cod":200}
+15:44:41 INFO lloc>::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+15:44:41 INFO Azimuth: 227.038607 Altitude: 35.615561
+15:44:41 INFO Sent packet with: WeatherUpdateEvent 800 0
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 -0.699719 0.000000 -8.985361
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 -0.567609 0.000000 -9.111420
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 -0.383031 0.000000 -9.189287
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 -0.198555 0.000000 -9.266666
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 -0.015299 0.000000 -9.347996
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 0.166421 0.000000 -9.432053
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 0.347110 0.000000 -9.519217
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 0.525692 0.000000 -9.609612
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 0.714878 0.000000 -9.567829
+15:44:42 INFO Sent packet with: PlayerMoveEvent 2 0.821547 0.000000 -9.533955
+15:44:43 DEBUG Closing application...

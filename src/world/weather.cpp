@@ -1,11 +1,11 @@
 #include <cmath>
-#include <iostream>
 #include <fstream>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 #include "json.hpp"
 
+#include "logging.hpp"
 #include "world/weather.hpp"
 
 Weather::Weather(float latitude, float longitude) : latitude_(latitude), longitude_(longitude) {
@@ -18,6 +18,7 @@ Weather::~Weather() {
 }
 
 bool Weather::update() {
+    DEBUG("Updating weather...");
     std::string url = "https://api.openweathermap.org/data/2.5/weather?lat=" + std::to_string(latitude_) + "&lon=" + std::to_string(longitude_) + "&appid=";
     std::ifstream file ("api.env");
     if (file) {
@@ -32,11 +33,11 @@ bool Weather::update() {
     auto res = cli.Get(url.c_str());
     if (!res || res->status != 200)
         return false;
-    std::cout << res->body << "\n";
+    DEBUG("Received query: " + res->body);
     try {
         auto json = nlohmann::json::parse(res->body);
         weather_id_ = json["weather"][0]["id"];
-        std::cout << "Set weather id to: " << weather_id_ << "\n";
+        INFO("Set weather id to: " + weather_id_);
     } catch(const std::exception& e) {
         return false;
     }
@@ -74,7 +75,7 @@ void Weather::update_sun(uint64_t current_timestamp) {
                         (std::cos(h_rad)*std::cos(latitude_*PI/180.0))));
     azimuth_ = std::sin(H*PI/180.0) > 0 ? 2*PI - A_rad : A_rad;
     altitude_ = h_rad;
-    std::cout << "Azimuth: " << std::to_string(azimuth_*180.0/PI) << " Altitude: " << std::to_string(altitude_*180.0/PI) << "\n";
+    INFO("Azimuth: " + std::to_string(azimuth_*180.0/PI) + " Altitude: " + std::to_string(altitude_*180.0/PI));
 }
 
 void Weather::set_location(float latitude, float longitude) {

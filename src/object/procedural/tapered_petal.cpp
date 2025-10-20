@@ -16,10 +16,6 @@ static int vertex_index(int i, int j, const std::pair<int,int>& slices, bool bot
     return ((slices.second+1)*i + j)*3 + ((slices.first+1)*(slices.second+1)*3*bottom);
 }
 
-static float lerp(float a, float b, float amount) {
-    return (1-amount)*a + amount*b;
-}
-
 TaperedPetal::TaperedPetal() : ParameterObject(), slices_{40,20} {
     std::random_device rd;
     seed_ = rd();
