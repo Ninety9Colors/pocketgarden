@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef POCKETLIFE_DEBUG
+#ifdef POCKETGARDEN_DEBUG
     #define INFO(x) (log(1,(x)))
     #define DEBUG(x) (log(2,(x)))
     #define WARN(x) (log(3,(x)))

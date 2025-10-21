@@ -22,7 +22,7 @@ constexpr int DEFAULT_SCREEN_HEIGHT = 720;
 constexpr int FONT_SIZE = 40;
 
 Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(false), port_focus_(false), username_focus_(false) {
-    InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "PocketLife");
+    InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "PocketGarden");
     SetWindowSize(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
     SetExitKey(KEY_NULL);
     event_buffer_ = {};
