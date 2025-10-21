@@ -17,3 +17,416 @@
 15:44:42 INFO Sent packet with: PlayerMoveEvent 2 0.714878 0.000000 -9.567829
 15:44:42 INFO Sent packet with: PlayerMoveEvent 2 0.821547 0.000000 -9.533955
 15:44:43 DEBUG Closing application...
+19:08:44 DEBUG Enet Initialized?: 1
+19:08:44 DEBUG Starting application...
+19:08:46 DEBUG Hosting server with address 0, port 2
+19:08:46 DEBUG Updating weather...
+19:08:46 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01n"}],"base":"stations","main":{"temp":304.71,"feels_like":305.89,"temp_min":303.63,"temp_max":305.52,"pressure":1011,"humidity":46,"sea_level":1011,"grnd_level":987},"visibility":10000,"wind":{"speed":4.02,"deg":135,"gust":4.92},"clouds":{"all":0},"dt":1761004943,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1760963786,"sunset":1761004479},"timezone":-18000,"id":4671654,"name":"Austin","cod":200}
+19:08:46 INFO lloc>::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+19:08:46 INFO Azimuth: 259.876521 Altitude: -3.912441
+19:08:46 INFO Sent packet with: WeatherUpdateEvent 800 0
+19:08:46 INFO Sent packet with: PlayerMoveEvent 2 0.830437 0.000000 -9.560783
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 0.803860 0.000000 -9.749624
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 0.791805 0.000000 -9.949303
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 0.874797 0.000000 -10.129160
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 1.029634 0.000000 -10.254023
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 1.219002 0.000000 -10.318763
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 1.417389 0.000000 -10.347727
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 1.616645 0.000000 -10.369476
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 1.815496 0.000000 -10.391161
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 2.016264 0.000000 -10.411041
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 2.212518 0.000000 -10.430205
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 2.352044 0.000000 -10.573527
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 2.493620 0.000000 -10.714878
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 2.519189 0.000000 -10.740180
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 2.505465 0.000000 -10.725811
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 2.377989 0.000000 -10.571553
+19:08:47 INFO Sent packet with: PlayerMoveEvent 2 2.278965 0.000000 -10.397269
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 2.193980 0.000000 -10.215434
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 2.110910 0.000000 -10.032764
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 2.028451 0.000000 -9.850405
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 1.945614 0.000000 -9.666758
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 1.863730 0.000000 -9.483505
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 1.781947 0.000000 -9.300627
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 1.696229 0.000000 -9.119591
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 1.678098 0.000000 -9.084230
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 1.699025 0.000000 -9.107989
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 1.832512 0.000000 -9.258105
+19:08:48 INFO Sent packet with: PlayerMoveEvent 2 1.965915 0.000000 -9.407869
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 2.099378 0.000000 -9.557708
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 2.232800 0.000000 -9.707504
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 2.365892 0.000000 -9.856926
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 2.499359 0.000000 -10.006765
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 2.632518 0.000000 -10.156263
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 2.765954 0.000000 -10.306059
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 2.899529 0.000000 -10.456027
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 3.032788 0.000000 -10.605637
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 3.166278 0.000000 -10.755509
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 3.299358 0.000000 -10.904921
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 3.432417 0.000000 -11.054302
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 3.565459 0.000000 -11.203670
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 3.698566 0.000000 -11.353113
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 3.832072 0.000000 -11.503001
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 3.965288 0.000000 -11.652559
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 4.098790 0.000000 -11.802436
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 4.232124 0.000000 -11.952136
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 4.365673 0.000000 -12.102065
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 4.498701 0.000000 -12.251417
+19:08:49 INFO Sent packet with: PlayerMoveEvent 2 4.631904 0.000000 -12.400963
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.765331 0.000000 -12.550759
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.898642 0.000000 -12.700424
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.031674 0.000000 -12.849782
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.165014 0.000000 -12.999481
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.298296 0.000000 -13.149113
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.431460 0.000000 -13.298619
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.564651 0.000000 -13.448149
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.618181 0.000000 -13.508251
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.513634 0.000000 -13.601371
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.363793 0.000000 -13.734832
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.214061 0.000000 -13.868200
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 5.061560 0.000000 -14.000239
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.902633 0.000000 -14.122443
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.732718 0.000000 -14.216727
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.590849 0.000000 -14.099219
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.502661 0.000000 -13.919383
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.417624 0.000000 -13.738161
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.332814 0.000000 -13.556907
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.247887 0.000000 -13.375051
+19:08:50 INFO Sent packet with: PlayerMoveEvent 2 4.163247 0.000000 -13.193608
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 4.078659 0.000000 -13.011143
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.994424 0.000000 -12.828453
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.910914 0.000000 -12.645978
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.828103 0.000000 -12.463856
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.745348 0.000000 -12.281169
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.662119 0.000000 -12.099095
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.574348 0.000000 -11.917815
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.482161 0.000000 -11.739460
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.387654 0.000000 -11.562711
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.290878 0.000000 -11.387331
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.192065 0.000000 -11.212416
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 3.092644 0.000000 -11.038136
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 2.992561 0.000000 -10.864006
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 2.892327 0.000000 -10.690255
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 2.792147 0.000000 -10.516768
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 2.691809 0.000000 -10.343001
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 2.591475 0.000000 -10.169249
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 2.491381 0.000000 -9.995904
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 2.391384 0.000000 -9.822444
+19:08:51 INFO Sent packet with: PlayerMoveEvent 2 2.334399 0.000000 -9.723297
+19:08:53 DEBUG Closing application...
+20:48:36 DEBUG Enet Initialized?: 1
+20:48:36 DEBUG Starting application...
+20:48:39 DEBUG Hosting server with address 0, port 2
+20:48:39 DEBUG Updating weather...
+20:48:39 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01n"}],"base":"stations","main":{"temp":300.87,"feels_like":301.37,"temp_min":299.03,"temp_max":302.47,"pressure":1012,"humidity":51,"sea_level":1012,"grnd_level":989},"visibility":10000,"wind":{"speed":1.54,"deg":190},"clouds":{"all":0},"dt":1761011177,"sys":{"type":2,"id":2003218,"country":"US","sunrise":1760963786,"sunset":1761004479},"timezone":-18000,"id":4671654,"name":"Austin","cod":200}
+20:48:39 INFO lloc>::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+20:48:39 INFO Azimuth: 272.198182 Altitude: -25.399777
+20:48:39 INFO Sent packet with: WeatherUpdateEvent 800 0
+20:48:40 INFO Sent packet with: PlayerMoveEvent 2 0.015823 0.000000 -0.026063
+20:48:40 INFO Sent packet with: PlayerMoveEvent 2 0.126432 0.000000 -0.192927
+20:48:40 INFO Sent packet with: PlayerMoveEvent 2 0.245873 0.000000 -0.353933
+20:48:40 INFO Sent packet with: PlayerMoveEvent 2 0.365468 0.000000 -0.515126
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 0.482109 0.000000 -0.678114
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 0.597420 0.000000 -0.842507
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 0.706742 0.000000 -1.010735
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 0.809681 0.000000 -1.182619
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 0.910182 0.000000 -1.356329
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 1.009681 0.000000 -1.530193
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 1.110552 0.000000 -1.703559
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 1.267047 0.000000 -1.803772
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 1.463965 0.000000 -1.841959
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 1.662181 0.000000 -1.869507
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 1.863017 0.000000 -1.887185
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 2.062495 0.000000 -1.878508
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 2.258891 0.000000 -1.840670
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 2.454296 0.000000 -1.796867
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 2.567932 0.000000 -1.636536
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 2.674415 0.000000 -1.466745
+20:48:41 INFO Sent packet with: PlayerMoveEvent 2 2.754103 0.000000 -1.338836
+20:48:42 INFO Sent packet with: PlayerMoveEvent 2 2.670066 0.000000 -1.303748
+20:48:42 INFO Sent packet with: PlayerMoveEvent 2 2.503812 0.000000 -1.234212
+20:48:42 INFO Sent packet with: PlayerMoveEvent 2 2.406013 0.000000 -1.192783
+20:48:42 INFO Sent packet with: PlayerMoveEvent 2 2.232000 0.000000 -1.117920
+20:48:42 INFO Sent packet with: ItemPickupEvent 2 (MoveTool 0.000000 0.000000 0.000000 2.000000 1.000000 0.000000 0.000000 0.000000 1.000000)
+20:48:42 INFO Sent packet with: ObjectRemoveEvent 2 3
+20:48:42 INFO Sent packet with: PlayerMoveEvent 2 2.306893 0.000000 -1.091472
+20:48:42 INFO Sent packet with: PlayerMoveEvent 2 2.489138 0.000000 -1.008433
+20:48:42 INFO Sent packet with: PlayerMoveEvent 2 2.673015 0.000000 -0.929740
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 2.857296 0.000000 -0.849318
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.035677 0.000000 -0.755507
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.200818 0.000000 -0.642198
+20:48:43 INFO Hitting object Cube 0.000000 0.000000 0.000000 1.000000 1.000000 1.000000 1.000000 230 41 55 255 0.000000 0.000000 0.000000 1.000000
+20:48:43 INFO Hitting object LilyFlower 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 1156983676 (ParameterMap ((PetalPitchLower -90.000000 35.000000 80.000000)(PetalPitchUpper -90.000000 35.000000 80.000000)))(TaperedPetal 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 1756867443 (ParameterMap ((BaseColor 309.207794 0.281764 0.353353)(BorderColor 336.428253 0.522183 0.369135)(BorderWidth 0.000000 1.390825 3.000000)(ConcaveBoolean 0.000000 0.000000 1.000000)(CreaseBoolean 0.000000 0.000000 1.000000)(Curl 1.500000 2.359800 3.000000)(Curvature 0.100000 0.193197 0.350000)(FreckleAmount 0.000000 0.388445 0.900000)(FreckleCentrality 1.000000 2.581736 4.000000)(FreckleColor 321.108948 0.572940 0.538426)(FreckleCoverage 0.000000 0.540977 0.900000)(FreckleSize 0.100000 0.607181 3.000000)(GradientColor 21.308014 0.580644 0.575789)(GradientWidth 0.000000 1.130751 3.000000)(Height 0.100000 0.427960 0.500000)(Length 0.100000 0.525363 1.000000)(Sharpness 0.500000 0.620266 1.000000)(StripeColor 357.517761 0.389805 0.521677)(StripeWidth 0.000000 0.069254 0.250000)(Width 0.100000 0.194903 0.250000))))(TaperedPetal 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 1975800047 (ParameterMap ((BaseColor 42.567444 0.242663 0.516026)(BorderColor 29.825867 0.522071 0.767577)(BorderWidth 0.000000 1.089692 3.000000)(ConcaveBoolean 0.000000 0.000000 1.000000)(CreaseBoolean 0.000000 0.000000 1.000000)(Curl 1.500000 1.988742 3.000000)(Curvature 0.100000 0.208960 0.350000)(FreckleAmount 0.000000 0.260703 0.900000)(FreckleCentrality 1.000000 1.875331 4.000000)(FreckleColor 287.839874 0.473276 0.575704)(FreckleCoverage 0.000000 0.746199 0.900000)(FreckleSize 0.100000 1.814542 3.000000)(GradientColor 7.760620 0.617478 0.241793)(GradientWidth 0.000000 2.052171 3.000000)(Height 0.100000 0.312715 0.500000)(Length 0.100000 0.503204 1.000000)(Sharpness 0.500000 0.733951 1.000000)(StripeColor 326.867371 0.563693 0.466788)(StripeWidth 0.000000 0.011402 0.250000)(Width 0.100000 0.169754 0.250000))))
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 0.079141 0.024137 -0.018364)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.358984 0.000000 -0.519303
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 0.218173 0.062904 -0.038808)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.516534 0.000000 -0.394926
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 0.358075 0.097825 -0.048737)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.671245 0.000000 -0.268147
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 0.499031 0.128056 -0.055882)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.818586 0.000000 -0.132390
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 0.640959 0.152687 -0.063105)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.954895 0.000000 0.014467
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 0.783892 0.173220 -0.075499)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 4.073365 0.000000 0.175507
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 0.929240 0.193992 -0.095199)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 4.169148 0.000000 0.352085
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 1.080817 0.216646 -0.130403)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 4.226479 0.000000 0.543728
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 1.237655 0.239921 -0.169359)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 4.251578 0.000000 0.742832
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 1.392666 0.260419 -0.198939)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 4.257175 0.000000 0.943502
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 1.548493 0.275739 -0.220025)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 4.240105 0.000000 1.143854
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 1.711696 0.285158 -0.237360)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 4.151516 0.000000 1.305187
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 1.870496 0.291699 -0.254899)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.964791 0.000000 1.377479
+20:48:43 INFO Sent packet with: ObjectMoveEvent 2 (1 1.942829 0.294310 -0.262122)
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.774422 0.000000 1.441424
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.595072 0.000000 1.530161
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.416641 0.000000 1.600792
+20:48:43 INFO Sent packet with: PlayerMoveEvent 2 3.226415 0.000000 1.665241
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 3.042008 0.000000 1.702787
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 2.858136 0.000000 1.624010
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 2.675458 0.000000 1.542462
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 2.492348 0.000000 1.460720
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 2.309150 0.000000 1.378941
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 2.126020 0.000000 1.297190
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 1.943017 0.000000 1.215497
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 1.760468 0.000000 1.132734
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 1.577469 0.000000 1.048239
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 1.390036 0.000000 0.977729
+20:48:44 INFO Sent packet with: PlayerMoveEvent 2 1.269106 0.000000 0.943706
+20:48:44 INFO Sent packet with: ItemDropEvent 2
+20:48:44 INFO Sent packet with: ObjectLoadEvent 2 (6 (MoveTool 1.269106 0.000000 0.943706 2.000000 1.000000 0.000000 0.000000 0.000000 1.000000))
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 1.196504 0.000000 0.932074
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.998806 0.000000 0.900629
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.800560 0.000000 0.869328
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.652806 0.000000 0.754036
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.602584 0.000000 0.599333
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.757601 0.000000 0.636655
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.871854 0.000000 0.800915
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.985451 0.000000 0.966376
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 1.089862 0.000000 1.138897
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 1.168288 0.000000 1.322783
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 1.203307 0.000000 1.519351
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 1.134101 0.000000 1.687521
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.977089 0.000000 1.811840
+20:48:45 INFO Sent packet with: PlayerMoveEvent 2 0.947346 0.000000 1.834978
+20:48:46 INFO Sent packet with: ItemPickupEvent 2 (SunTool 0.000000 0.000000 0.000000 0 1.000000)
+20:48:46 INFO Sent packet with: ObjectRemoveEvent 2 4
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 0.991695 0.000000 1.675864
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.053852 0.000000 1.482276
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.112730 0.000000 1.291119
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.163074 0.000000 1.097033
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.203813 0.000000 0.900444
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.237340 0.000000 0.701348
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.263137 0.000000 0.502655
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.280880 0.000000 0.303436
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.282781 0.000000 0.102933
+20:48:46 INFO Sent packet with: PlayerMoveEvent 2 1.273299 0.000000 -0.025706
+20:48:46 INFO Azimuth: 270.928537 Altitude: -23.265188
+20:48:46 INFO Sent packet with: WeatherUpdateEvent 800 -600
+20:48:46 INFO Azimuth: 269.665939 Altitude: -21.104628
+20:48:46 INFO Sent packet with: WeatherUpdateEvent 800 -1200
+20:48:46 INFO Azimuth: 268.421015 Altitude: -18.944340
+20:48:46 INFO Sent packet with: WeatherUpdateEvent 800 -1800
+20:48:46 INFO Azimuth: 267.189578 Altitude: -16.785332
+20:48:46 INFO Azimuth: 265.967701 Altitude: -14.628584
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -3000
+20:48:47 INFO Azimuth: 264.753690 Altitude: -12.478644
+20:48:47 INFO Azimuth: 263.539945 Altitude: -10.329290
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -4200
+20:48:47 INFO Azimuth: 262.325064 Altitude: -8.185074
+20:48:47 INFO Azimuth: 261.105704 Altitude: -6.046972
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -5400
+20:48:47 INFO Azimuth: 259.878574 Altitude: -3.915986
+20:48:47 INFO Azimuth: 258.640405 Altitude: -1.793150
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -6600
+20:48:47 INFO Sent packet with: PlayerMoveEvent 2 1.270685 0.000000 -0.037901
+20:48:47 INFO Azimuth: 257.387920 Altitude: 0.320457
+20:48:47 INFO Sent packet with: PlayerMoveEvent 2 1.228651 0.000000 -0.234020
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -7200
+20:48:47 INFO Azimuth: 256.117807 Altitude: 2.423701
+20:48:47 INFO Sent packet with: PlayerMoveEvent 2 1.186390 0.000000 -0.429989
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -7800
+20:48:47 INFO Azimuth: 254.826693 Altitude: 4.515383
+20:48:47 INFO Azimuth: 253.511120 Altitude: 6.594227
+20:48:47 INFO Sent packet with: PlayerMoveEvent 2 1.153557 0.000000 -0.576868
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -9000
+20:48:47 INFO Azimuth: 252.167516 Altitude: 8.658868
+20:48:47 INFO Azimuth: 250.792177 Altitude: 10.707840
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -10200
+20:48:47 INFO Azimuth: 249.381240 Altitude: 12.739561
+20:48:47 INFO Azimuth: 247.930662 Altitude: 14.752318
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -11400
+20:48:47 INFO Azimuth: 246.436201 Altitude: 16.744248
+20:48:47 INFO Sent packet with: WeatherUpdateEvent 800 -12000
+20:48:48 INFO Azimuth: 244.896008 Altitude: 18.710062
+20:48:48 INFO Azimuth: 243.300252 Altitude: 20.654114
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -13200
+20:48:48 INFO Azimuth: 241.646517 Altitude: 22.570682
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -13800
+20:48:48 INFO Azimuth: 239.929610 Altitude: 24.457117
+20:48:48 INFO Azimuth: 238.144081 Altitude: 26.310513
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -15000
+20:48:48 INFO Azimuth: 236.284243 Altitude: 28.127687
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -15600
+20:48:48 INFO Azimuth: 234.344192 Altitude: 29.905150
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -16200
+20:48:48 INFO Azimuth: 232.317854 Altitude: 31.639080
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -16800
+20:48:48 INFO Azimuth: 230.199045 Altitude: 33.325299
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -17400
+20:48:48 INFO Azimuth: 227.981568 Altitude: 34.959250
+20:48:48 INFO Azimuth: 225.659336 Altitude: 36.535976
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -18600
+20:48:48 INFO Azimuth: 223.226541 Altitude: 38.050116
+20:48:48 INFO Azimuth: 220.677868 Altitude: 39.495895
+20:48:48 INFO Azimuth: 218.008751 Altitude: 40.867144
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -20400
+20:48:48 INFO Azimuth: 215.215688 Altitude: 42.157332
+20:48:48 INFO Azimuth: 212.296598 Altitude: 43.359614
+20:48:48 INFO Azimuth: 209.251208 Altitude: 44.466924
+20:48:48 INFO Sent packet with: WeatherUpdateEvent 800 -22200
+20:48:48 INFO Sent packet with: PlayerMoveEvent 2 1.298475 0.000000 -0.630371
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.388214 0.000000 -0.805808
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.455852 0.000000 -0.994588
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.500671 0.000000 -1.189560
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.519170 0.000000 -1.388596
+20:48:49 INFO Azimuth: 206.086841 Altitude: 45.470493
+20:48:49 INFO Azimuth: 202.797462 Altitude: 46.366537
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.512727 0.000000 -1.589532
+20:48:49 INFO Sent packet with: WeatherUpdateEvent 800 -23400
+20:48:49 INFO Azimuth: 199.395698 Altitude: 47.146363
+20:48:49 INFO Azimuth: 195.892130 Altitude: 47.803465
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.489976 0.000000 -1.788876
+20:48:49 INFO Sent packet with: WeatherUpdateEvent 800 -24600
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.457939 0.000000 -1.986580
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.422690 0.000000 -2.183751
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.383806 0.000000 -2.380056
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.341437 0.000000 -2.575984
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.267247 0.000000 -2.750331
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.196748 0.000000 -2.791631
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 1.159419 0.000000 -2.810948
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 0.977458 0.000000 -2.894274
+20:48:49 INFO Sent packet with: PlayerMoveEvent 2 0.788145 0.000000 -2.958816
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 0.592009 0.000000 -2.997887
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 0.392298 0.000000 -3.011101
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 0.191854 0.000000 -3.005811
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -0.007563 0.000000 -2.990128
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -0.206880 0.000000 -2.969445
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -0.405690 0.000000 -2.946368
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -0.604715 0.000000 -2.921242
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -0.803423 0.000000 -2.895744
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -0.899699 0.000000 -2.883148
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -0.929093 0.000000 -2.875878
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -1.122941 0.000000 -2.824883
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -1.315212 0.000000 -2.767225
+20:48:50 INFO Sent packet with: PlayerMoveEvent 2 -1.505297 0.000000 -2.704478
+20:48:51 INFO Sent packet with: PlayerMoveEvent 2 -1.695239 0.000000 -2.640819
+20:48:51 INFO Sent packet with: PlayerMoveEvent 2 -1.884993 0.000000 -2.576062
+20:48:51 INFO Sent packet with: PlayerMoveEvent 2 -2.074086 0.000000 -2.509017
+20:48:51 INFO Sent packet with: PlayerMoveEvent 2 -2.098459 0.000000 -2.500134
+20:48:51 INFO Azimuth: 199.407213 Altitude: 47.143964
+20:48:51 INFO Sent packet with: WeatherUpdateEvent 800 -24000
+20:48:51 INFO Azimuth: 202.808618 Altitude: 46.363739
+20:48:51 INFO Sent packet with: WeatherUpdateEvent 800 -23400
+20:48:51 INFO Azimuth: 206.097609 Altitude: 45.467319
+20:48:51 INFO Azimuth: 209.266747 Altitude: 44.461635
+20:48:51 INFO Sent packet with: WeatherUpdateEvent 800 -22200
+20:48:51 INFO Azimuth: 212.311508 Altitude: 43.353833
+20:48:51 INFO Sent packet with: WeatherUpdateEvent 800 -21600
+20:48:51 INFO Azimuth: 215.229966 Altitude: 42.151094
+20:48:51 INFO Azimuth: 218.022402 Altitude: 40.860484
+20:48:51 INFO Sent packet with: WeatherUpdateEvent 800 -20400
+20:48:51 INFO Azimuth: 220.690907 Altitude: 39.488846
+20:48:51 INFO Sent packet with: WeatherUpdateEvent 800 -19800
+20:48:51 INFO Azimuth: 223.238989 Altitude: 38.042710
+20:48:51 INFO Sent packet with: WeatherUpdateEvent 800 -19200
+20:48:52 INFO Azimuth: 220.695253 Altitude: 39.486496
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -19800
+20:48:52 INFO Azimuth: 218.026952 Altitude: 40.858264
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -20400
+20:48:52 INFO Azimuth: 215.234725 Altitude: 42.149014
+20:48:52 INFO Azimuth: 212.316478 Altitude: 43.351906
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -21600
+20:48:52 INFO Azimuth: 209.271926 Altitude: 44.459872
+20:48:52 INFO Azimuth: 206.102992 Altitude: 45.465732
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -22800
+20:48:52 INFO Azimuth: 202.814196 Altitude: 46.362340
+20:48:52 INFO Azimuth: 199.412970 Altitude: 47.142764
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -24000
+20:48:52 INFO Azimuth: 195.909879 Altitude: 47.800495
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -24600
+20:48:52 INFO Azimuth: 192.318667 Altitude: 48.329669
+20:48:52 INFO Azimuth: 188.656105 Altitude: 48.725299
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -25800
+20:48:52 INFO Azimuth: 184.941610 Altitude: 48.983491
+20:48:52 INFO Azimuth: 181.196637 Altitude: 49.101623
+20:48:52 INFO Azimuth: 177.443886 Altitude: 49.078472
+20:48:52 INFO Azimuth: 173.706364 Altitude: 48.914282
+20:48:52 INFO Sent packet with: PlayerMoveEvent 2 -2.073172 0.000000 -2.514454
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -28200
+20:48:52 INFO Azimuth: 170.006459 Altitude: 48.610745
+20:48:52 INFO Azimuth: 166.365039 Altitude: 48.170918
+20:48:52 INFO Sent packet with: PlayerMoveEvent 2 -1.877846 0.000000 -2.468296
+20:48:52 INFO Sent packet with: WeatherUpdateEvent 800 -29400
+20:48:52 INFO Sent packet with: PlayerMoveEvent 2 -1.682656 0.000000 -2.422169
+20:48:52 INFO Sent packet with: PlayerMoveEvent 2 -1.487726 0.000000 -2.376105
+20:48:52 INFO Sent packet with: PlayerMoveEvent 2 -1.292997 0.000000 -2.330110
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 -1.097622 0.000000 -2.284145
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 -0.902567 0.000000 -2.238256
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 -0.707736 0.000000 -2.192419
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 -0.512848 0.000000 -2.146569
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 -0.318107 0.000000 -2.100753
+20:48:53 INFO Azimuth: 162.806574 Altitude: 47.600140
+20:48:53 INFO Azimuth: 159.334973 Altitude: 46.901795
+20:48:53 INFO Azimuth: 155.968955 Altitude: 46.082830
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 -0.123352 0.000000 -2.054934
+20:48:53 INFO Sent packet with: WeatherUpdateEvent 800 -31200
+20:48:53 INFO Azimuth: 152.718046 Altitude: 45.149918
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 0.071940 0.000000 -2.008990
+20:48:53 INFO Sent packet with: WeatherUpdateEvent 800 -31800
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 0.267192 0.000000 -1.962956
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 0.462009 0.000000 -1.916606
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 0.656726 0.000000 -1.869278
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 0.832211 0.000000 -1.951514
+20:48:53 INFO Azimuth: 149.588697 Altitude: 44.110082
+20:48:53 INFO Azimuth: 146.584539 Altitude: 42.970501
+20:48:53 INFO Azimuth: 143.706727 Altitude: 41.738332
+20:48:53 INFO Azimuth: 140.954340 Altitude: 40.420581
+20:48:53 INFO Sent packet with: PlayerMoveEvent 2 0.987149 0.000000 -2.031691
+20:48:53 INFO Sent packet with: WeatherUpdateEvent 800 -34200
+20:48:53 INFO Azimuth: 138.324778 Altitude: 39.023998
+20:48:53 INFO Sent packet with: WeatherUpdateEvent 800 -34800
+20:48:53 INFO Azimuth: 135.814145 Altitude: 37.554999
+20:48:53 INFO Azimuth: 133.417591 Altitude: 36.019627
+20:48:53 INFO Azimuth: 131.129604 Altitude: 34.423518
+20:48:53 INFO Sent packet with: WeatherUpdateEvent 800 -36600
+20:48:53 INFO Azimuth: 128.944261 Altitude: 32.771903
+20:48:53 INFO Azimuth: 126.855417 Altitude: 31.069603
+20:48:53 INFO Sent packet with: WeatherUpdateEvent 800 -37800
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 0.907179 0.000000 -1.925375
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 0.766520 0.000000 -1.782463
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 0.616659 0.000000 -1.649496
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 0.463541 0.000000 -1.517942
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 0.312481 0.000000 -1.386771
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 0.162053 0.000000 -1.254771
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 0.011585 0.000000 -1.122193
+20:48:54 INFO Azimuth: 272.230619 Altitude: -25.453753
+20:48:54 INFO Sent packet with: ItemDropEvent 2
+20:48:54 INFO Sent packet with: ObjectLoadEvent 2 (7 (SunTool -0.088467 0.000000 -1.057292 0 1.000000))
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -0.163741 0.000000 -1.061455
+20:48:54 INFO Sent packet with: WeatherUpdateEvent 800 0
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -0.363711 0.000000 -1.070313
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -0.563659 0.000000 -1.067291
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -0.756502 0.000000 -1.067425
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -0.945904 0.000000 -1.129984
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -1.143403 0.000000 -1.109138
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -1.324419 0.000000 -1.024683
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -1.509485 0.000000 -1.010430
+20:48:54 INFO Sent packet with: PlayerMoveEvent 2 -1.645425 0.000000 -1.045207
+20:48:55 DEBUG Closing application...

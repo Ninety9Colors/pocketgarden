@@ -1,2 +1,2 @@
-g++ -DPOCKETLIFE_DEBUG src/*.cpp src/event/*.cpp src/network/*.cpp src/object/*.cpp src/object/consistent/*.cpp src/object/procedural/*.cpp src/player/*.cpp src/world/*.cpp -D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -static -Isrc -Iinclude -Llib -lssl -lcrypto -lcrypt32 -lraylib -lopengl32 -lgdi32 -lwinmm -lenet -lws2_32 -lwinmm -std=c++20 -o game_debug.exe
+g++ -DPOCKETLIFE_DEBUG src/*.cpp src/event/*.cpp src/network/*.cpp src/object/*.cpp src/object/consistent/*.cpp src/object/procedural/*.cpp src/player/*.cpp src/world/*.cpp -D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -static -Isrc -Iinclude -Llib -lssl -lcrypto -lcrypt32 -lraylib -lopengl32 -lgdi32 -lenet -lwinmm -lws2_32 -std=c++20 -o game_debug.exe
 PAUSE
