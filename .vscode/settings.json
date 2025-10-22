@@ -95,7 +95,9 @@
         "stop_token": "cpp",
         "syncstream": "cpp",
         "thread": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++20"
 }

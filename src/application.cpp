@@ -70,6 +70,10 @@ void Application::run(Game& game) {
     int sun_color_loc = GetShaderLocation(*shader_default_,"sunColor");
     int ambient_loc = GetShaderLocation(*shader_default_,"ambient");
 
+    SetShaderValue(*shader_default_, sun_position_loc, (float[3]){0.0f,game.get_world()->get_sun()->get_position().y,0.0f}, SHADER_UNIFORM_VEC3);
+    SetShaderValue(*shader_default_, sun_color_loc, (float[4]){1.0f,1.0f,1.0f,1.0f}, SHADER_UNIFORM_VEC4);
+    SetShaderValue(*shader_default_, ambient_loc, (float[4]){1.0f,1.0f,0.75f,1.0f}, SHADER_UNIFORM_VEC4);
+
     std::string fps_buffer;
 
     while (!WindowShouldClose()) {
@@ -99,7 +103,6 @@ void Application::run(Game& game) {
                 if (updated) {
                     DEBUG("Updating weather information in world and shader...");
                     event_buffer_["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(game.get_world()->get_weather()->get_weather_id());
-                    last_weather_update = current_timestamp;
                     game.get_world()->get_weather()->update_sun(current_timestamp);
                     game.get_world()->update_sun();
 
@@ -113,7 +116,10 @@ void Application::run(Game& game) {
                     float ambient_level = (std::pow(std::max(sun_position.y,0.0f),2)/10000.0f)*0.5f + 0.25f;
                     float ambient[4] = {ambient_level,ambient_level,ambient_level,1.0f};
                     SetShaderValue(*shader_default_, ambient_loc, ambient, SHADER_UNIFORM_VEC4);
+                } else {
+                    WARN("Failed to retrieve weather information");
                 }
+                last_weather_update = current_timestamp;
             }
             tick(event_buffer_, game);
             dt_tick = 0;
