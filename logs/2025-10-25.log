@@ -1,0 +1,46 @@
+00:03:41 DEBUG Initializing window with size 1280,720
+00:03:42 DEBUG Enet Initialized?: 1
+00:03:42 DEBUG Starting application...
+00:03:44 DEBUG Hosting server with address 0, port 2
+00:03:44 DEBUG Updating weather...
+00:03:44 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":804,"main":"Clouds","description":"overcast clouds","icon":"04n"}],"base":"stations","main":{"temp":295.15,"feels_like":295.42,"temp_min":293.46,"temp_max":297.73,"pressure":1014,"humidity":77,"sea_level":1014,"grnd_level":988},"visibility":10000,"wind":{"speed":0.89,"deg":338,"gust":4.02},"clouds":{"all":100},"dt":1761368626,"sys":{"type":2,"id":2003218,"country":"US","sunrise":1761396002,"sunset":1761436183},"timezone":-18000,"id":4671654,"name":"Austin","cod":200}
+00:03:44 INFO >::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+00:03:44 DEBUG Updating weather information in world and shader...
+00:03:44 INFO Azimuth: 313.774679 Altitude: -65.511916
+00:03:44 INFO Sent packet with: WeatherUpdateEvent 804 0
+00:03:44 INFO Updating FPS
+00:03:45 INFO Updating FPS
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 2.848041 0.000000 -0.999264
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 2.736573 0.000000 -1.166679
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 2.623170 0.000000 -1.332320
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 2.509800 0.000000 -1.497911
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 2.396101 0.000000 -1.663983
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 2.282596 0.000000 -1.829773
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 2.169532 0.000000 -1.994917
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 2.055952 0.000000 -2.160814
+00:03:45 INFO Sent packet with: PlayerMoveEvent 2 1.942192 0.000000 -2.326976
+00:03:46 INFO Updating FPS
+00:03:46 INFO Sent packet with: PlayerMoveEvent 2 1.828660 0.000000 -2.492804
+00:03:46 INFO Sent packet with: PlayerMoveEvent 2 1.714714 0.000000 -2.659237
+00:03:46 INFO Sent packet with: PlayerMoveEvent 2 1.601283 0.000000 -2.824919
+00:03:46 INFO Sent packet with: PlayerMoveEvent 2 1.486533 0.000000 -2.992527
+00:03:46 INFO Sent packet with: PlayerMoveEvent 2 1.373166 0.000000 -3.158116
+00:03:46 INFO Sent packet with: PlayerMoveEvent 2 1.259787 0.000000 -3.323720
+00:03:46 INFO Sent packet with: PlayerMoveEvent 2 1.189053 0.000000 -3.420761
+00:03:47 INFO Updating FPS
+00:03:47 INFO Sent packet with: PlayerMoveEvent 2 1.161008 0.000000 -3.337785
+00:03:47 INFO Sent packet with: PlayerMoveEvent 2 1.095575 0.000000 -3.145285
+00:03:47 INFO Sent packet with: PlayerMoveEvent 2 1.031117 0.000000 -2.955650
+00:03:47 INFO Sent packet with: PlayerMoveEvent 2 0.966126 0.000000 -2.764451
+00:03:47 INFO Sent packet with: PlayerMoveEvent 2 0.945671 0.000000 -2.704274
+00:03:48 INFO Updating FPS
+00:04:30 WARN Connection to server 1091975483,2 failed
+00:04:36 DEBUG Hosting server with address 0, port 2
+00:04:36 INFO Updating FPS
+00:04:37 INFO Updating FPS
+00:04:38 INFO Updating FPS
+00:04:38 DEBUG Hosting server with address 0, port 2
+00:04:39 INFO Updating FPS
+00:04:39 DEBUG Hosting server with address 0, port 2
+00:04:40 INFO Updating FPS
+00:04:41 DEBUG Closing Window

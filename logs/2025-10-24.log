@@ -1,0 +1,209 @@
+21:40:09 DEBUG Initializing window with size 1280,720
+21:40:10 DEBUG Enet Initialized?: 1
+21:40:10 DEBUG Starting application...
+21:40:13 DEBUG Hosting server with address 0, port 2
+21:40:13 DEBUG Updating weather...
+21:40:13 WARN Failed to retrieve weather information
+21:40:13 INFO Updating FPS
+21:40:14 INFO Updating FPS
+21:40:15 INFO Updating FPS
+21:40:16 INFO Updating FPS
+21:40:17 INFO Updating FPS
+21:40:18 INFO Updating FPS
+21:40:19 INFO Updating FPS
+21:40:20 INFO Updating FPS
+21:40:21 INFO Updating FPS
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.017838 0.000000 -0.028685
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.123849 0.000000 -0.199158
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.230284 0.000000 -0.370315
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.336053 0.000000 -0.540399
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.442284 0.000000 -0.711226
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.548250 0.000000 -0.881628
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.654199 0.000000 -1.052002
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.760770 0.000000 -1.223376
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.866492 0.000000 -1.393385
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -0.972453 0.000000 -1.563776
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -1.078579 0.000000 -1.734435
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -1.184200 0.000000 -1.904282
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -1.290622 0.000000 -2.075417
+21:40:21 INFO Sent packet with: PlayerMoveEvent 2 -1.315563 0.000000 -2.115523
+21:40:22 INFO Updating FPS
+21:40:23 INFO Updating FPS
+21:40:24 DEBUG Closing Window
+21:40:28 DEBUG Initializing window with size 1280,720
+21:40:28 DEBUG Enet Initialized?: 1
+21:40:28 DEBUG Starting application...
+21:40:31 DEBUG Hosting server with address 0, port 2
+21:40:31 DEBUG Updating weather...
+21:40:31 WARN Failed to retrieve weather information
+21:40:31 INFO Updating FPS
+21:40:32 INFO Updating FPS
+21:40:33 INFO Updating FPS
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -1.338564 0.000000 -2.171303
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -1.451485 0.000000 -2.319939
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -1.642426 0.000000 -2.380892
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -1.840102 0.000000 -2.428388
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -2.037430 0.000000 -2.464739
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -2.236624 0.000000 -2.494355
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -2.436448 0.000000 -2.519783
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -2.636261 0.000000 -2.542053
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -2.835722 0.000000 -2.560760
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -3.036670 0.000000 -2.574722
+21:40:33 INFO Sent packet with: PlayerMoveEvent 2 -3.237372 0.000000 -2.583370
+21:40:34 INFO Updating FPS
+21:40:34 INFO Sent packet with: PlayerMoveEvent 2 -3.257373 0.000000 -2.604578
+21:40:35 DEBUG Closing Window
+21:42:04 DEBUG Initializing window with size 1280,720
+21:42:04 DEBUG Enet Initialized?: 1
+21:42:04 DEBUG Starting application...
+21:42:06 DEBUG Hosting server with address 0, port 2
+21:42:06 DEBUG Updating weather...
+21:42:07 DEBUG Received query: {"coord":{"lon":-97.7428,"lat":30.2681},"weather":[{"id":804,"main":"Clouds","description":"overcast clouds","icon":"04n"}],"base":"stations","main":{"temp":297.2,"feels_like":297.67,"temp_min":294.57,"temp_max":299.16,"pressure":1013,"humidity":77,"sea_level":1013,"grnd_level":988},"visibility":10000,"wind":{"speed":4.12,"deg":160},"clouds":{"all":100},"dt":1761367252,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1761309558,"sunset":1761349840},"timezone":-18000,"id":4671654,"name":"Austin","cod":200}
+21:42:07 INFO >::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+21:42:07 DEBUG Updating weather information in world and shader...
+21:42:07 INFO Azimuth: 305.047813 Altitude: -61.893503
+21:42:07 INFO Sent packet with: WeatherUpdateEvent 804 0
+21:42:07 INFO Updating FPS
+21:42:07 INFO Updating FPS
+21:42:08 INFO Updating FPS
+21:42:08 INFO Sent packet with: PlayerMoveEvent 2 -3.274660 0.000000 -2.465454
+21:42:08 INFO Sent packet with: PlayerMoveEvent 2 -3.298670 0.000000 -2.265422
+21:42:09 INFO Updating FPS
+21:42:09 INFO Sent packet with: PlayerMoveEvent 2 -3.322544 0.000000 -2.066530
+21:42:09 INFO Sent packet with: PlayerMoveEvent 2 -3.346582 0.000000 -1.866262
+21:42:09 INFO Sent packet with: PlayerMoveEvent 2 -3.368660 0.000000 -1.667072
+21:42:09 INFO Sent packet with: PlayerMoveEvent 2 -3.367600 0.000000 -1.466671
+21:42:09 INFO Sent packet with: PlayerMoveEvent 2 -3.333657 0.000000 -1.269300
+21:42:09 INFO Sent packet with: PlayerMoveEvent 2 -3.274469 0.000000 -1.078227
+21:42:09 INFO Sent packet with: PlayerMoveEvent 2 -3.247415 0.000000 -1.002432
+21:42:10 INFO Updating FPS
+21:42:10 INFO Sent packet with: PlayerMoveEvent 2 -3.252458 0.000000 -1.107127
+21:42:11 INFO Updating FPS
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.244950 0.000000 -1.307085
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.247707 0.000000 -1.507370
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.264674 0.000000 -1.707576
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.282147 0.000000 -1.907147
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.298199 0.000000 -2.107272
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.285157 0.000000 -2.307965
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.230483 0.000000 -2.500489
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.148750 0.000000 -2.684710
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -3.056440 0.000000 -2.862797
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -2.962393 0.000000 -3.040202
+21:42:11 INFO Sent packet with: PlayerMoveEvent 2 -2.948368 0.000000 -3.066658
+21:42:12 INFO Updating FPS
+21:42:12 INFO Sent packet with: PlayerMoveEvent 2 -2.939899 0.000000 -3.060397
+21:42:12 INFO Sent packet with: PlayerMoveEvent 2 -2.778093 0.000000 -2.940763
+21:42:12 INFO Sent packet with: PlayerMoveEvent 2 -2.615699 0.000000 -2.820695
+21:42:13 INFO Updating FPS
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -2.451742 0.000000 -2.699472
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -2.289788 0.000000 -2.579727
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -2.128504 0.000000 -2.460479
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -1.930541 0.000000 -2.490143
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -1.732602 0.000000 -2.519803
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -1.534435 0.000000 -2.549497
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -1.394250 0.000000 -2.675466
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -1.274796 0.000000 -2.837027
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -1.154828 0.000000 -2.999286
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -1.035426 0.000000 -3.160779
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -0.915251 0.000000 -3.321993
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -0.781862 0.000000 -3.470853
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -0.621951 0.000000 -3.594964
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -0.442874 0.000000 -3.684640
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -0.251391 0.000000 -3.744546
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 -0.054966 0.000000 -3.783566
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 0.143201 0.000000 -3.818223
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 0.340351 0.000000 -3.852702
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 0.538845 0.000000 -3.887416
+21:42:13 INFO Sent packet with: PlayerMoveEvent 2 0.736649 0.000000 -3.922009
+21:42:14 INFO Updating FPS
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 0.934206 0.000000 -3.956559
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 1.132115 0.000000 -3.991170
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 1.330646 0.000000 -4.025892
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 1.528837 0.000000 -4.060553
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 1.706375 0.000000 -4.005921
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 1.870283 0.000000 -3.890810
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 2.035970 0.000000 -3.774450
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 2.200237 0.000000 -3.659087
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 2.364463 0.000000 -3.543753
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 2.529984 0.000000 -3.431035
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 2.699712 0.000000 -3.324717
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 2.870933 0.000000 -3.220487
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 3.041784 0.000000 -3.114306
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 3.209010 0.000000 -3.003361
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 3.365723 0.000000 -2.879028
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 3.391011 0.000000 -2.689352
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 3.370781 0.000000 -2.488601
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 3.336546 0.000000 -2.291538
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 3.298770 0.000000 -2.093211
+21:42:14 INFO Sent packet with: PlayerMoveEvent 2 3.265193 0.000000 -1.894890
+21:42:15 INFO Updating FPS
+21:42:15 INFO Sent packet with: PlayerMoveEvent 2 3.238020 0.000000 -1.695805
+21:42:15 INFO Sent packet with: PlayerMoveEvent 2 3.211209 0.000000 -1.496716
+21:42:15 INFO Sent packet with: PlayerMoveEvent 2 3.184321 0.000000 -1.297074
+21:42:15 INFO Sent packet with: PlayerMoveEvent 2 3.157080 0.000000 -1.094787
+21:42:15 INFO Sent packet with: PlayerMoveEvent 2 3.130192 0.000000 -0.895123
+21:42:15 INFO Sent packet with: PlayerMoveEvent 2 3.103322 0.000000 -0.695602
+21:42:15 INFO Sent packet with: PlayerMoveEvent 2 3.075620 0.000000 -0.496951
+21:42:15 INFO Sent packet with: PlayerMoveEvent 2 3.048015 0.000000 -0.316087
+21:42:16 INFO Updating FPS
+21:42:17 INFO Updating FPS
+21:42:17 INFO Sent packet with: PlayerMoveEvent 2 3.189091 0.000000 -0.297956
+21:42:18 INFO Updating FPS
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 3.389003 0.000000 -0.276953
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 3.589447 0.000000 -0.269957
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 3.790073 0.000000 -0.278370
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 3.989787 0.000000 -0.298391
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 4.189026 0.000000 -0.324727
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 4.387894 0.000000 -0.354516
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 4.585397 0.000000 -0.387142
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 4.782708 0.000000 -0.422180
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 4.981169 0.000000 -0.458744
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 5.179549 0.000000 -0.495572
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 5.376452 0.000000 -0.531701
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 5.574785 0.000000 -0.567399
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 5.772496 0.000000 -0.602280
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 5.970770 0.000000 -0.636907
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 6.169332 0.000000 -0.671288
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 6.366997 0.000000 -0.705058
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 6.567317 0.000000 -0.737946
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 6.766776 0.000000 -0.767769
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 6.965742 0.000000 -0.792527
+21:42:18 INFO Sent packet with: PlayerMoveEvent 2 7.166338 0.000000 -0.812053
+21:42:19 INFO Updating FPS
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 7.366393 0.000000 -0.828677
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 7.537519 0.000000 -0.842592
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 7.351892 0.000000 -0.812944
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 7.160110 0.000000 -0.804427
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 6.992280 0.000000 -0.917342
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 6.825878 0.000000 -1.030097
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 6.659308 0.000000 -1.145689
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 6.499836 0.000000 -1.267624
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 6.347410 0.000000 -1.400719
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 6.201778 0.000000 -1.537824
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 6.061634 0.000000 -1.680665
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 5.862632 0.000000 -1.690961
+21:42:19 INFO Sent packet with: PlayerMoveEvent 2 5.805487 0.000000 -1.693012
+21:42:20 INFO Updating FPS
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 5.669393 0.000000 -1.661989
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 5.472173 0.000000 -1.620105
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 5.275586 0.000000 -1.579613
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 5.078931 0.000000 -1.539106
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 4.881478 0.000000 -1.498436
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 4.684433 0.000000 -1.457848
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 4.488349 0.000000 -1.417459
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 4.290849 0.000000 -1.376778
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 4.092885 0.000000 -1.336002
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 3.894999 0.000000 -1.294660
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 3.699956 0.000000 -1.249241
+21:42:20 INFO Sent packet with: PlayerMoveEvent 2 3.506649 0.000000 -1.196144
+21:42:21 INFO Updating FPS
+21:42:21 INFO Sent packet with: PlayerMoveEvent 2 3.388467 0.000000 -1.146508
+21:42:21 INFO Sent packet with: PlayerMoveEvent 2 3.201941 0.000000 -1.068696
+21:42:21 INFO Sent packet with: PlayerMoveEvent 2 3.016278 0.000000 -0.992332
+21:42:21 INFO Sent packet with: PlayerMoveEvent 2 2.885988 0.000000 -0.941055
+21:42:22 INFO Updating FPS
+21:42:23 INFO Updating FPS
+21:42:24 INFO Updating FPS
+21:42:25 INFO Updating FPS
+21:42:26 INFO Updating FPS
+21:42:27 DEBUG Closing Window

@@ -92,8 +92,8 @@ void Application::run(Game& game) {
         
         const auto player = game.get_current_player();
         if (player == nullptr) {
-            CRITICAL("Could not find player!");
-            break;
+            WARN("Could not find player! May be waiting on SyncEvent");
+            continue;
         }
 
         player->update(event_buffer_, main_camera, game.get_world(), keybinds, dt);

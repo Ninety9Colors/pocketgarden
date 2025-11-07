@@ -37,7 +37,7 @@ std::unique_ptr<Event> Network::poll_events() {
             break;
         case ENET_EVENT_TYPE_RECEIVE:
             data = std::string((char*)event.packet->data, event.packet->dataLength-1);
-            INFO("Packet of length " + std::to_string(event.packet->dataLength) + " containing {" + data + "} received from " + (char*)event.peer->data);
+            INFO("Packet of length " + std::to_string(event.packet->dataLength) + " containing {" + data + "} received from " + std::to_string(event.peer->address.host));
             split = split_string(data);
             if (split[0] == "IAmHostEvent") {
                 result = std::make_unique<IAmHostEvent>(split[1]);

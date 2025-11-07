@@ -1,0 +1,974 @@
+12:46:41 DEBUG Enet Initialized?: 1
+12:46:41 DEBUG Starting application...
+12:46:45 DEBUG Enet Initialized?: 1
+12:46:45 DEBUG Starting application...
+12:46:48 DEBUG Hosting server with address 0, port 2
+12:46:48 DEBUG Updating weather...
+12:46:48 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.1,"feels_like":305.12,"temp_min":302.6,"temp_max":305.85,"pressure":1008,"humidity":47,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":2.24,"deg":165,"gust":4.92},"clouds":{"all":0},"dt":1762541102,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+12:46:48 INFO lloc>::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+12:46:48 INFO Azimuth: 190.478721 Altitude: 42.583040
+12:46:48 INFO Sent packet with: WeatherUpdateEvent 800 0
+12:46:49 INFO Sent packet with: PlayerMoveEvent 2 -4.538241 0.000000 0.627572
+12:46:49 INFO Sent packet with: PlayerMoveEvent 2 -4.440462 0.000000 0.452507
+12:46:49 INFO Sent packet with: PlayerMoveEvent 2 -4.392451 0.000000 0.270808
+12:46:49 INFO Sent packet with: PlayerMoveEvent 2 -4.447078 0.000000 0.077149
+12:46:49 INFO Sent packet with: PlayerMoveEvent 2 -4.501845 0.000000 -0.117001
+12:46:49 INFO Sent packet with: PlayerMoveEvent 2 -4.556752 0.000000 -0.311643
+12:46:49 INFO Sent packet with: PlayerMoveEvent 2 -4.611084 0.000000 -0.504253
+12:46:50 INFO Sent packet with: PlayerMoveEvent 2 -4.665405 0.000000 -0.696819
+12:46:50 INFO Sent packet with: PlayerMoveEvent 2 -4.695792 0.000000 -0.804541
+12:46:56 DEBUG Connection to server 16777343,2 succeeded
+12:46:56 INFO Sent packet with: ConnectEvent 3
+12:46:56 DEBUG New connection: 16777343, 50801
+12:51:15 DEBUG Initializing window with size 1280,720
+12:51:16 DEBUG Enet Initialized?: 1
+12:51:16 DEBUG Starting application...
+12:51:22 DEBUG Hosting server with address 0, port 2
+12:51:22 DEBUG Updating weather...
+12:51:23 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.1,"feels_like":305.12,"temp_min":302.6,"temp_max":305.85,"pressure":1008,"humidity":47,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":2.24,"deg":165,"gust":4.92},"clouds":{"all":0},"dt":1762541102,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+12:51:23 INFO lloc>::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+12:51:23 DEBUG Updating weather information in world and shader...
+12:51:23 INFO Azimuth: 191.939806 Altitude: 42.390450
+12:51:23 INFO Sent packet with: WeatherUpdateEvent 800 0
+12:51:23 INFO Updating FPS
+12:51:23 INFO Updating FPS
+12:51:23 INFO Sent packet with: PlayerMoveEvent 2 -4.675714 0.000000 0.562883
+12:51:23 INFO Sent packet with: PlayerMoveEvent 2 -4.849305 0.000000 0.463072
+12:51:23 INFO Sent packet with: PlayerMoveEvent 2 -5.024204 0.000000 0.362825
+12:51:23 INFO Sent packet with: PlayerMoveEvent 2 -5.199008 0.000000 0.262631
+12:51:23 INFO Sent packet with: PlayerMoveEvent 2 -5.373250 0.000000 0.162762
+12:51:23 INFO Sent packet with: PlayerMoveEvent 2 -5.461316 0.000000 0.112243
+12:51:24 INFO Updating FPS
+12:51:25 INFO Updating FPS
+12:51:26 INFO Updating FPS
+12:51:27 INFO Updating FPS
+12:51:27 INFO Sent packet with: PlayerMoveEvent 2 -5.521787 0.000000 0.077423
+12:51:27 INFO Sent packet with: PlayerMoveEvent 2 -5.696348 0.000000 -0.023093
+12:51:27 INFO Sent packet with: PlayerMoveEvent 2 -5.871950 0.000000 -0.123677
+12:51:27 INFO Sent packet with: PlayerMoveEvent 2 -6.048653 0.000000 -0.218149
+12:51:28 INFO Updating FPS
+12:51:28 INFO Sent packet with: PlayerMoveEvent 2 -6.232395 0.000000 -0.301530
+12:51:28 INFO Sent packet with: PlayerMoveEvent 2 -6.420673 0.000000 -0.369397
+12:51:28 INFO Sent packet with: PlayerMoveEvent 2 -6.610030 0.000000 -0.427244
+12:51:29 INFO Updating FPS
+12:51:30 INFO Updating FPS
+12:51:31 INFO Updating FPS
+12:51:32 INFO Updating FPS
+12:51:33 INFO Updating FPS
+12:51:34 INFO Updating FPS
+12:51:35 INFO Updating FPS
+12:51:35 DEBUG New connection: 16777343, 51026
+12:56:28 DEBUG Initializing window with size 1280,720
+12:56:28 DEBUG Initializing window with size 1280,720
+12:56:28 DEBUG Enet Initialized?: 1
+12:56:28 DEBUG Starting application...
+12:56:28 DEBUG Enet Initialized?: 1
+12:56:28 DEBUG Starting application...
+12:56:34 DEBUG Hosting server with address 0, port 2
+12:56:34 DEBUG Updating weather...
+12:56:34 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.23,"feels_like":305.51,"temp_min":302.75,"temp_max":306.07,"pressure":1008,"humidity":48,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":3.58,"deg":137,"gust":3.58},"clouds":{"all":0},"dt":1762541706,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+12:56:34 INFO lloc>::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+12:56:34 DEBUG Updating weather information in world and shader...
+12:56:34 INFO Azimuth: 193.589970 Altitude: 42.141334
+12:56:34 INFO Sent packet with: WeatherUpdateEvent 800 0
+12:56:34 INFO Updating FPS
+12:56:35 INFO Updating FPS
+12:56:35 INFO Sent packet with: PlayerMoveEvent 2 -4.564459 0.000000 0.622658
+12:56:35 INFO Sent packet with: PlayerMoveEvent 2 -4.716362 0.000000 0.490906
+12:56:35 INFO Sent packet with: PlayerMoveEvent 2 -4.872728 0.000000 0.363846
+12:56:35 INFO Sent packet with: PlayerMoveEvent 2 -5.033762 0.000000 0.244851
+12:56:35 INFO Sent packet with: PlayerMoveEvent 2 -5.200935 0.000000 0.131513
+12:56:35 INFO Sent packet with: PlayerMoveEvent 2 -5.312036 0.000000 0.061025
+12:56:36 INFO Updating FPS
+12:56:37 INFO Updating FPS
+12:56:38 INFO Updating FPS
+12:56:39 INFO Updating FPS
+12:56:40 INFO Updating FPS
+12:56:41 INFO Updating FPS
+12:56:42 INFO Updating FPS
+12:56:43 INFO Updating FPS
+12:56:44 INFO Updating FPS
+12:56:45 INFO Updating FPS
+12:56:46 INFO Updating FPS
+12:56:46 WARN Connection to server 2350987579,2 failed
+12:56:47 INFO Updating FPS
+12:56:48 INFO Updating FPS
+12:56:49 INFO Updating FPS
+12:56:50 INFO Updating FPS
+12:56:51 INFO Updating FPS
+12:56:52 INFO Updating FPS
+12:56:53 INFO Updating FPS
+12:56:54 INFO Updating FPS
+12:56:55 INFO Updating FPS
+12:56:56 INFO Updating FPS
+12:56:57 INFO Updating FPS
+12:56:58 INFO Updating FPS
+12:56:59 INFO Updating FPS
+12:56:59 DEBUG Connection to server 16777343,2 succeeded
+12:56:59 INFO Sent packet with: ConnectEvent 3
+12:56:59 CRITICAL Could not find player!
+12:56:59 DEBUG New connection: 16777343, 62833
+12:57:02 DEBUG Closing Window
+12:58:13 DEBUG Initializing window with size 1280,720
+12:58:13 DEBUG Enet Initialized?: 1
+12:58:13 DEBUG Starting application...
+12:58:18 DEBUG Initializing window with size 1280,720
+12:58:19 DEBUG Enet Initialized?: 1
+12:58:19 DEBUG Starting application...
+12:58:25 DEBUG Hosting server with address 0, port 2
+12:58:25 DEBUG Updating weather...
+12:58:25 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.23,"feels_like":305.51,"temp_min":302.75,"temp_max":306.07,"pressure":1008,"humidity":48,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":3.58,"deg":137,"gust":3.58},"clouds":{"all":0},"dt":1762541706,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+12:58:25 INFO lloc>::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+12:58:25 DEBUG Updating weather information in world and shader...
+12:58:25 INFO Azimuth: 194.173263 Altitude: 42.045137
+12:58:25 INFO Sent packet with: WeatherUpdateEvent 800 0
+12:58:25 INFO Updating FPS
+12:58:26 INFO Updating FPS
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.562862 0.000000 0.623679
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.635594 0.000000 0.452112
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.640248 0.000000 0.251005
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.643795 0.000000 0.050541
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.651907 0.000000 -0.150373
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.664313 0.000000 -0.350208
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.681424 0.000000 -0.550010
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.702110 0.000000 -0.750506
+12:58:26 INFO Sent packet with: PlayerMoveEvent 2 -4.698775 0.000000 -0.808344
+12:58:27 INFO Updating FPS
+12:58:28 INFO Updating FPS
+12:58:29 INFO Updating FPS
+12:58:30 INFO Updating FPS
+12:58:31 INFO Updating FPS
+12:58:32 INFO Updating FPS
+12:58:33 INFO Updating FPS
+12:58:34 INFO Updating FPS
+12:58:35 INFO Updating FPS
+12:58:36 INFO Updating FPS
+12:58:37 INFO Updating FPS
+12:58:38 INFO Updating FPS
+12:58:39 INFO Updating FPS
+12:58:40 INFO Updating FPS
+12:58:41 INFO Updating FPS
+12:58:42 INFO Updating FPS
+12:58:43 INFO Updating FPS
+12:58:44 INFO Updating FPS
+12:58:45 INFO Updating FPS
+12:58:46 INFO Updating FPS
+12:58:47 INFO Updating FPS
+12:58:48 INFO Updating FPS
+12:58:49 INFO Updating FPS
+12:58:50 INFO Updating FPS
+12:58:51 INFO Updating FPS
+12:58:52 INFO Updating FPS
+12:58:53 INFO Updating FPS
+12:58:54 INFO Updating FPS
+12:58:55 INFO Updating FPS
+12:58:56 INFO Updating FPS
+12:58:57 INFO Updating FPS
+12:58:58 INFO Updating FPS
+12:58:59 INFO Updating FPS
+12:59:00 INFO Updating FPS
+12:59:01 INFO Updating FPS
+12:59:02 INFO Updating FPS
+12:59:03 INFO Updating FPS
+12:59:04 INFO Updating FPS
+12:59:05 INFO Updating FPS
+12:59:06 INFO Updating FPS
+12:59:07 INFO Updating FPS
+12:59:08 INFO Updating FPS
+12:59:09 INFO Updating FPS
+12:59:10 INFO Updating FPS
+12:59:11 INFO Updating FPS
+12:59:12 INFO Updating FPS
+12:59:13 INFO Updating FPS
+12:59:14 INFO Updating FPS
+12:59:15 INFO Updating FPS
+12:59:16 INFO Updating FPS
+12:59:17 INFO Updating FPS
+12:59:18 INFO Updating FPS
+12:59:19 INFO Updating FPS
+12:59:20 INFO Updating FPS
+12:59:21 INFO Updating FPS
+12:59:22 INFO Updating FPS
+12:59:23 INFO Updating FPS
+12:59:24 INFO Updating FPS
+12:59:25 INFO Updating FPS
+12:59:26 INFO Updating FPS
+12:59:27 INFO Updating FPS
+12:59:28 INFO Updating FPS
+12:59:29 INFO Updating FPS
+12:59:30 INFO Updating FPS
+12:59:31 INFO Updating FPS
+12:59:32 INFO Updating FPS
+12:59:33 INFO Updating FPS
+12:59:34 INFO Updating FPS
+12:59:35 INFO Updating FPS
+12:59:36 INFO Updating FPS
+12:59:37 INFO Updating FPS
+12:59:38 INFO Updating FPS
+12:59:39 INFO Updating FPS
+12:59:40 INFO Updating FPS
+12:59:41 INFO Updating FPS
+12:59:42 INFO Updating FPS
+12:59:43 INFO Updating FPS
+12:59:44 INFO Updating FPS
+12:59:45 INFO Updating FPS
+12:59:46 INFO Updating FPS
+12:59:47 INFO Updating FPS
+12:59:47 DEBUG Closing Window
+12:59:48 INFO Updating FPS
+12:59:49 INFO Updating FPS
+12:59:50 DEBUG Closing Window
+13:01:13 DEBUG Initializing window with size 1280,720
+13:01:13 DEBUG Enet Initialized?: 1
+13:01:13 DEBUG Starting application...
+13:01:17 DEBUG Initializing window with size 1280,720
+13:01:18 DEBUG Enet Initialized?: 1
+13:01:18 DEBUG Starting application...
+13:01:21 DEBUG Hosting server with address 0, port 2
+13:01:21 DEBUG Updating weather...
+13:01:21 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.23,"feels_like":305.51,"temp_min":302.75,"temp_max":306.07,"pressure":1008,"humidity":48,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":3.58,"deg":137,"gust":3.58},"clouds":{"all":0},"dt":1762541706,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+13:01:21 INFO lloc>::value_type& std::__cxx11::match_results<_Bi_iter, _Alloc>::operator[](size_type) const [with _Bi_iter = __gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > > >; const_reference = const std::__cxx11::sub_match<__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> > >&; size_type = long long unsigned int]
+13:01:21 DEBUG Updating weather information in world and shader...
+13:01:21 INFO Azimuth: 195.093782 Altitude: 41.884552
+13:01:21 INFO Sent packet with: WeatherUpdateEvent 800 0
+13:01:21 INFO Updating FPS
+13:01:22 INFO Updating FPS
+13:01:23 INFO Updating FPS
+13:01:24 INFO Updating FPS
+13:01:25 INFO Updating FPS
+13:01:26 INFO Updating FPS
+13:01:27 INFO Updating FPS
+13:01:28 INFO Updating FPS
+13:01:29 INFO Updating FPS
+13:01:30 INFO Updating FPS
+13:01:31 INFO Updating FPS
+13:01:32 INFO Updating FPS
+13:01:33 INFO Updating FPS
+13:01:38 DEBUG Closing Window
+13:01:39 DEBUG Closing Window
+13:05:19 DEBUG Initializing window with size 1280,720
+13:05:19 DEBUG Initializing window with size 1280,720
+13:05:19 DEBUG Enet Initialized?: 1
+13:05:19 DEBUG Starting application...
+13:05:19 DEBUG Enet Initialized?: 1
+13:05:19 DEBUG Starting application...
+13:05:27 DEBUG Hosting server with address 0, port 2
+13:05:27 DEBUG Updating weather...
+13:05:27 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.23,"feels_like":305.51,"temp_min":302.75,"temp_max":306.07,"pressure":1008,"humidity":48,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":3.58,"deg":137,"gust":3.58},"clouds":{"all":0},"dt":1762541706,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+13:05:27 INFO Set weather id to: 800
+13:05:27 DEBUG Updating weather information in world and shader...
+13:05:27 INFO Azimuth: 196.371033 Altitude: 41.643712
+13:05:27 INFO Sent packet with: WeatherUpdateEvent 800 0
+13:05:27 INFO Updating FPS
+13:05:28 INFO Updating FPS
+13:05:29 INFO Updating FPS
+13:05:30 INFO Updating FPS
+13:05:31 INFO Updating FPS
+13:05:32 INFO Updating FPS
+13:05:33 INFO Updating FPS
+13:05:34 INFO Updating FPS
+13:05:35 INFO Updating FPS
+13:05:36 INFO Updating FPS
+13:05:37 INFO Updating FPS
+13:05:38 INFO Updating FPS
+13:05:39 INFO Updating FPS
+13:05:40 INFO Updating FPS
+13:05:41 INFO Updating FPS
+13:05:42 INFO Updating FPS
+13:05:43 INFO Updating FPS
+13:05:44 INFO Updating FPS
+13:05:45 INFO Updating FPS
+13:05:46 INFO Updating FPS
+13:05:46 DEBUG Connection to server 16777343,2 succeeded
+13:05:46 INFO Sent packet with: ConnectEvent 3
+13:05:46 CRITICAL Could not find player!
+13:05:46 DEBUG New connection: 16777343, 65189
+13:05:49 DEBUG Closing Window
+13:05:51 DEBUG Initializing window with size 1280,720
+13:05:51 DEBUG Enet Initialized?: 1
+13:05:51 DEBUG Starting application...
+13:05:55 DEBUG Initializing window with size 1280,720
+13:05:55 DEBUG Enet Initialized?: 1
+13:05:55 DEBUG Starting application...
+13:06:01 DEBUG Hosting server with address 0, port 2
+13:06:01 DEBUG Updating weather...
+13:06:01 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.23,"feels_like":305.51,"temp_min":302.75,"temp_max":306.07,"pressure":1008,"humidity":48,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":3.58,"deg":137,"gust":3.58},"clouds":{"all":0},"dt":1762541706,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+13:06:01 INFO Set weather id to: 800
+13:06:01 DEBUG Updating weather information in world and shader...
+13:06:01 INFO Azimuth: 196.546668 Altitude: 41.608936
+13:06:01 INFO Sent packet with: WeatherUpdateEvent 800 0
+13:06:01 INFO Updating FPS
+13:06:02 INFO Updating FPS
+13:06:02 INFO Sent packet with: PlayerMoveEvent 3 1.337916 0.000000 -2.492556
+13:06:02 INFO Sent packet with: PlayerMoveEvent 3 1.157438 0.000000 -2.581554
+13:06:02 INFO Sent packet with: PlayerMoveEvent 3 0.971614 0.000000 -2.658924
+13:06:02 INFO Sent packet with: PlayerMoveEvent 3 0.784750 0.000000 -2.732035
+13:06:02 INFO Sent packet with: PlayerMoveEvent 3 0.596311 0.000000 -2.804547
+13:06:02 INFO Sent packet with: PlayerMoveEvent 3 0.408407 0.000000 -2.876608
+13:06:02 INFO Sent packet with: PlayerMoveEvent 3 0.220276 0.000000 -2.948594
+13:06:02 INFO Sent packet with: PlayerMoveEvent 3 0.033048 0.000000 -3.020238
+13:06:03 INFO Updating FPS
+13:06:03 INFO Sent packet with: PlayerMoveEvent 3 -0.159349 0.000000 -3.093858
+13:06:03 INFO Sent packet with: PlayerMoveEvent 3 -0.346792 0.000000 -3.165583
+13:06:03 INFO Sent packet with: PlayerMoveEvent 3 -0.398533 0.000000 -3.185381
+13:06:04 INFO Updating FPS
+13:06:05 INFO Updating FPS
+13:06:06 INFO Updating FPS
+13:06:07 INFO Updating FPS
+13:06:08 INFO Updating FPS
+13:06:09 INFO Updating FPS
+13:06:10 INFO Updating FPS
+13:06:11 INFO Updating FPS
+13:06:12 INFO Updating FPS
+13:06:13 INFO Updating FPS
+13:06:13 DEBUG Connection to server 16777343,2 succeeded
+13:06:13 INFO Sent packet with: ConnectEvent 2
+13:06:13 DEBUG New connection: 16777343, 65190
+13:06:13 CRITICAL Could not find player!
+13:06:16 DEBUG Closing Window
+13:07:54 DEBUG Initializing window with size 1280,720
+13:07:54 DEBUG Initializing window with size 1280,720
+13:07:55 DEBUG Enet Initialized?: 1
+13:07:55 DEBUG Starting application...
+13:07:55 DEBUG Enet Initialized?: 1
+13:07:55 DEBUG Starting application...
+13:08:10 DEBUG Hosting server with address 0, port 2
+13:08:10 DEBUG Updating weather...
+13:08:10 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.73,"feels_like":305.35,"temp_min":303.23,"temp_max":306.41,"pressure":1008,"humidity":43,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":6.17,"deg":190,"gust":9.26},"clouds":{"all":0},"dt":1762542306,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+13:08:10 INFO Set weather id to: 800
+13:08:10 DEBUG Updating weather information in world and shader...
+13:08:10 INFO Azimuth: 197.211002 Altitude: 41.473732
+13:08:10 INFO Sent packet with: WeatherUpdateEvent 800 0
+13:08:10 INFO Updating FPS
+13:08:11 INFO Updating FPS
+13:08:11 INFO Sent packet with: PlayerMoveEvent 2 -4.790932 0.000000 -0.928986
+13:08:11 INFO Sent packet with: PlayerMoveEvent 2 -4.912699 0.000000 -1.088386
+13:08:11 INFO Sent packet with: PlayerMoveEvent 2 -5.035686 0.000000 -1.249385
+13:08:11 INFO Sent packet with: PlayerMoveEvent 2 -5.157199 0.000000 -1.408452
+13:08:11 INFO Sent packet with: PlayerMoveEvent 2 -5.279095 0.000000 -1.568023
+13:08:11 INFO Sent packet with: PlayerMoveEvent 2 -5.330762 0.000000 -1.635657
+13:08:12 INFO Updating FPS
+13:08:13 INFO Updating FPS
+13:08:14 INFO Updating FPS
+13:08:15 INFO Updating FPS
+13:08:16 INFO Updating FPS
+13:08:17 INFO Updating FPS
+13:08:18 INFO Updating FPS
+13:08:19 INFO Updating FPS
+13:08:20 INFO Updating FPS
+13:08:21 INFO Updating FPS
+13:08:22 INFO Updating FPS
+13:08:23 INFO Updating FPS
+13:08:23 DEBUG Connection to server 16777343,2 succeeded
+13:08:23 INFO Sent packet with: ConnectEvent 3
+13:08:23 CRITICAL Could not find player!
+13:08:23 DEBUG New connection: 16777343, 60782
+13:08:23 INFO Packet of length 15 containing {ConnectEvent 3} received from 16777343
+13:08:23 DEBUG Disconnection: 16777343,60782, data: 3
+13:08:23 INFO Sent packet with: DisconnectEvent 3
+13:08:23 DEBUG Closing Window
+13:08:24 INFO Updating FPS
+13:08:25 INFO Updating FPS
+13:08:26 INFO Updating FPS
+13:08:27 INFO Updating FPS
+13:08:28 INFO Updating FPS
+13:08:29 INFO Updating FPS
+13:08:30 INFO Updating FPS
+13:08:31 INFO Updating FPS
+13:08:32 INFO Updating FPS
+13:08:33 INFO Updating FPS
+13:08:34 INFO Updating FPS
+13:08:35 INFO Updating FPS
+13:08:36 INFO Updating FPS
+13:08:37 INFO Updating FPS
+13:08:38 INFO Updating FPS
+13:08:39 INFO Updating FPS
+13:08:40 INFO Updating FPS
+13:08:41 INFO Updating FPS
+13:08:42 INFO Updating FPS
+13:08:43 INFO Updating FPS
+13:08:44 INFO Updating FPS
+13:08:45 INFO Updating FPS
+13:08:46 INFO Updating FPS
+13:08:47 INFO Updating FPS
+13:08:47 DEBUG Initializing window with size 1280,720
+13:08:48 INFO Updating FPS
+13:08:48 DEBUG Enet Initialized?: 1
+13:08:48 DEBUG Starting application...
+13:08:49 INFO Updating FPS
+13:08:50 INFO Updating FPS
+13:08:51 INFO Updating FPS
+13:08:52 INFO Updating FPS
+13:08:53 INFO Updating FPS
+13:08:53 DEBUG Connection to server 16777343,2 succeeded
+13:08:53 INFO Sent packet with: ConnectEvent 3
+13:08:53 CRITICAL Could not find player!
+13:08:53 DEBUG New connection: 16777343, 55598
+13:08:53 INFO Packet of length 15 containing {ConnectEvent 3} received from 16777343
+13:08:53 DEBUG Disconnection: 16777343,55598, data: 3
+13:08:53 INFO Sent packet with: DisconnectEvent 3
+13:08:53 DEBUG Closing Window
+13:08:54 INFO Updating FPS
+13:08:55 INFO Updating FPS
+13:08:56 INFO Updating FPS
+13:08:57 INFO Updating FPS
+13:08:58 INFO Updating FPS
+13:09:00 DEBUG Closing Window
+13:10:17 DEBUG Initializing window with size 1280,720
+13:10:17 DEBUG Initializing window with size 1280,720
+13:10:17 DEBUG Enet Initialized?: 1
+13:10:17 DEBUG Starting application...
+13:10:17 DEBUG Enet Initialized?: 1
+13:10:17 DEBUG Starting application...
+13:10:23 DEBUG Hosting server with address 0, port 2
+13:10:23 DEBUG Updating weather...
+13:10:23 DEBUG Received query: {"coord":{"lon":-97.7431,"lat":30.2672},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":304.73,"feels_like":305.35,"temp_min":303.23,"temp_max":306.41,"pressure":1008,"humidity":43,"sea_level":1008,"grnd_level":983},"visibility":10000,"wind":{"speed":6.17,"deg":190,"gust":9.26},"clouds":{"all":0},"dt":1762542306,"sys":{"type":2,"id":2105175,"country":"US","sunrise":1762519812,"sunset":1762558751},"timezone":-21600,"id":4671654,"name":"Austin","cod":200}
+13:10:23 INFO Set weather id to: 800
+13:10:23 DEBUG Updating weather information in world and shader...
+13:10:23 INFO Azimuth: 197.892472 Altitude: 41.328969
+13:10:23 INFO Sent packet with: WeatherUpdateEvent 800 0
+13:10:23 INFO Updating FPS
+13:10:24 INFO Updating FPS
+13:10:25 INFO Updating FPS
+13:10:26 INFO Updating FPS
+13:10:27 INFO Updating FPS
+13:10:28 INFO Updating FPS
+13:10:29 INFO Updating FPS
+13:10:30 INFO Updating FPS
+13:10:31 INFO Updating FPS
+13:10:32 INFO Updating FPS
+13:10:32 DEBUG Connection to server 16777343,2 succeeded
+13:10:32 INFO Sent packet with: ConnectEvent 3
+13:10:32 WARN Could not find player! May be waiting on SyncEvent
+13:10:32 WARN Could not find player! May be waiting on SyncEvent
+13:10:32 DEBUG New connection: 16777343, 62144
+13:10:32 WARN Could not find player! May be waiting on SyncEvent
+13:10:32 WARN Could not find player! May be waiting on SyncEvent
+ived from 16777343
+13:10:32 WARN Could not find player! May be waiting on SyncEvent
+13:10:32 INFO Packet of length 2835 containing {SyncEvent World 7 ((1 (Cube 7.981651 0.218239 -2.342320 1.000000 1.000000 1.000000 1.000000 230 41 55 255 0.000000 0.000000 0.000000 1.000000))(2 (LilyFlower 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 479361026 (ParameterMap ((PetalPitchLower -90.000000 35.000000 80.000000)(PetalPitchUpper -90.000000 35.000000 80.000000)))(TaperedPetal 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 2828156292 (ParameterMap ((BaseColor 8.376617 0.581039 0.331516)(BorderColor 334.344513 0.354630 0.405196)(BorderWidth 0.000000 0.850388 3.000000)(ConcaveBoolean 0.000000 0.000000 1.000000)(CreaseBoolean 0.000000 0.000000 1.000000)(Curl 1.500000 2.268852 3.000000)(Curvature 0.100000 0.218533 0.350000)(FreckleAmount 0.000000 0.563668 0.900000)(FreckleCentrality 1.000000 2.438236 4.000000)(FreckleColor 348.899261 0.401963 0.783421)(FreckleCoverage 0.000000 0.577801 0.900000)(FreckleSize 0.100000 1.843094 3.000000)(GradientColor 305.369995 0.635091 0.719927)(GradientWidth 0.000000 1.834435 3.000000)(Height 0.100000 0.282802 0.500000)(Length 0.100000 0.404142 1.000000)(Sharpness 0.500000 0.756401 1.000000)(StripeColor 352.181458 0.553112 0.632507)(StripeWidth 0.000000 0.206428 0.250000)(Width 0.100000 0.179318 0.250000))))(TaperedPetal 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 3561278964 (ParameterMap ((BaseColor 287.692596 0.469164 0.561431)(BorderColor 18.465393 0.701845 0.670849)(BorderWidth 0.000000 0.575513 3.000000)(ConcaveBoolean 0.000000 0.000000 1.000000)(CreaseBoolean 0.000000 0.000000 1.000000)(Curl 1.500000 2.278383 3.000000)(Curvature 0.100000 0.198982 0.350000)(FreckleAmount 0.000000 0.234478 0.900000)(FreckleCentrality 1.000000 2.356212 4.000000)(FreckleColor 348.692261 0.527754 0.610844)(FreckleCoverage 0.000000 0.395313 0.900000)(FreckleSize 0.100000 0.672873 3.000000)(GradientColor 42.955414 0.315992 0.481608)(GradientWidth 0.000000 1.901838 3.000000)(Height 0.100000 0.312419 0.500000)(Length 0.100000 0.805714 1.000000)(Sharpness 0.500000 0.759567 1.000000)(StripeColor 337.174713 0.379555 0.318916)(StripeWidth 0.000000 0.091091 0.250000)(Width 0.100000 0.206579 0.250000))))))(4 (SunTool 0.000000 2.000000 3.000000 0 1.000000))(5 (RotateTool 0.000000 2.000000 4.000000 1.570796 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000))(6 (MoveTool -3.561113 0.000000 0.922349 20.500000 1.000000 0.000000 0.000000 0.000000 1.000000)))((Player 2 -5.330762 0.000000 -1.635657 1 (null_item)((Cube 0.000000 1.000000 0.000000 0.500000 0.500000 0.500000 1.000000 255 109 194 255 0.000000 0.000000 0.000000 1.000000)))(Player 3 1.462522 0.000000 -2.420511 1 (null_item)((Cube 0.000000 1.000000 0.000000 0.500000 0.500000 0.500000 1.000000 255 109 194 255 0.000000 0.000000 0.000000 1.000000)))) 30.267200 -97.743103} received from 16777343
+13:10:32 INFO Updating FPS
+13:10:32 INFO Packet of length 25 containing {WeatherUpdateEvent 800 0} received from 16777343
+13:10:32 INFO Azimuth: 197.938457 Altitude: 41.318977
+13:10:32 INFO Packet of length 15 containing {IAmHostEvent 2} received from 16777343
+13:10:33 INFO Updating FPS
+13:10:33 INFO Updating FPS
+13:10:33 INFO Sent packet with: PlayerMoveEvent 3 1.461131 0.000000 -2.233901
+13:10:33 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.461131 0.000000 -2.233901} received from 16777343
+13:10:33 INFO Sent packet with: PlayerMoveEvent 3 1.459636 0.000000 -2.033459
+13:10:33 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.459636 0.000000 -2.033459} received from 16777343
+13:10:33 INFO Sent packet with: PlayerMoveEvent 3 1.458161 0.000000 -1.833175
+13:10:33 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.458161 0.000000 -1.833175} received from 16777343
+13:10:34 INFO Updating FPS
+13:10:34 INFO Updating FPS
+13:10:34 INFO Sent packet with: PlayerMoveEvent 3 1.457179 0.000000 -1.681062
+13:10:34 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.457179 0.000000 -1.681062} received from 16777343
+13:10:35 INFO Updating FPS
+13:10:35 INFO Updating FPS
+13:10:36 INFO Updating FPS
+13:10:36 INFO Updating FPS
+13:10:36 INFO Sent packet with: PlayerMoveEvent 3 1.481593 0.000000 -1.756943
+13:10:36 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.481593 0.000000 -1.756943} received from 16777343
+13:10:36 INFO Sent packet with: PlayerMoveEvent 3 1.543097 0.000000 -1.947854
+13:10:36 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.543097 0.000000 -1.947854} received from 16777343
+13:10:36 INFO Sent packet with: PlayerMoveEvent 3 1.604449 0.000000 -2.138293
+13:10:36 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.604449 0.000000 -2.138293} received from 16777343
+13:10:36 INFO Sent packet with: PlayerMoveEvent 3 1.529873 0.000000 -2.317938
+13:10:36 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.529873 0.000000 -2.317938} received from 16777343
+13:10:36 INFO Sent packet with: PlayerMoveEvent 3 1.438554 0.000000 -2.496058
+13:10:36 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.438554 0.000000 -2.496058} received from 16777343
+13:10:36 INFO Sent packet with: PlayerMoveEvent 3 1.473239 0.000000 -2.684296
+13:10:36 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.473239 0.000000 -2.684296} received from 16777343
+13:10:36 INFO Sent packet with: PlayerMoveEvent 3 1.515061 0.000000 -2.814116
+13:10:36 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.515061 0.000000 -2.814116} received from 16777343
+13:10:37 INFO Updating FPS
+13:10:37 INFO Updating FPS
+13:10:38 INFO Updating FPS
+13:10:38 INFO Updating FPS
+13:10:39 INFO Updating FPS
+13:10:39 INFO Updating FPS
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 1.581557 0.000000 -2.655137
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.581557 0.000000 -2.655137} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 1.578201 0.000000 -2.469541
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.578201 0.000000 -2.469541} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 1.512807 0.000000 -2.279831
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.512807 0.000000 -2.279831} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 1.453686 0.000000 -2.088133
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.453686 0.000000 -2.088133} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 1.395536 0.000000 -1.895463
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.395536 0.000000 -1.895463} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 1.259707 0.000000 -1.767566
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.259707 0.000000 -1.767566} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 1.083191 0.000000 -1.672930
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.083191 0.000000 -1.672930} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 0.906228 0.000000 -1.577876
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.906228 0.000000 -1.577876} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 0.729324 0.000000 -1.483076
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.729324 0.000000 -1.483076} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 0.552473 0.000000 -1.388488
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.552473 0.000000 -1.388488} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 0.375716 0.000000 -1.294139
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.375716 0.000000 -1.294139} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 0.198185 0.000000 -1.199187
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.198185 0.000000 -1.199187} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 0.021424 0.000000 -1.104470
+13:10:39 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.021424 0.000000 -1.104470} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 -0.155568 0.000000 -1.009189
+13:10:39 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.155568 0.000000 -1.009189} received from 16777343
+13:10:39 INFO Sent packet with: PlayerMoveEvent 3 -0.331744 0.000000 -0.913720
+13:10:39 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.331744 0.000000 -0.913720} received from 16777343
+13:10:40 INFO Updating FPS
+13:10:40 INFO Updating FPS
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.508378 0.000000 -0.817085
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.508378 0.000000 -0.817085} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.683527 0.000000 -0.720416
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.683527 0.000000 -0.720416} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.859184 0.000000 -0.622981
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.859184 0.000000 -0.622981} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -1.034768 0.000000 -0.525183
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -1.034768 0.000000 -0.525183} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -1.210679 0.000000 -0.426844
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -1.210679 0.000000 -0.426844} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -1.385894 0.000000 -0.328371
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -1.385894 0.000000 -0.328371} received from 16777343
+13:10:40 INFO Sent packet with: ItemPickupEvent 3 (MoveTool 0.000000 0.000000 0.000000 20.500000 1.000000 0.000000 0.000000 0.000000 1.000000)
+13:10:40 INFO Sent packet with: ObjectRemoveEvent 3 6
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -1.538572 0.000000 -0.242076
+13:10:40 INFO Packet of length 111 containing {ItemPickupEvent 3 (MoveTool 0.000000 0.000000 0.000000 20.500000 1.000000 0.000000 0.000000 0.000000 1.000000)} received from 16777343
+13:10:40 INFO Packet of length 22 containing {ObjectRemoveEvent 3 6} received from 16777343
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -1.538572 0.000000 -0.242076} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -1.529032 0.000000 -0.247490
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -1.529032 0.000000 -0.247490} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -1.353666 0.000000 -0.347000
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -1.353666 0.000000 -0.347000} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -1.179072 0.000000 -0.446073
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -1.179072 0.000000 -0.446073} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -1.004858 0.000000 -0.544929
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -1.004858 0.000000 -0.544929} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.838305 0.000000 -0.658112
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.838305 0.000000 -0.658112} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.685948 0.000000 -0.787899
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.685948 0.000000 -0.787899} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.543913 0.000000 -0.930786
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.543913 0.000000 -0.930786} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.410734 0.000000 -1.081803
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.410734 0.000000 -1.081803} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.284163 0.000000 -1.238378
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.284163 0.000000 -1.238378} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 -0.113089 0.000000 -1.316128
+13:10:40 INFO Packet of length 47 containing {PlayerMoveEvent 3 -0.113089 0.000000 -1.316128} received from 16777343
+13:10:40 INFO Sent packet with: PlayerMoveEvent 3 0.084668 0.000000 -1.357728
+13:10:40 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.084668 0.000000 -1.357728} received from 16777343
+13:10:41 INFO Updating FPS
+13:10:41 INFO Updating FPS
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 0.279546 0.000000 -1.404786
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.279546 0.000000 -1.404786} received from 16777343
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 0.476504 0.000000 -1.456255
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.476504 0.000000 -1.456255} received from 16777343
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 0.670459 0.000000 -1.508541
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.670459 0.000000 -1.508541} received from 16777343
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 0.865806 0.000000 -1.561696
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.865806 0.000000 -1.561696} received from 16777343
+13:10:41 INFO Hitting object LilyFlower 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 479361026 (ParameterMap ((PetalPitchLower -90.000000 35.000000 80.000000)(PetalPitchUpper -90.000000 35.000000 80.000000)))(TaperedPetal 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 2828156292 (ParameterMap ((BaseColor 8.376617 0.581039 0.331516)(BorderColor 334.344513 0.354630 0.405196)(BorderWidth 0.000000 0.850388 3.000000)(ConcaveBoolean 0.000000 0.000000 1.000000)(CreaseBoolean 0.000000 0.000000 1.000000)(Curl 1.500000 2.268852 3.000000)(Curvature 0.100000 0.218533 0.350000)(FreckleAmount 0.000000 0.563668 0.900000)(FreckleCentrality 1.000000 2.438236 4.000000)(FreckleColor 348.899261 0.401963 0.783421)(FreckleCoverage 0.000000 0.577801 0.900000)(FreckleSize 0.100000 1.843094 3.000000)(GradientColor 305.369995 0.635091 0.719927)(GradientWidth 0.000000 1.834435 3.000000)(Height 0.100000 0.282802 0.500000)(Length 0.100000 0.404142 1.000000)(Sharpness 0.500000 0.756401 1.000000)(StripeColor 352.181458 0.553112 0.632507)(StripeWidth 0.000000 0.206428 0.250000)(Width 0.100000 0.179318 0.250000))))(TaperedPetal 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 3561278964 (ParameterMap ((BaseColor 287.692596 0.469164 0.561431)(BorderColor 18.465393 0.701845 0.670849)(BorderWidth 0.000000 0.575513 3.000000)(ConcaveBoolean 0.000000 0.000000 1.000000)(CreaseBoolean 0.000000 0.000000 1.000000)(Curl 1.500000 2.278383 3.000000)(Curvature 0.100000 0.198982 0.350000)(FreckleAmount 0.000000 0.234478 0.900000)(FreckleCentrality 1.000000 2.356212 4.000000)(FreckleColor 348.692261 0.527754 0.610844)(FreckleCoverage 0.000000 0.395313 0.900000)(FreckleSize 0.100000 0.672873 3.000000)(GradientColor 42.955414 0.315992 0.481608)(GradientWidth 0.000000 1.901838 3.000000)(Height 0.100000 0.312419 0.500000)(Length 0.100000 0.805714 1.000000)(Sharpness 0.500000 0.759567 1.000000)(StripeColor 337.174713 0.379555 0.318916)(StripeWidth 0.000000 0.091091 0.250000)(Width 0.100000 0.206579 0.250000))))
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.582556 0.000000 1.020798)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 0.993646 0.000000 -1.699304
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -0.582556 0.000000 1.020798)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 0.993646 0.000000 -1.699304} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -1.341063 0.000000 2.349946)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.093495 0.000000 -1.873832
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -1.341063 0.000000 2.349946)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.093495 0.000000 -1.873832} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -2.016747 0.000000 3.534002)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.193238 0.000000 -2.048173
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -2.016747 0.000000 3.534002)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.193238 0.000000 -2.048173} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -2.617641 0.000000 4.587043)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.292865 0.000000 -2.222311
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -2.617641 0.000000 4.587043)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.292865 0.000000 -2.222311} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -3.150402 0.000000 5.520724)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.392244 0.000000 -2.396016
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -3.150402 0.000000 5.520724)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.392244 0.000000 -2.396016} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -3.623804 0.000000 6.350421)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.491812 0.000000 -2.570051
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -3.623804 0.000000 6.350421)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.491812 0.000000 -2.570051} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -4.043214 0.000000 7.085535)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.591555 0.000000 -2.744393
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -4.043214 0.000000 7.085535)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.591555 0.000000 -2.744393} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -4.413178 0.000000 7.733927)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.691333 0.000000 -2.918786
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -4.413178 0.000000 7.733927)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.691333 0.000000 -2.918786} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -4.767304 0.000000 8.312809)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.792711 0.000000 -3.091552
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -4.767304 0.000000 8.312809)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.792711 0.000000 -3.091552} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -5.139583 0.000000 8.833072)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 1.898483 0.000000 -3.262110
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -5.139583 0.000000 8.833072)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 1.898483 0.000000 -3.262110} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -5.527842 0.000000 9.278304)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 2.009618 0.000000 -3.429969
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -5.527842 0.000000 9.278304)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 2.009618 0.000000 -3.429969} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -5.895689 0.000000 9.651164)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 2.122958 0.000000 -3.595315
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -5.895689 0.000000 9.651164)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 2.122958 0.000000 -3.595315} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -6.240756 0.000000 9.961992)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 2.238951 0.000000 -3.759980
+13:10:41 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -6.240756 0.000000 9.961992)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 2.238951 0.000000 -3.759980} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -6.569376 0.000000 10.211050)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 2.357968 0.000000 -3.923228
+13:10:41 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -6.569376 0.000000 10.211050)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 2.357968 0.000000 -3.923228} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -6.904141 0.000000 10.384836)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 2.481765 0.000000 -4.082314
+13:10:41 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -6.904141 0.000000 10.384836)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 2.481765 0.000000 -4.082314} received from 16777343
+13:10:41 INFO Sent packet with: ObjectMoveEvent 3 (2 -7.233150 0.000000 10.495109)
+13:10:41 INFO Sent packet with: PlayerMoveEvent 3 2.608988 0.000000 -4.237242
+13:10:41 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -7.233150 0.000000 10.495109)} received from 16777343
+13:10:41 INFO Packet of length 46 containing {PlayerMoveEvent 3 2.608988 0.000000 -4.237242} received from 16777343
+13:10:42 INFO Updating FPS
+13:10:42 INFO Updating FPS
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -7.556764 0.000000 10.548649)
+13:10:42 INFO Sent packet with: PlayerMoveEvent 3 2.740104 0.000000 -4.388876
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -7.556764 0.000000 10.548649)} received from 16777343
+13:10:42 INFO Packet of length 46 containing {PlayerMoveEvent 3 2.740104 0.000000 -4.388876} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -7.899897 0.000000 10.531695)
+13:10:42 INFO Sent packet with: PlayerMoveEvent 3 2.878419 0.000000 -4.536271
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -7.899897 0.000000 10.531695)} received from 16777343
+13:10:42 INFO Packet of length 46 containing {PlayerMoveEvent 3 2.878419 0.000000 -4.536271} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -8.262954 0.000000 10.440032)
+13:10:42 INFO Sent packet with: PlayerMoveEvent 3 3.022648 0.000000 -4.675994
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -8.262954 0.000000 10.440032)} received from 16777343
+13:10:42 INFO Packet of length 46 containing {PlayerMoveEvent 3 3.022648 0.000000 -4.675994} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -8.649550 0.000000 10.272776)
+13:10:42 INFO Sent packet with: PlayerMoveEvent 3 3.087328 0.000000 -4.734361
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -8.649550 0.000000 10.272776)} received from 16777343
+13:10:42 INFO Packet of length 46 containing {PlayerMoveEvent 3 3.087328 0.000000 -4.734361} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -9.038509 0.000000 10.074973)
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -9.038509 0.000000 10.074973)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -9.388916 0.000000 9.896436)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -9.388916 0.000000 9.896436)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -9.707371 0.000000 9.734180)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -9.707371 0.000000 9.734180)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -9.994907 0.000000 9.587675)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -9.994907 0.000000 9.587675)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -10.254553 0.000000 9.455384)
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -10.254553 0.000000 9.455384)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -10.490983 0.000000 9.334923)
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -10.490983 0.000000 9.334923)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -10.669295 0.000000 9.199296)
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -10.669295 0.000000 9.199296)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -10.601779 0.000000 8.889557)
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -10.601779 0.000000 8.889557)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -10.266150 0.000000 8.384244)
+13:10:42 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -10.266150 0.000000 8.384244)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -9.698917 0.014729 7.710742)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -9.698917 0.014729 7.710742)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -8.911424 0.059230 6.876672)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -8.911424 0.059230 6.876672)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -7.939449 0.129091 5.909593)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -7.939449 0.129091 5.909593)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -6.773693 0.225037 4.800487)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -6.773693 0.225037 4.800487)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -5.542742 0.332074 3.653273)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -5.542742 0.332074 3.653273)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -4.251119 0.449055 2.469007)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -4.251119 0.449055 2.469007)} received from 16777343
+13:10:42 INFO Sent packet with: ObjectMoveEvent 3 (2 -2.823771 0.584531 1.186215)
+13:10:42 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 -2.823771 0.584531 1.186215)} received from 16777343
+13:10:43 INFO Updating FPS
+13:10:43 INFO Updating FPS
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 -1.259680 0.738076 -0.198216)
+13:10:43 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -1.259680 0.738076 -0.198216)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 0.412084 0.906415 -1.660302)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.412084 0.906415 -1.660302)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 2.056988 1.073837 -3.091431)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 2.056988 1.073837 -3.091431)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 3.609548 1.232624 -4.439024)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 3.609548 1.232624 -4.439024)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 5.033846 1.378490 -5.674470)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 5.033846 1.378490 -5.674470)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 6.317141 1.509915 -6.787608)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 6.317141 1.509915 -6.787608)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 7.479377 1.628942 -7.795743)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 7.479377 1.628942 -7.795743)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 8.524039 1.735841 -8.702259)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 8.524039 1.735841 -8.702259)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 9.292734 1.812403 -9.378064)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 9.292734 1.812403 -9.378064)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 9.704135 1.849323 -9.756698)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 9.704135 1.849323 -9.756698)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 9.927302 1.865729 -9.977213)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 9.927302 1.865729 -9.977213)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 10.109517 1.878308 -10.160686)
+13:10:43 INFO Packet of length 52 containing {ObjectMoveEvent 3 (2 10.109517 1.878308 -10.160686)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 10.115446 1.871588 -10.196430)
+13:10:43 INFO Packet of length 52 containing {ObjectMoveEvent 3 (2 10.115446 1.871588 -10.196430)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 9.902415 1.840599 -10.049955)
+13:10:43 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 9.902415 1.840599 -10.049955)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 9.446894 1.782603 -9.702222)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 9.446894 1.782603 -9.702222)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 8.754815 1.698209 -9.158376)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 8.754815 1.698209 -9.158376)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 7.918502 1.597895 -8.494208)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 7.918502 1.597895 -8.494208)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 7.125290 1.502952 -7.863430)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 7.125290 1.502952 -7.863430)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 6.410263 1.417367 -7.294828)
+13:10:43 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 6.410263 1.417367 -7.294828)} received from 16777343
+13:10:43 INFO Sent packet with: ObjectMoveEvent 3 (2 5.761875 1.339759 -6.779221)
+13:10:44 INFO Updating FPS
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 5.761875 1.339759 -6.779221)} received from 16777343
+13:10:44 INFO Updating FPS
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 5.175710 1.269598 -6.313092)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 5.175710 1.269598 -6.313092)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 4.642427 1.205768 -5.889016)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 4.642427 1.205768 -5.889016)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 4.164142 1.148520 -5.508675)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 4.164142 1.148520 -5.508675)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 3.727563 1.089740 -5.164733)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 3.727563 1.089740 -5.164733)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 3.326417 1.016506 -4.860961)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 3.326417 1.016506 -4.860961)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 2.961698 0.943046 -4.597510)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 2.961698 0.943046 -4.597510)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 2.620634 0.872693 -4.374983)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 2.620634 0.872693 -4.374983)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 2.293332 0.803719 -4.207177)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 2.293332 0.803719 -4.207177)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 1.984338 0.737421 -4.084913)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 1.984338 0.737421 -4.084913)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 1.698153 0.671955 -3.990694)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 1.698153 0.671955 -3.990694)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 1.439489 0.613871 -3.905845)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 1.439489 0.613871 -3.905845)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 1.204862 0.562244 -3.827569)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 1.204862 0.562244 -3.827569)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 0.994250 0.522972 -3.751833)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.994250 0.522972 -3.751833)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 0.806377 0.504244 -3.670061)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.806377 0.504244 -3.670061)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 0.640334 0.500813 -3.583395)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.640334 0.500813 -3.583395)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 0.491834 0.503501 -3.500359)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.491834 0.503501 -3.500359)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 0.358637 0.511162 -3.422683)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.358637 0.511162 -3.422683)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 0.238317 0.523761 -3.350478)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.238317 0.523761 -3.350478)} received from 16777343
+13:10:44 INFO Sent packet with: ObjectMoveEvent 3 (2 0.129782 0.536211 -3.285267)
+13:10:44 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.129782 0.536211 -3.285267)} received from 16777343
+13:10:45 INFO Updating FPS
+13:10:45 INFO Updating FPS
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 0.031872 0.547152 -3.226468)
+13:10:45 INFO Packet of length 50 containing {ObjectMoveEvent 3 (2 0.031872 0.547152 -3.226468)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.056824 0.556580 -3.172775)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.056824 0.556580 -3.172775)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.136653 0.564262 -3.124687)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.136653 0.564262 -3.124687)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.209618 0.569637 -3.082400)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.209618 0.569637 -3.082400)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.276631 0.572424 -3.045974)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.276631 0.572424 -3.045974)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.338700 0.570768 -3.017804)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.338700 0.570768 -3.017804)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.396467 0.566969 -2.996027)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.396467 0.566969 -2.996027)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.449069 0.563705 -2.976809)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.449069 0.563705 -2.976809)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.496551 0.560759 -2.959463)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.496551 0.560759 -2.959463)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.539397 0.558099 -2.943810)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.539397 0.558099 -2.943810)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.578629 0.555665 -2.929476)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.578629 0.555665 -2.929476)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.613796 0.553482 -2.916631)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.613796 0.553482 -2.916631)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.647391 0.550858 -2.908803)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.647391 0.550858 -2.908803)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.678390 0.547854 -2.903411)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.678390 0.547854 -2.903411)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.706492 0.545364 -2.898517)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.706492 0.545364 -2.898517)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.731897 0.543312 -2.894088)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.731897 0.543312 -2.894088)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.754918 0.541452 -2.890073)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.754918 0.541452 -2.890073)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.775651 0.539777 -2.886459)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.775651 0.539777 -2.886459)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.794406 0.538262 -2.883189)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.794406 0.538262 -2.883189)} received from 16777343
+13:10:45 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.811525 0.536879 -2.880203)
+13:10:45 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.811525 0.536879 -2.880203)} received from 16777343
+13:10:46 INFO Updating FPS
+13:10:46 INFO Updating FPS
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.827215 0.535612 -2.877468)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.827215 0.535612 -2.877468)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.841120 0.534488 -2.875042)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.841120 0.534488 -2.875042)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.853669 0.533475 -2.872853)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.853669 0.533475 -2.872853)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.865039 0.532556 -2.870870)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.865039 0.532556 -2.870870)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.875346 0.531724 -2.869073)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.875346 0.531724 -2.869073)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.884636 0.530974 -2.867453)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.884636 0.530974 -2.867453)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.893036 0.530295 -2.865988)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.893036 0.530295 -2.865988)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.900656 0.529680 -2.864659)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.900656 0.529680 -2.864659)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.907561 0.529122 -2.863455)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.907561 0.529122 -2.863455)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.913811 0.528617 -2.862366)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.913811 0.528617 -2.862366)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.919385 0.528167 -2.861393)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.919385 0.528167 -2.861393)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.924477 0.527756 -2.860506)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.924477 0.527756 -2.860506)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.929068 0.527385 -2.859705)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.929068 0.527385 -2.859705)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.933197 0.527051 -2.858986)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.933197 0.527051 -2.858986)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.936962 0.526747 -2.858329)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.936962 0.526747 -2.858329)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.940332 0.526475 -2.857741)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.940332 0.526475 -2.857741)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.943378 0.526229 -2.857210)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.943378 0.526229 -2.857210)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.946164 0.526004 -2.856724)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.946164 0.526004 -2.856724)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.948683 0.525801 -2.856284)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.948683 0.525801 -2.856284)} received from 16777343
+13:10:46 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.950944 0.525618 -2.855891)
+13:10:46 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.950944 0.525618 -2.855891)} received from 16777343
+13:10:47 INFO Updating FPS
+13:10:47 INFO Updating FPS
+13:10:47 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.952316 0.525507 -2.855651)
+13:10:47 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.952316 0.525507 -2.855651)} received from 16777343
+13:10:48 INFO Updating FPS
+13:10:48 INFO Updating FPS
+13:10:49 INFO Updating FPS
+13:10:49 INFO Updating FPS
+13:10:50 INFO Updating FPS
+13:10:50 INFO Updating FPS
+13:10:51 INFO Updating FPS
+13:10:52 INFO Updating FPS
+13:10:52 INFO Updating FPS
+13:10:53 INFO Updating FPS
+13:10:53 INFO Updating FPS
+13:10:53 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.952390 0.525384 -2.855641)
+13:10:53 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.952390 0.525384 -2.855641)} received from 16777343
+13:10:53 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.951808 0.513552 -2.853444)
+13:10:53 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.951808 0.513552 -2.853444)} received from 16777343
+13:10:53 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.941038 0.476175 -2.840833)
+13:10:53 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.941038 0.476175 -2.840833)} received from 16777343
+13:10:53 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.916458 0.430328 -2.812684)
+13:10:53 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.916458 0.430328 -2.812684)} received from 16777343
+13:10:53 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.881723 0.388966 -2.772588)
+13:10:53 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.881723 0.388966 -2.772588)} received from 16777343
+13:10:53 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.845551 0.351818 -2.729587)
+13:10:53 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.845551 0.351818 -2.729587)} received from 16777343
+13:10:54 INFO Updating FPS
+13:10:54 INFO Updating FPS
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.815609 0.318303 -2.690637)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.815609 0.318303 -2.690637)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.797710 0.290944 -2.662291)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.797710 0.290944 -2.662291)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.796894 0.283876 -2.655432)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.796894 0.283876 -2.655432)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.812208 0.288838 -2.676629)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.812208 0.288838 -2.676629)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.831693 0.294302 -2.708145)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.831693 0.294302 -2.708145)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.849381 0.298773 -2.736977)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.849381 0.298773 -2.736977)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.865296 0.302795 -2.762918)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.865296 0.302795 -2.762918)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.879713 0.306451 -2.786383)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.879713 0.306451 -2.786383)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.892556 0.309738 -2.807199)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.892556 0.309738 -2.807199)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.904194 0.312732 -2.826056)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.904194 0.312732 -2.826056)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.914745 0.315841 -2.843041)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.914745 0.315841 -2.843041)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.924308 0.318658 -2.858433)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.924308 0.318658 -2.858433)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.933056 0.321202 -2.872597)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.933056 0.321202 -2.872597)} received from 16777343
+13:10:54 INFO Sent packet with: ObjectMoveEvent 3 (2 -0.941076 0.323519 -2.885625)
+13:10:54 INFO Packet of length 51 containing {ObjectMoveEvent 3 (2 -0.941076 0.323519 -2.885625)} received from 16777343
+13:10:54 DEBUG Disconnection: 16777343,62144, data: 3
+13:10:54 INFO Sent packet with: DisconnectEvent 3
+13:10:55 INFO Updating FPS
+13:10:56 INFO Updating FPS
+13:10:57 INFO Updating FPS
+13:10:58 INFO Updating FPS
+13:10:59 INFO Updating FPS
+13:11:00 INFO Updating FPS
+13:11:01 INFO Updating FPS
+13:11:02 INFO Updating FPS
+13:11:03 INFO Updating FPS
+13:11:04 INFO Updating FPS
+13:11:05 INFO Updating FPS
+13:11:06 INFO Updating FPS
+13:11:07 INFO Updating FPS
+13:11:08 INFO Updating FPS
+13:11:09 INFO Updating FPS
+13:11:10 INFO Updating FPS
+13:11:11 INFO Updating FPS
+13:11:12 INFO Updating FPS
+13:11:13 INFO Updating FPS
+13:11:14 INFO Updating FPS
+13:11:15 INFO Updating FPS
+13:11:16 INFO Updating FPS
+13:11:17 INFO Updating FPS
+13:11:18 INFO Updating FPS
+13:11:19 INFO Updating FPS
+13:11:20 INFO Updating FPS
+13:11:21 INFO Updating FPS
+13:11:22 INFO Updating FPS
+13:11:23 INFO Updating FPS
+13:11:24 INFO Updating FPS
+13:11:25 INFO Updating FPS
+13:11:26 INFO Updating FPS
+13:11:27 INFO Updating FPS
+13:11:28 INFO Updating FPS
+13:11:29 INFO Updating FPS
+13:11:30 INFO Updating FPS
+13:11:30 DEBUG Closing Window
+13:11:31 INFO Updating FPS
+13:11:32 INFO Updating FPS
+13:11:33 INFO Updating FPS
+13:11:33 INFO Sent packet with: PlayerMoveEvent 2 -5.275161 0.000000 -1.622320
+13:11:33 INFO Sent packet with: PlayerMoveEvent 2 -5.081417 0.000000 -1.571264
+13:11:33 INFO Sent packet with: PlayerMoveEvent 2 -4.887267 0.000000 -1.518434
+13:11:33 INFO Sent packet with: PlayerMoveEvent 2 -4.696146 0.000000 -1.484688
+13:11:33 INFO Sent packet with: PlayerMoveEvent 2 -4.523541 0.000000 -1.588046
+13:11:33 INFO Sent packet with: PlayerMoveEvent 2 -4.354558 0.000000 -1.696117
+13:11:34 INFO Updating FPS
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -4.188655 0.000000 -1.808122
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -4.022498 0.000000 -1.920188
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -3.853962 0.000000 -2.029944
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -3.771344 0.000000 -2.201408
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -3.700505 0.000000 -2.389171
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -3.595000 0.000000 -2.559551
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -3.459687 0.000000 -2.708252
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -3.307568 0.000000 -2.840189
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -3.149675 0.000000 -2.963697
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -2.995819 0.000000 -3.092170
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -2.851103 0.000000 -3.230920
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -2.712282 0.000000 -3.379757
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -2.584974 0.000000 -3.535630
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -2.463751 0.000000 -3.695793
+13:11:34 INFO Sent packet with: PlayerMoveEvent 2 -2.437662 0.000000 -3.730583
+13:11:36 DEBUG Closing Window

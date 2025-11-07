@@ -37,7 +37,7 @@ bool Weather::update() {
     try {
         auto json = nlohmann::json::parse(res->body);
         weather_id_ = json["weather"][0]["id"];
-        INFO("Set weather id to: " + weather_id_);
+        INFO("Set weather id to: " + std::to_string(weather_id_));
     } catch(const std::exception& e) {
         return false;
     }
