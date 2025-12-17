@@ -7,11 +7,10 @@
 class Cube : public Object3d {
 public:
     Cube(std::string data);
-    Cube(Vector3 position, Vector3 size, float scale, Color color);
-    Cube(const Cube&) = delete;
-    Cube& operator=(const Cube&) = delete;
+    Cube(Quaternion quaternion, Vector3 position, Vector3 size, float scale, Color color);
 
     std::string to_string() const override;
+    friend void swap(Cube& a, Cube& b) noexcept;
 private:
     Vector3 size_;
     Color color_;

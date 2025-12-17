@@ -24,7 +24,6 @@ bool Game::host(std::string current_user, std::string save_file, char* ip, char*
     current_user_ = current_user;
     world_->load_world(save_file, shader);
     world_->load_player(current_user, shader);
-    world_->set_alone(current_user);
     bool success = network_->host_server(ip, port);
     if (success) {
         in_world_ = true;

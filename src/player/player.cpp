@@ -218,7 +218,7 @@ const Cube& Player::get_hitbox() {
     return hitbox_;
 }
 
-std::string Player::get_username() {
+std::string Player::get_username() const {
     return username_;
 }
 

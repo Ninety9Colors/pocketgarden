@@ -38,7 +38,7 @@ public:
     void on_disconnect();
     bool is_online() const;
 
-    std::string get_username();
+    std::string get_username() const;
     const Cube& get_hitbox();
     Vector3 get_position() const;
 

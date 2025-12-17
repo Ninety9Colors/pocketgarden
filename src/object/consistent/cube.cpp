@@ -21,7 +21,7 @@ Cube::Cube(std::string data) {
     material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
     update_matrix();
 }
-Cube::Cube(Vector3 position, Vector3 size, float scale, Color color) : Object3d(position, scale), size_(size), color_(color) {
+Cube::Cube(Quaternion quaternion, Vector3 position, Vector3 size, float scale, Color color) : Object3d(quaternion, position, scale), size_(size), color_(color) {
     UnloadMesh(mesh_);
     mesh_ = GenMeshCube(size_.x, size_.y, size_.z);
     material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
@@ -35,4 +35,11 @@ std::string Cube::to_string() const {
         std::to_string(scale_) + " " +
         std::to_string(color_.r) + " " + std::to_string(color_.g) + " " + std::to_string(color_.b) + " " + std::to_string(color_.a) + " " +
         std::to_string(quaternion_.x) + " " + std::to_string(quaternion_.y) + " " + std::to_string(quaternion_.z) + " " + std::to_string(quaternion_.w);
+}
+
+void swap(Cube& a, Cube& b) noexcept {
+    using std::swap;
+    swap(static_cast<Object3d&>(a),static_cast<Object3d&>(b));
+    swap(a.size_,b.size_);
+    swap(a.color_,b.color_);
 }

@@ -4,19 +4,23 @@
 #include "rlgl.h"
 #include "raymath.h"
 
-Object3d::Object3d() : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(std::move(LoadMaterialDefault())), position_{0.0f,0.0f,0.0f}, scale_(1.0f), quaternion_{0.0f,0.0f,0.0f,1.0f} {};
-Object3d::Object3d(float scale) : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(std::move(LoadMaterialDefault())), position_{0.0f,0.0f,0.0f}, scale_(scale), quaternion_{0.0f,0.0f,0.0f,1.0f} {};
-Object3d::Object3d(Vector3 position, float scale) : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(std::move(LoadMaterialDefault())), position_(position), scale_(scale), quaternion_{0.0f,0.0f,0.0f,1.0f} {};
-Object3d::Object3d(Quaternion quaternion, Vector3 position, float scale) : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(std::move(LoadMaterialDefault())), position_(position), scale_(scale), quaternion_{quaternion} {};
+Object3d::Object3d() : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(LoadMaterialDefault()), position_{0.0f,0.0f,0.0f}, scale_(1.0f), quaternion_{0.0f,0.0f,0.0f,1.0f} {
+    update_matrix();
+}
+Object3d::Object3d(Quaternion quaternion, Vector3 position, float scale) : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(LoadMaterialDefault()), position_(position), scale_(scale), quaternion_{quaternion} {
+    update_matrix();
+}
+Object3d::Object3d(const Object3d& rhs) noexcept : quaternion_(rhs.quaternion_),position_(rhs.position_),mesh_(GenMeshCube(1.0f,1.0f,1.0f)),material_(LoadMaterialDefault()),scale_(rhs.scale_),transform_(rhs.transform_) {
+    update_matrix();
+}
 Object3d::~Object3d() {
     UnloadMesh(mesh_);
-    if (material_.maps != NULL){
-        for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
-            if (material_.maps[i].texture.id != rlGetTextureIdDefault()) rlUnloadTexture(material_.maps[i].texture.id);
-    }
-    RL_FREE(material_.maps);
+    UnloadMaterial(material_);
 }
-
+void Object3d::generate_mesh() {
+    UnloadMesh(mesh_);
+    mesh_ = GenMeshCube(1.0f,1.0f,1.0f);
+}
 void Object3d::draw() const {
     DrawMesh(mesh_, material_, transform_);
 }
@@ -33,21 +37,12 @@ void Object3d::draw_offset(float x, float y, float z) const {
     DrawMesh(mesh_, material_, offset);
 }
 
-std::shared_ptr<Shader> Object3d::get_shader() {
-    return shader_;
-}
-
-void Object3d::set_shader(std::shared_ptr<Shader> shader) {
-    shader_ = shader;
-    material_.shader = *shader;
-}
-
 void Object3d::set_quaternion(Quaternion quaternion) {
     quaternion_ = quaternion;
     update_matrix();
 }
 
-Quaternion Object3d::get_quaternion() {
+Quaternion Object3d::get_quaternion() const {
     return quaternion_;
 }
 
@@ -131,14 +126,21 @@ BoundingBox Object3d::get_bounding_box(Matrix transform) const {
     return box;
 }
 
+void swap(Object3d& a, Object3d& b) noexcept {
+    using std::swap;
+    swap(a.quaternion_,b.quaternion_);
+    swap(a.position_,b.position_);
+    swap(a.mesh_,b.mesh_);
+    swap(a.material_,b.material_);
+    swap(a.scale_,b.scale_);
+    swap(a.transform_,b.transform_);
+    swap(a.id_,b.id_);
+}
+
 Item::Item() : Object3d() {}
-Item::Item(float scale) : Object3d(scale) {}
-Item::Item(Vector3 position, float scale) : Object3d(position, scale) {}
 Item::Item(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {}
 
 ParameterObject::ParameterObject() : Object3d() {};
-ParameterObject::ParameterObject(float scale) : Object3d(scale) {}
-ParameterObject::ParameterObject(Vector3 position, float scale) : Object3d(position, scale) {}
 ParameterObject::ParameterObject(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {}
 
 void ParameterObject::set_parameters(ParameterMap map) {
