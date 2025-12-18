@@ -8,6 +8,12 @@
 
 #include <iostream>
 
+Cube::Cube() : Object3d(), size_(1.0f,1.0f,1.0f), color_(WHITE) {
+    UnloadMesh(mesh_);
+    mesh_ = GenMeshCube(size_.x, size_.y, size_.z);
+    material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
+    update_matrix();
+}
 Cube::Cube(std::string data) {
     std::vector<std::string> split = split_string(data);
     assert(split[0] == "Cube" && split.size() == 16);

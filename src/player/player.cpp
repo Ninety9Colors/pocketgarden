@@ -12,25 +12,34 @@
 #include "world/world.hpp"
 #include "object/procedural/lily_flower.hpp"
 
-Player::Player() : position_(0.0f,0.0f,0.0f), selected_item_(nullptr), online_(false), pickup_range_(3.0f), speed_(4.0f), username_("No Username"), hitbox_({0.0f,0.0f,0.0f,1.0f},Vector3{position.x,position.y+1.0f,position.z}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},Vector3{position.x, position.y+1.5f, position.z}, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {};
+#include "raymath.h"
 
-Player::Player(std::string username, Vector3 position) : position_(position), selected_item_(nullptr), online_(false), pickup_range_(3.0f), speed_(4.0f), username_(username), hitbox_({0.0f,0.0f,0.0f,1.0f},Vector3{position.x,position.y+1.0f,position.z}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},Vector3{position.x, position.y+1.5f, position.z}, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {};
+constexpr float DEFAULT_PLAYER_SPEED = 4.0f;
+constexpr float DEFAULT_PLAYER_PICKUP_RANGE= 3.0f;
+const Vector3 HITBOX_OFFSET = {0.0f,1.0f,0.0f};
+const Vector3 HEAD_OFFSET = {0.0f,1.5f,0.0f};
+const Vector3 ITEM_OFFSET = {0.0f,2.0f,0.0f};
 
-Player::Player(std::string data) : hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE) {
-    speed_ = 4.0f;
-    pickup_range_ = 3.0f;
+Player::Player() : position_(0.0f,0.0f,0.0f), selected_item_(nullptr), online_(false), pickup_range_(DEFAULT_PLAYER_PICKUP_RANGE), speed_(DEFAULT_PLAYER_SPEED), username_("No Username"), hitbox_({0.0f,0.0f,0.0f,1.0f},HITBOX_OFFSET, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},HEAD_OFFSET, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {};
+
+Player::Player(std::string username, Vector3 position) : position_(position), selected_item_(nullptr), online_(false), pickup_range_(DEFAULT_PLAYER_PICKUP_RANGE), speed_(DEFAULT_PLAYER_SPEED), username_(username), hitbox_({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HITBOX_OFFSET), {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HEAD_OFFSET), Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {};
+
+Player::Player(std::string data) : speed_(DEFAULT_PLAYER_SPEED), pickup_range_(DEFAULT_PLAYER_PICKUP_RANGE) {
+    // TODO: fix this implementation with the changes to members
     std::vector<std::string> split = split_string(data);
     assert(split[0] == "Player" && split.size() == 8);
     username_ = split[1];
-    set_position(Vector3{std::stof(split[2]), std::stof(split[3]), std::stof(split[4])});
+    position_ = Vector3{std::stof(split[2]), std::stof(split[3]), std::stof(split[4])};
+    hitbox_ = Cube({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HITBOX_OFFSET),{1.0f,2.0f,1.0f},1.0f,WHITE);
+    head_ = Cube({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HEAD_OFFSET),{0.5f,0.5f,0.5f},1.0f,PINK);
     online_ = std::stoi(split[5]) == 1;
     if (split[6] != "null_item") {
         if (get_first_word(split[6]) == "MoveTool") {
-            selected_item_ = std::make_shared<MoveTool>(split[6]);
+            selected_item_ = std::make_unique<MoveTool>(split[6]);
         } else if (get_first_word(split[6]) == "SunTool") {
-            selected_item_ = std::make_shared<SunTool>(split[6]);
+            selected_item_ = std::make_unique<SunTool>(split[6]);
         } else if (get_first_word(split[6]) == "RotateTool") {
-            selected_item_ = std::make_shared<RotateTool>(split[6]);
+            selected_item_ = std::make_unique<RotateTool>(split[6]);
         }
     }
     std::vector<std::string> model_objects = split_string(split[7]);
@@ -46,27 +55,19 @@ Player::Player(std::string data) : hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f},
 };
 
 Player::~Player() {
-    shader_.reset();
-    selected_item_.reset();
-    selected_item_previous_shader_.reset();
 }
 
-void Player::draw(std::string current_user, const MainCamera& camera) const {
-    if ((camera.get_mode() != CAMERA_CUSTOM || username_ != current_user) && online_) {
-        for (const auto& object : model_)
-            object->draw_offset(get_position().x, get_position().y, get_position().z);
-    }
-    if (selected_item_ != nullptr && online_) {
-        selected_item_->draw_offset(get_position().x, get_position().y + 2.0f, get_position().z);
-    }
+void Player::draw(std::string current_user) const {
+    if (username_ != current_user && online_)
+        head_.draw();
+    if (selected_item_ != nullptr && online_)
+        selected_item_->draw();
 }
 
-bool Player::move(MainCamera& camera, const std::vector<bool>& keybinds, float dt) {
+bool Player::move(Vector3 direction, const std::vector<bool>& keybinds, float dt) {
     assert(keybinds.size() >= 4);
-    if (camera.get_mode() == CAMERA_FREE || !online_ || (!keybinds[0] && !keybinds[1] && !keybinds[2] && !keybinds[3])) {
+    if (!online_ || (!keybinds[0] && !keybinds[1] && !keybinds[2] && !keybinds[3]))
         return false;
-    }
-    Vector3 direction = camera.get_direction();
     Vector3 left = Vector3{direction.z, 0.0f, -direction.x};
     float dx = (keybinds[0]*direction.x-keybinds[2]*direction.x-keybinds[3]*left.x+keybinds[1]*left.x);
     float dz = (keybinds[0]*direction.z-keybinds[2]*direction.z-keybinds[3]*left.z+keybinds[1]*left.z);
@@ -75,7 +76,11 @@ bool Player::move(MainCamera& camera, const std::vector<bool>& keybinds, float d
     dx = dx/magnitude*dt*speed_;
     dz = dz/magnitude*dt*speed_;
 
-    hitbox_.set_position(Vector3{hitbox_.get_position().x + dx, hitbox_.get_position().y, hitbox_.get_position().z + dz});
+    position_ = Vector3Add(position_,{dx,0.0f,dz});
+    hitbox_.set_position(Vector3Add(position_,HITBOX_OFFSET));
+    head_.set_position(Vector3Add(position_,HEAD_OFFSET));
+    if (selected_item_ != nullptr)
+        selected_item_->set_position(Vector3Add(position_,ITEM_OFFSET));
     return true;
 }
 

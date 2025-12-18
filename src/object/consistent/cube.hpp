@@ -6,6 +6,7 @@
 
 class Cube : public Object3d {
 public:
+    Cube();
     Cube(std::string data);
     Cube(Quaternion quaternion, Vector3 position, Vector3 size, float scale, Color color);
 

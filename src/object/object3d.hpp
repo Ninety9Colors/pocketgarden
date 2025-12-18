@@ -35,7 +35,6 @@ public:
     virtual Quaternion get_quaternion() const;
     virtual void rotate_axis(Vector3 axis, float radians);
 
-    virtual void update_matrix(); // called automatically
     virtual const Matrix& get_matrix() const;
 
     virtual void set_position(Vector3 position);
@@ -50,6 +49,8 @@ public:
     virtual std::string to_string() const = 0;
     friend void swap(Object3d& a, Object3d& b) noexcept;
 protected:
+    virtual void update_matrix(); // called automatically
+
     Quaternion quaternion_;
     Vector3 position_;
     Mesh mesh_;

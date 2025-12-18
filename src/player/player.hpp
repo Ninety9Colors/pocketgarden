@@ -43,14 +43,14 @@ public:
     Vector3 get_position() const;
 
     std::string to_string() const;
-    
 private:
     std::string username_;
     float speed_;
     float pickup_range_;
     bool online_;
-    Vector3 position_;
-
+    
+    // Update these everytime position is updated:
+    Vector3 position_; // Center of the bottom face of the hitbox
     Cube hitbox_;
     Cube head_;
     std::unique_ptr<Item> selected_item_;
