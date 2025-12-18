@@ -16,6 +16,7 @@
 #include "player/maincamera.hpp"
 #include "object/consistent/move_tool.hpp"
 #include "object/procedural/spline.hpp"
+#include "settings.hpp"
 
 constexpr int DEFAULT_SCREEN_WIDTH = 1280;
 constexpr int DEFAULT_SCREEN_HEIGHT = 720;
@@ -35,13 +36,6 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
         }
     );
     shader_default_->locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(*shader_default_, "colorDiffuse");
-    shader_light_source_ = std::shared_ptr<Shader>(
-        new Shader(LoadShader("shaders/default.vs","shaders/light_source.fs")),
-        [](Shader* s) {
-            UnloadShader(*s);
-            delete s;
-        }
-    );
 }
 
 void Application::tick(std::map<std::string, std::shared_ptr<Event>>& event_buffer, Game& game) {

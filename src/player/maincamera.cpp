@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "player/maincamera.hpp"
+#include "settings.hpp"
 #include <algorithm>
 
 MainCamera::MainCamera() {
@@ -15,20 +16,19 @@ MainCamera::MainCamera() {
     camera_.projection = CAMERA_PERSPECTIVE;
 
     camera_mode_ = CAMERA_CUSTOM;
-
-    sensitivity_ = 0.001f;
 }
 
-void MainCamera::update(const std::shared_ptr<Player> player, Vector2 mouse_delta) {
+void MainCamera::update(Vector3 position, Vector2 mouse_delta) {
     if (camera_mode_ != CAMERA_CUSTOM) {
         UpdateCamera(&camera_,camera_mode_);
         return;
     }
-    camera_.position = Vector3{player->get_position().x, player->get_position().y + 1.0f, player->get_position().z};
+    float sens = std::any_cast<float>(Settings::get("Camera Sensitivity"));
+    camera_.position = Vector3{position.x, position.y + 1.0f, position.z};
     camera_.target = Vector3{camera_.position.x + direction_.x, camera_.position.y + direction_.y, camera_.position.z + direction_.z};
 
-    float dpitch = mouse_delta.y*sensitivity_; // 0 when straight on y axis, positive downward
-    float dyaw = mouse_delta.x*sensitivity_; // 0 when straight on x axis, positive leftward
+    float dpitch = mouse_delta.y*sens; // 0 when straight on y axis, positive downward
+    float dyaw = mouse_delta.x*sens; // 0 when straight on x axis, positive leftward
 
     float prev_pitch = acosf(direction_.y);
 

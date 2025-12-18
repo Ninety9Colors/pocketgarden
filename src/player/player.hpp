@@ -12,16 +12,16 @@
 #include "object/object3d.hpp"
 
 class World;
-class MainCamera;
 
-class Player : public std::enable_shared_from_this<Player> {
+class Player {
 public:
+    Player();
     Player(std::string username, Vector3 position);
     Player(std::string data);
     ~Player();
 
-    void draw(std::string current_user, const MainCamera& camera) const;
-    bool move(MainCamera& camera, const std::vector<bool>& keybinds, float dt);
+    void draw(std::string current_user) const;
+    bool move(Vector3 direction, const std::vector<bool>& keybinds, float dt);
     void set_position(Vector3 position);
     void add_to_model(std::unique_ptr<Object3d>&& object);
     void set_shader(std::shared_ptr<Shader> shader);
@@ -29,7 +29,7 @@ public:
 
     void update(std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
 
-    uint32_t try_pickup(MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds) const;
+    uint32_t try_pickup(Vector3 direction, std::shared_ptr<World> world, const std::vector<bool>& keybinds) const;
     void set_item(std::shared_ptr<Item> item);
     std::shared_ptr<Item> drop_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
     void use_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
@@ -49,10 +49,9 @@ private:
     float speed_;
     float pickup_range_;
     bool online_;
+    Vector3 position_;
 
     Cube hitbox_;
-    std::shared_ptr<Shader> shader_;
-    std::vector<std::unique_ptr<Object3d>> model_;
-    std::shared_ptr<Item> selected_item_;
-    std::shared_ptr<Shader> selected_item_previous_shader_;
+    Cube head_;
+    std::unique_ptr<Item> selected_item_;
 };

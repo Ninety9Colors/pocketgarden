@@ -2,11 +2,16 @@
 
 #include "event/event.hpp"
 #include "game.hpp"
+#include "settings.hpp"
+#include "logging.hpp"
 #include <cassert>
 
 Game::Game() : in_world_(false), current_user_("") {
     world_ = std::make_shared<World>();
     network_ = std::make_unique<Network>();
+    // TODO: Load settings from file
+    INFO("Initializing Settings");
+    Settings::set("Camera Sensitivity",0.001f);
 };
 
 bool Game::in_world() const {

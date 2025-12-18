@@ -15,7 +15,6 @@
 class MoveTool : public Item {
 public:
     MoveTool();
-    MoveTool(std::string data);
     MoveTool(Vector3 position, float scale);
 
     void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;

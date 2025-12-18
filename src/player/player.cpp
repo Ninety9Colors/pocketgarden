@@ -3,7 +3,6 @@
 #include <cmath>
 #include <iostream>
 
-#include "player/maincamera.hpp"
 #include "object/consistent/move_tool.hpp"
 #include "object/consistent/sun_tool.hpp"
 #include "object/consistent/rotate_tool.hpp"
@@ -13,15 +12,9 @@
 #include "world/world.hpp"
 #include "object/procedural/lily_flower.hpp"
 
-Player::Player(std::string username, Vector3 position) : username_(username), hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE) {
-    speed_ = 4.0f;
-    pickup_range_ = 3.0f;
-    online_ = false;
-    set_position(position);
-    auto head = std::make_unique<Cube>(Vector3{0, 1.0f, 0}, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK);
-    add_to_model(std::move(head));
-    selected_item_ = nullptr;
-};
+Player::Player() : position_(0.0f,0.0f,0.0f), selected_item_(nullptr), online_(false), pickup_range_(3.0f), speed_(4.0f), username_("No Username"), hitbox_({0.0f,0.0f,0.0f,1.0f},Vector3{position.x,position.y+1.0f,position.z}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},Vector3{position.x, position.y+1.5f, position.z}, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {};
+
+Player::Player(std::string username, Vector3 position) : position_(position), selected_item_(nullptr), online_(false), pickup_range_(3.0f), speed_(4.0f), username_(username), hitbox_({0.0f,0.0f,0.0f,1.0f},Vector3{position.x,position.y+1.0f,position.z}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},Vector3{position.x, position.y+1.5f, position.z}, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {};
 
 Player::Player(std::string data) : hitbox_({0.0f,0.0f,0.0f}, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE) {
     speed_ = 4.0f;
