@@ -21,7 +21,7 @@ class Event {
 public:
     virtual std::string make_packet() const = 0;
     virtual bool reliable() const = 0;
-    virtual void receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) = 0;
+    virtual void receive(Game& game, uint64_t current_timestamp, MainCamera& camera, const std::vector<bool>& keybinds, float dt) = 0;
     virtual ~Event() {};
 };
 

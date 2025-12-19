@@ -14,6 +14,12 @@ class World;
 class MainCamera;
 class Event;
 
+enum class ObjectType : uint8_t {
+    NONE = 0,
+    DEFAULT = 1,
+    ITEM = 1 << 1
+};
+
 class Object3d {
 public:
     Object3d();
@@ -46,10 +52,14 @@ public:
     virtual BoundingBox get_bounding_box() const;
     virtual BoundingBox get_bounding_box(Matrix transform) const;
 
+    uint8_t get_type() const;
+
     virtual std::string to_string() const = 0;
     friend void swap(Object3d& a, Object3d& b) noexcept;
 protected:
     virtual void update_matrix(); // called automatically
+
+    uint8_t object_type_;
 
     Quaternion quaternion_;
     Vector3 position_;

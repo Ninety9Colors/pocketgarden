@@ -27,7 +27,6 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
     InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "PocketGarden");
     SetWindowSize(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
     SetExitKey(KEY_NULL);
-    event_buffer_ = {};
     shader_default_ = std::shared_ptr<Shader>(
         new Shader(LoadShader("shaders/default.vs","shaders/default.fs")),
         [](Shader* s) {
@@ -38,17 +37,8 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
     shader_default_->locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(*shader_default_, "colorDiffuse");
 }
 
-void Application::tick(std::map<std::string, std::shared_ptr<Event>>& event_buffer, Game& game) {
-    const auto player = game.get_current_player();
-    for (const auto& p : event_buffer) {
-        game.get_network()->send_packet(p.second->make_packet(), p.second->reliable());
-    }
-    event_buffer.clear();
-}
-
 void Application::run(Game& game) {
     DEBUG("Starting application...");
-    MainCamera main_camera {};
 
     const float TPS = 20.0f; // ticks per second
     float dt_tick = 0; // time elapsed since last tick (seconds)
@@ -64,7 +54,7 @@ void Application::run(Game& game) {
     int sun_color_loc = GetShaderLocation(*shader_default_,"sunColor");
     int ambient_loc = GetShaderLocation(*shader_default_,"ambient");
 
-    SetShaderValue(*shader_default_, sun_position_loc, (float[3]){0.0f,game.get_world()->get_sun()->get_position().y,0.0f}, SHADER_UNIFORM_VEC3);
+    SetShaderValue(*shader_default_, sun_position_loc, (float[3]){0.0f,game.get_world()->get_sun().get_position().y,0.0f}, SHADER_UNIFORM_VEC3);
     SetShaderValue(*shader_default_, sun_color_loc, (float[4]){1.0f,1.0f,1.0f,1.0f}, SHADER_UNIFORM_VEC4);
     SetShaderValue(*shader_default_, ambient_loc, (float[4]){1.0f,1.0f,0.75f,1.0f}, SHADER_UNIFORM_VEC4);
 
@@ -82,7 +72,7 @@ void Application::run(Game& game) {
 
         std::vector<bool> keybinds = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB), IsKeyDown(KEY_ESCAPE),
                                         IsMouseButtonPressed(MOUSE_LEFT_BUTTON), (GetMouseWheelMoveV().y > 0), (GetMouseWheelMoveV().y < 0), IsKeyPressed(KEY_SPACE), IsKeyDown(KEY_Q), IsKeyDown(KEY_E), IsKeyPressed(KEY_R)};
-        game.poll_events(game.get_current_user(), game.get_world(), game.get_network(), game, current_timestamp, event_buffer_, main_camera, keybinds,dt,shader_default_);
+        game.poll_events();
         
         const auto player = game.get_current_player();
         if (player == nullptr) {
@@ -232,8 +222,4 @@ void Application::draw_players(std::string current_user, const std::vector<std::
 void Application::exit() {
     DEBUG("Closing Window");
     CloseWindow();
-}
-
-std::map<std::string, std::shared_ptr<Event>>& Application::get_event_buffer() {
-    return event_buffer_;
 }

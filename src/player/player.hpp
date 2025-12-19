@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <deque>
 
 #include "raylib.h"
 
@@ -21,21 +22,15 @@ public:
     ~Player();
 
     void draw(std::string current_user) const;
-    bool move(Vector3 direction, const std::vector<bool>& keybinds, float dt);
+    bool move(Vector3 direction, float dt);
     void set_position(Vector3 position);
-    void add_to_model(std::unique_ptr<Object3d>&& object);
-    void set_shader(std::shared_ptr<Shader> shader);
-    std::shared_ptr<Shader> get_shader() const;
-
-    void update(std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
-
+    
     uint32_t try_pickup(Vector3 direction, std::shared_ptr<World> world, const std::vector<bool>& keybinds) const;
     void set_item(std::shared_ptr<Item> item);
     std::shared_ptr<Item> drop_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
     void use_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
 
-    void on_join();
-    void on_disconnect();
+    void set_online(bool online);
     bool is_online() const;
 
     std::string get_username() const;

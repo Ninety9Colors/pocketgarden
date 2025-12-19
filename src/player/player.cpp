@@ -129,53 +129,6 @@ std::shared_ptr<Shader> Player::get_shader() const {
     return shader_;
 }
 
-void Player::update(std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
-    bool moved = move(camera, keybinds, dt);
-    uint32_t pickup_id = try_pickup(camera, world, keybinds);
-    use_item(event_buffer, camera, world, keybinds, dt);
-    if (moved) {
-        event_buffer["PlayerMoveEvent"] = std::make_shared<PlayerMoveEvent>(shared_from_this());
-    }
-    if (pickup_id != 0) {
-        std::shared_ptr<Item> dropped = drop_item(event_buffer,camera,world,keybinds,dt);
-        if (dropped != nullptr) {
-            uint32_t id = world->load_object(dropped, dropped->get_shader());
-            event_buffer["ItemDropEvent"] = std::make_shared<ItemDropEvent>(shared_from_this());
-            if (event_buffer.find("ObjectLoadEvent") == event_buffer.end()) {
-                std::shared_ptr<ObjectLoadEvent> load_event = std::make_shared<ObjectLoadEvent>(std::map<uint32_t,std::shared_ptr<Object3d>>{}, get_username());
-                load_event->add(id, dropped);
-                event_buffer["ObjectLoadEvent"] = load_event;
-            } else {
-                std::dynamic_pointer_cast<ObjectLoadEvent>(event_buffer["ObjectLoadEvent"])->add(id, dropped);
-            }
-        }
-        std::shared_ptr<Item> item = std::dynamic_pointer_cast<Item>(world->get_objects().at(pickup_id));
-        set_item(item);
-        world->remove_object(pickup_id);
-        event_buffer["ItemPickupEvent"] = std::make_shared<ItemPickupEvent>(item, get_username());
-        if (event_buffer.find("ObjectRemoveEvent") == event_buffer.end()) {
-            std::shared_ptr<ObjectRemoveEvent> remove_event = std::make_shared<ObjectRemoveEvent>(std::vector<uint32_t>{}, get_username());
-            remove_event->add(pickup_id);
-            event_buffer["ObjectRemoveEvent"] = std::move(remove_event);
-        } else {
-            std::dynamic_pointer_cast<ObjectRemoveEvent>(event_buffer["ObjectRemoveEvent"])->add(pickup_id);
-        }
-    } else if (keybinds[9]) {
-        std::shared_ptr<Item> dropped = drop_item(event_buffer,camera,world,keybinds,dt);
-        if (dropped == nullptr)
-            return;
-        event_buffer["ItemDropEvent"] = std::make_shared<ItemDropEvent>(shared_from_this());
-        uint32_t id = world->load_object(dropped, dropped->get_shader());
-        if (event_buffer.find("ObjectLoadEvent") == event_buffer.end()) {
-            std::shared_ptr<ObjectLoadEvent> load_event = std::make_shared<ObjectLoadEvent>(std::map<uint32_t,std::shared_ptr<Object3d>>{}, get_username());
-            load_event->add(id, dropped);
-            event_buffer["ObjectLoadEvent"] = load_event;
-        } else {
-            std::dynamic_pointer_cast<ObjectLoadEvent>(event_buffer["ObjectLoadEvent"])->add(id, dropped);
-        }
-    }
-}
-
 void Player::set_item(std::shared_ptr<Item> item) {
     if (selected_item_ != nullptr && item.get() == selected_item_.get())
         return;
@@ -200,14 +153,9 @@ void Player::use_item(std::map<std::string, std::shared_ptr<Event>>& event_buffe
     selected_item_->use(event_buffer, camera, shared_from_this(), world, keybinds, dt);
 }
 
-void Player::on_join() {
-    online_ = true;
+void Player::set_online(bool online) {
+    online_ = online;
 }
-
-void Player::on_disconnect() {
-    online_ = false;
-}
-
 bool Player::is_online() const {
     return online_;
 }

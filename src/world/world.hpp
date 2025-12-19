@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include <cstdint>
+#include <functional>
 #include <vector>
 
 #include "raylib.h"
@@ -32,7 +33,7 @@ public:
     void delete_object(uint32_t object_id);
 
     const std::vector<Player>& get_players() const;
-    const std::optional<Player> get_player(std::string username) const;
+    std::optional<std::reference_wrapper<Player>> get_player(std::string username);
     Weather get_weather();
     const Cube& get_sun() const;
     void update_sun();

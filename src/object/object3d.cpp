@@ -4,13 +4,13 @@
 #include "rlgl.h"
 #include "raymath.h"
 
-Object3d::Object3d() : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(LoadMaterialDefault()), position_{0.0f,0.0f,0.0f}, scale_(1.0f), quaternion_{0.0f,0.0f,0.0f,1.0f} {
+Object3d::Object3d() : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(LoadMaterialDefault()), position_{0.0f,0.0f,0.0f}, scale_(1.0f), quaternion_{0.0f,0.0f,0.0f,1.0f} {
     update_matrix();
 }
-Object3d::Object3d(Quaternion quaternion, Vector3 position, float scale) : mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(LoadMaterialDefault()), position_(position), scale_(scale), quaternion_{quaternion} {
+Object3d::Object3d(Quaternion quaternion, Vector3 position, float scale) : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(LoadMaterialDefault()), position_(position), scale_(scale), quaternion_{quaternion} {
     update_matrix();
 }
-Object3d::Object3d(const Object3d& rhs) noexcept : quaternion_(rhs.quaternion_),position_(rhs.position_),mesh_(GenMeshCube(1.0f,1.0f,1.0f)),material_(LoadMaterialDefault()),scale_(rhs.scale_),transform_(rhs.transform_) {
+Object3d::Object3d(const Object3d& rhs) noexcept : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), quaternion_(rhs.quaternion_),position_(rhs.position_),mesh_(GenMeshCube(1.0f,1.0f,1.0f)),material_(LoadMaterialDefault()),scale_(rhs.scale_),transform_(rhs.transform_) {
     update_matrix();
 }
 Object3d::~Object3d() {
@@ -126,6 +126,10 @@ BoundingBox Object3d::get_bounding_box(Matrix transform) const {
     return box;
 }
 
+uint8_t Object3d::get_type() const {
+    return object_type_;
+}
+
 void swap(Object3d& a, Object3d& b) noexcept {
     using std::swap;
     swap(a.quaternion_,b.quaternion_);
@@ -137,8 +141,12 @@ void swap(Object3d& a, Object3d& b) noexcept {
     swap(a.id_,b.id_);
 }
 
-Item::Item() : Object3d() {}
-Item::Item(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {}
+Item::Item() : Object3d() {
+    object_type_ |= static_cast<uint8_t>(ObjectType::ITEM);
+}
+Item::Item(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {
+    object_type_ |= static_cast<uint8_t>(ObjectType::ITEM);
+}
 
 ParameterObject::ParameterObject() : Object3d() {};
 ParameterObject::ParameterObject(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {}

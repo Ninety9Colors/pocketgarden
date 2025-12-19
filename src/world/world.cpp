@@ -149,10 +149,10 @@ void World::delete_object(uint32_t object_id) {
 const std::vector<Player>& World::get_players() const {
     return players_;
 }
-const std::optional<Player> World::get_player(std::string username) const {
-    for (const Player player : players_) {
+std::optional<std::reference_wrapper<Player>> World::get_player(std::string username) {
+    for (Player& player : players_) {
         if (player.get_username() == username)
-            return player;
+            return std::ref<Player>(player);
     }
     WARN("Could not find player: " + username);
     return std::nullopt;
