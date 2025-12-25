@@ -5,6 +5,9 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <any>
+
+#include "settings.hpp"
 
 #ifdef POCKETGARDEN_DEBUG
     #define INFO(x) (log(1,(x)))
@@ -21,6 +24,8 @@
 const std::string LOG_PATH = "logs/";
 
 inline void log(const int level, const std::string message) {
+    if (level < std::any_cast<int>(Settings::get("Log Level")))
+        return;
     const std::chrono::time_point now(std::chrono::system_clock::now());
     const auto local = std::chrono::current_zone()->to_local(now);
     const std::chrono::year_month_day ymd(std::chrono::floor<std::chrono::days>(local));

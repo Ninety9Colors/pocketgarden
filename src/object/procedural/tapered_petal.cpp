@@ -9,43 +9,53 @@
 #include "raymath.h"
 
 #include "object/procedural/tapered_petal.hpp"
-#include "util.hpp"
 
-// Returns the true float index offset, not the triplet offset
+// Returns the true float index offset for a point on the petal, not the triplet offset
 static int vertex_index(int i, int j, const std::pair<int,int>& slices, bool bottom) {
     return ((slices.second+1)*i + j)*3 + ((slices.first+1)*(slices.second+1)*3*bottom);
 }
 
-TaperedPetal::TaperedPetal() : ParameterObject(), slices_{40,20} {
-    std::random_device rd;
-    seed_ = rd();
+constexpr int DEFAULT_SLICES_X = 40;
+constexpr int DEFAULT_SLICES_Y = 20;
+
+TaperedPetal::TaperedPetal() : TaperedPetal(std::random_device{}()) {}
+TaperedPetal::TaperedPetal(uint32_t seed) : ParameterObject(seed), slices_{40,20} {
     initialize_parameters();
 }
-TaperedPetal::TaperedPetal(float scale) : ParameterObject(scale), slices_{40,20} {
-    std::random_device rd;
-    seed_ = rd();
+TaperedPetal::TaperedPetal(Quaternion quaternion, Vector3 position, float scale) : TaperedPetal(quaternion, position, scale, std::random_device{}()) {}
+TaperedPetal::TaperedPetal(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : ParameterObject(quaternion,position,scale,seed), slices_{40,20} {
     initialize_parameters();
 }
-TaperedPetal::TaperedPetal(Vector3 position, float scale) : ParameterObject(position, scale), slices_{40,20} {
-    std::random_device rd;
-    seed_ = rd();
+TaperedPetal::TaperedPetal(const json& j) {
+    from_json(j);
     initialize_parameters();
 }
-TaperedPetal::TaperedPetal(ParameterMap map, uint64_t seed, Quaternion quaternion, Vector3 position, float scale) : ParameterObject(quaternion, position,scale), slices_(40,20), seed_(seed) {
-    parameter_map_ = map;
+
+json TaperedPetal::to_json() const {
+    json j = {
+        {"type","TaperedPetal"},
+        {"object_type",object_type_},
+        {"position",{{"x",position_.x},{"y",position_.y},{"z",position_.z}}},
+        {"scale",scale_},
+        {"quaternion",{{"x",quaternion_.x},{"y",quaternion_.y},{"z",quaternion_.z},{"w",quaternion_.w}}},
+        {"seed",seed_},
+        {"parameter_map",parameter_map_.to_json()},
+        {"slices",{{"first",slices_.first},{"second",slices_.second}}}
+    };
+    return j;
 }
-TaperedPetal::TaperedPetal(std::string data) : slices_{40,20} {
-    std::vector<std::string> split = split_string(data);
-    assert(split[0] == "TaperedPetal");
-    position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
-    scale_ = std::stof(split[4]);
-    quaternion_ = Quaternion{std::stof(split[5]),std::stof(split[6]),std::stof(split[7]),std::stof(split[8])};
-    seed_ = std::stoull(split[9]);
-    parameter_map_ = ParameterMap(split[10]);
+
+void TaperedPetal::from_json(const json& j) {
+    object_type_ = j.at("object_type");
+    position_ = {j.at("position")["x"],j.at("position")["y"],j.at("position")["z"]};
+    scale_ = j.at("scale");
+    quaternion_ = {j.at("quaternion")["x"],j.at("quaternion")["y"],j.at("quaternion")["z"],j.at("quaternion")["w"]};
+    seed_ = j.at("seed");
+    parameter_map_ = ParameterMap{j.at("parameter_map")};
+    slices_ = {j.at("slices")["first"],j.at("slices")["second"]};
 }
 
 void TaperedPetal::generate_mesh() {
-    UnloadMesh(mesh_);
 
     float length = parameter_map_.get_parameter("Length").value;
     float width = parameter_map_.get_parameter("Width").value;
@@ -101,18 +111,18 @@ void TaperedPetal::generate_mesh() {
             mesh_.vertices[index_bottom+1] = y;
             mesh_.vertices[index_bottom+2] = z;
 
-            Color base = ColorFromHSV(parameter_map_.get_parameter("BaseColor").min,
-                                        parameter_map_.get_parameter("BaseColor").value,
-                                        parameter_map_.get_parameter("BaseColor").max);
-            Color gradient = ColorFromHSV(parameter_map_.get_parameter("GradientColor").min,
-                                        parameter_map_.get_parameter("GradientColor").value,
-                                        parameter_map_.get_parameter("GradientColor").max);
-            Color border = ColorFromHSV(parameter_map_.get_parameter("BorderColor").min,
-                                        parameter_map_.get_parameter("BorderColor").value,
-                                        parameter_map_.get_parameter("BorderColor").max);
-            Color stripe = ColorFromHSV(parameter_map_.get_parameter("StripeColor").min,
-                                        parameter_map_.get_parameter("StripeColor").value,
-                                        parameter_map_.get_parameter("StripeColor").max);
+            Color base = ColorFromHSV(parameter_map_.get_parameter("BaseHue").value,
+                                        parameter_map_.get_parameter("BaseSaturation").value,
+                                        parameter_map_.get_parameter("BaseValue").value);
+            Color gradient = ColorFromHSV(parameter_map_.get_parameter("GradientHue").value,
+                                        parameter_map_.get_parameter("GradientValue").value,
+                                        parameter_map_.get_parameter("GradientHue").value);
+            Color border = ColorFromHSV(parameter_map_.get_parameter("BorderHue").value,
+                                        parameter_map_.get_parameter("BorderValue").value,
+                                        parameter_map_.get_parameter("BorderHue").value);
+            Color stripe = ColorFromHSV(parameter_map_.get_parameter("StripeHue").value,
+                                        parameter_map_.get_parameter("StripeValue").value,
+                                        parameter_map_.get_parameter("StripeHue").value);
 
             float gradient_width = parameter_map_.get_parameter("GradientWidth").value;
             float gradient_amount = std::max<float>(gradient_width-(length-u)/length,0.0f)/gradient_width;
@@ -253,9 +263,9 @@ void TaperedPetal::generate_mesh() {
         constexpr float ROOT2_2 = 0.7071067811865475244f;
         constexpr float epsilon = 0.0001f; // Prevent Z-fighting
         
-        Color freckle_color = ColorFromHSV(parameter_map_.get_parameter("FreckleColor").min,
-                                        parameter_map_.get_parameter("FreckleColor").value,
-                                        parameter_map_.get_parameter("FreckleColor").max);
+        Color freckle_color = ColorFromHSV(parameter_map_.get_parameter("FreckleHue").value,
+                                        parameter_map_.get_parameter("FreckleSaturation").value,
+                                        parameter_map_.get_parameter("FreckleValue").value);
         Vector3 normal = Vector3{mesh_.normals[index_vertex],mesh_.normals[index_vertex+1],mesh_.normals[index_vertex+2]};
         Vector3 position = Vector3Add(Vector3{mesh_.vertices[index_vertex],mesh_.vertices[index_vertex+1],mesh_.vertices[index_vertex+2]},
                                     normal*epsilon);
@@ -362,20 +372,6 @@ void TaperedPetal::generate_mesh() {
     update_matrix();
 }
 
-void TaperedPetal::generate_mesh(uint64_t seed) {
-    seed_ = seed;
-    generate_mesh();
-}
-
-std::string TaperedPetal::to_string() const {
-    return "TaperedPetal " +
-    std::to_string(position_.x) + " " + std::to_string(position_.y) + " " + std::to_string(position_.z) + " " +
-    std::to_string(scale_) + " " +
-    std::to_string(quaternion_.x) + " " + std::to_string(quaternion_.y) + " " + std::to_string(quaternion_.z) + " " + std::to_string(quaternion_.w) + " " +
-    std::to_string(seed_) + " (" + 
-    parameter_map_.to_string() + ")";
-}
-
 void TaperedPetal::set_slices(std::pair<int,int> slices) {
     slices_ = slices;
 }
@@ -402,26 +398,42 @@ void TaperedPetal::initialize_parameters() {
 
 
 
-    parameter_map_.set_parameter("BaseColor", Parameter{});
-    parameter_map_.seed_hsv_gaussian("BaseColor",270.0f, 430.0f, rng);
+    parameter_map_.set_parameter("BaseHue", Parameter{250.0f,340.0f,440.0f});
+    parameter_map_.seed_gaussian("BaseHue",rng);
+    parameter_map_.set_parameter("BaseSaturation", Parameter{0.0f,0.5f,1.0f});
+    parameter_map_.seed_log_normal("BaseSaturation",rng);
+    parameter_map_.set_parameter("BaseValue", Parameter{0.2f,0.7f,1.0f});
+    parameter_map_.seed_log_normal_inverse("BaseValue",rng);
 
     parameter_map_.set_parameter("BorderWidth", Parameter{0.0f,0.5f,3.0f});
     parameter_map_.seed_gaussian("BorderWidth",rng);
 
-    parameter_map_.set_parameter("BorderColor", Parameter{});
-    parameter_map_.seed_hsv_uniform("BorderColor",270.0f, 430.0f, rng);
+    parameter_map_.set_parameter("BorderHue", Parameter{250.0f,340.0f,440.0f});
+    parameter_map_.seed_gaussian("BorderHue",rng);
+    parameter_map_.set_parameter("BorderSaturation", Parameter{0.0f,0.5f,1.0f});
+    parameter_map_.seed_log_normal("BorderSaturation",rng);
+    parameter_map_.set_parameter("BorderValue", Parameter{0.2f,0.7f,1.0f});
+    parameter_map_.seed_log_normal_inverse("BorderValue",rng);
 
     parameter_map_.set_parameter("GradientWidth", Parameter{0.0f,1.5f,3.0f});
     parameter_map_.seed_gaussian("GradientWidth",rng);
 
-    parameter_map_.set_parameter("GradientColor", Parameter{});
-    parameter_map_.seed_hsv_gaussian("GradientColor",270.0f, 430.0f, rng);
+    parameter_map_.set_parameter("GradientHue", Parameter{250.0f,340.0f,440.0f});
+    parameter_map_.seed_gaussian("GradientHue",rng);
+    parameter_map_.set_parameter("GradientSaturation", Parameter{0.0f,0.5f,1.0f});
+    parameter_map_.seed_log_normal("GradientSaturation",rng);
+    parameter_map_.set_parameter("GradientValue", Parameter{0.2f,0.7f,1.0f});
+    parameter_map_.seed_log_normal_inverse("GradientValue",rng);
 
     parameter_map_.set_parameter("StripeWidth", Parameter{0.0f,0.125f,0.25f});
     parameter_map_.seed_gaussian("StripeWidth",rng);
 
-    parameter_map_.set_parameter("StripeColor", Parameter{});
-    parameter_map_.seed_hsv_uniform("StripeColor",270.0f, 430.0f, rng);
+    parameter_map_.set_parameter("StripeHue", Parameter{250.0f,340.0f,440.0f});
+    parameter_map_.seed_gaussian("StripeHue",rng);
+    parameter_map_.set_parameter("StripeSaturation", Parameter{0.0f,0.5f,1.0f});
+    parameter_map_.seed_log_normal("StripeSaturation",rng);
+    parameter_map_.set_parameter("StripeValue", Parameter{0.2f,0.7f,1.0f});
+    parameter_map_.seed_log_normal_inverse("StripeValue",rng);
 
     parameter_map_.set_parameter("FreckleAmount", Parameter{0.0f,0.45f,0.9f});
     parameter_map_.seed_gaussian("FreckleAmount",rng);
@@ -435,8 +447,12 @@ void TaperedPetal::initialize_parameters() {
     parameter_map_.set_parameter("FreckleCoverage", Parameter{0.0f,0.6f,0.9f});
     parameter_map_.seed_gaussian("FreckleCoverage",rng);
 
-    parameter_map_.set_parameter("FreckleColor", Parameter{});
-    parameter_map_.seed_hsv_uniform("FreckleColor",270.0f, 430.0f, rng);
+    parameter_map_.set_parameter("FreckleHue", Parameter{250.0f,340.0f,440.0f});
+    parameter_map_.seed_gaussian("FreckleHue",rng);
+    parameter_map_.set_parameter("FreckleSaturation", Parameter{0.0f,0.5f,1.0f});
+    parameter_map_.seed_log_normal("FreckleSaturation",rng);
+    parameter_map_.set_parameter("FreckleValue", Parameter{0.0f,0.2f,0.3f});
+    parameter_map_.seed_log_normal("FreckleValue",rng);
     
     parameter_map_.set_parameter("CreaseBoolean", Parameter{0.0f,0.0f,1.0f});
     

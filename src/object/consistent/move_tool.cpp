@@ -9,146 +9,94 @@
 #include "object/consistent/cube.hpp"
 #include "object/consistent/move_tool.hpp"
 #include "player/maincamera.hpp"
-#include "util.hpp"
 
-MoveTool::MoveTool() : Item(), holding_distance_(2.0f) {
-    held_id_ = 0;
-    speed_ = 2.0f;
-    material_.maps[MATERIAL_MAP_DIFFUSE].color = GREEN;
-    UnloadMesh(mesh_);
-    mesh_ = GenMeshCylinder(0.25f,0.5f,10);
+MoveTool::MoveTool() : Item(), holding_distance_(2.0f), held_id_(0), speed_(2.0f) {
+    generate_mesh();
+    update_matrix();
+}
+MoveTool::MoveTool(const json& j) {
+    from_json(j);
+    generate_mesh();
     update_matrix();
 }
 
-MoveTool::MoveTool(std::string data) : Item() {
-    std::vector<std::string> split = split_string(data);
-    assert(split[0] == "MoveTool" && split.size() == 10);
-    position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
-    holding_distance_ = std::stof(split[4]);
-    scale_ = std::stof(split[5]);
-    quaternion_ = Quaternion{std::stof(split[6]),std::stof(split[7]),std::stof(split[8]),std::stof(split[9])};
-    held_id_ = 0;
-    speed_ = 2.0f;
-    material_.maps[MATERIAL_MAP_DIFFUSE].color = GREEN;
-    UnloadMesh(mesh_);
-    mesh_ = GenMeshCylinder(0.25f,0.5f,10);
+MoveTool::MoveTool(Quaternion quaternion, Vector3 position, float scale) : Item(quaternion, position,scale), holding_distance_(2.0f), held_id_(0), speed_(2.0f) {
+    generate_mesh();
     update_matrix();
 }
 
-MoveTool::MoveTool(Vector3 position, float scale) : Item(position,scale), holding_distance_(2.0f) {
-    held_id_ = 0;
-    speed_ = 2.0f;
+void MoveTool::generate_mesh() {
     material_.maps[MATERIAL_MAP_DIFFUSE].color = GREEN;
-    UnloadMesh(mesh_);
     mesh_ = GenMeshCylinder(0.25f,0.5f,10);
-    update_matrix();
 }
 
-void MoveTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
-    constexpr float epsilon = 0.02f;
-    if (in_use()) {
-        if (world->get_objects().find(held_id_) == world->get_objects().end()) {
+json MoveTool::to_json() const {
+    json j = {
+        {"type","MoveTool"},
+        {"object_type",object_type_},
+        {"position",{{"x",position_.x},{"y",position_.y},{"z",position_.z}}},
+        {"held_id",held_id_},
+        {"scale",scale_},
+        {"holding_distance",holding_distance_},
+        {"speed",speed_},
+        {"quaternion",{{"x",quaternion_.x},{"y",quaternion_.y},{"z",quaternion_.z},{"w",quaternion_.w}}}
+    };
+    return j;
+}
+void MoveTool::from_json(const json& j) {
+    object_type_ = j.at("object_type");
+    position_ = {j.at("position")["x"],j.at("position")["y"],j.at("position")["z"]};
+    held_id_ = j.at("held_id");
+    scale_ = j.at("scale");
+    quaternion_ = {j.at("quaternion")["x"],j.at("quaternion")["y"],j.at("quaternion")["z"],j.at("quaternion")["w"]};
+    speed_ = j.at("speed");
+    holding_distance_ = j.at("holding_distance");
+    generate_mesh();
+}
+
+void MoveTool::use(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) {
+    constexpr float epsilon = 0.02f; // distance at which where the object stops moving toward pointed location
+    if (held_id_ != 0) {
+        if (!game.get_world().contains_object(held_id_)) {
+            WARN("Tried to move nonexistent id " + std::to_string(held_id_) + ", resetting to 0");
             held_id_ = 0;
         } else {
-            std::shared_ptr<Object3d> held_item = world->get_objects().at(held_id_);
             if (keybinds[7])
                 holding_distance_ += 0.5f;
             else if (keybinds[8])
                 holding_distance_ -= 0.5f;
-            Vector3 pos = held_item->get_position();
+            Vector3 pos = game.get_world().get_object_position(held_id_);
             float x = pos.x;
             float y = pos.y;
             float z = pos.z;
+            MainCamera& camera = game.get_camera();
             float target_x = camera.get_position().x + camera.get_direction().x * holding_distance_;
             float target_y = std::max(0.0f,camera.get_position().y + camera.get_direction().y * holding_distance_);
             float target_z = camera.get_position().z + camera.get_direction().z * holding_distance_;
-            if ((x <= (target_x-epsilon) || x >= (target_x+epsilon)) || (y <= (target_y-epsilon) || y >= (target_y+epsilon)) || (z <= (target_z-epsilon) || z >= (target_z+epsilon))) {
+            if (pos.x != target_x || pos.y != target_y || pos.z != target_z) {
                 float move_magnitude = std::sqrt(std::pow(x - target_x,2) + std::pow(y - target_y,2) + std::pow(z - target_z,2));
                 Vector3 move_direction = {(target_x-x)/move_magnitude, (target_y-y)/move_magnitude, (target_z-z)/move_magnitude};
                 float move_distance = speed_*dt*(move_magnitude);
-
                 if (move_magnitude <= epsilon) {
-                    held_item->set_position(Vector3{target_x, target_y, target_z});
+                    game.get_world().move_object(held_id_,Vector3{target_x, target_y, target_z});
                 } else {
-                    held_item->set_position(Vector3{x + move_direction.x*move_distance, y + move_direction.y*move_distance, z + move_direction.z*move_distance});
+                    game.get_world().move_object(held_id_,Vector3{x + move_direction.x*move_distance, y + move_direction.y*move_distance, z + move_direction.z*move_distance});
                 }
-                if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
-                    std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,held_item->get_position());
-                } else {
-                    ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{}, user->get_username());
-                    move_event.add(held_id_,held_item->get_position());
-                    event_buffer["ObjectMoveEvent"] = std::make_shared<ObjectMoveEvent>(move_event);
-                }
+                game.queue_event_send(std::make_unique<ObjectMoveEvent>(held_id_,game.get_world().get_object_position(held_id_),username));
             }
         }
     }
-    if (!keybinds[6])
+    if (!keybinds[6]) // mouse left click
         return;
-    if (in_use()) {
+    if (held_id_ != 0) {
         held_id_ = 0;
-    } else {
-        Ray ray = Ray{camera.get_position(), camera.get_direction()};
-        uint32_t nearest = 0;
-        float min_distance = std::numeric_limits<float>::infinity();
-        for (const auto& p : world->get_objects()) {
-            if (p.second.get() == this) {
-                continue;
-            }
-            RayCollision c = GetRayCollisionBox(ray, p.second->get_bounding_box());
-            if (c.hit) {
-                INFO("Hitting object " + p.second->to_string());
-                float d = c.distance;
-                if (d < min_distance) {
-                    nearest = p.first;
-                    min_distance = d;
-                }
-            }
-        }
-        if (nearest != 0) {
-            held_id_ = nearest;
-            std::shared_ptr<Object3d> held_item = world->get_objects().at(held_id_);
-            Vector3 pos = held_item->get_position();
-            float x = pos.x;
-            float y = pos.y;
-            float z = pos.z;
-            float target_x = camera.get_position().x + camera.get_direction().x * holding_distance_;
-            float target_y = std::max(0.0f,camera.get_position().y + camera.get_direction().y * holding_distance_);
-            float target_z = camera.get_position().z + camera.get_direction().z * holding_distance_;
-            if ((x >= (target_x-epsilon) && x <= (target_x+epsilon)) && (y >= (target_y-epsilon) && y <= (target_y+epsilon)) && (z >= (target_z-epsilon) && z <= (target_z+epsilon)))
-                return;
-            float move_magnitude = std::sqrt(std::pow(x - target_x,2) + std::pow(y - target_y,2) + std::pow(z - target_z,2));
-            Vector3 move_direction = {(target_x-x)/move_magnitude, (target_y-y)/move_magnitude, (target_z-z)/move_magnitude};
-            float move_distance = speed_*dt*(move_magnitude);
-
-            if (move_magnitude <= epsilon) {
-                held_item->set_position(Vector3{target_x, target_y, target_z});
-            } else {
-                held_item->set_position(Vector3{x + move_direction.x*move_distance, y + move_direction.y*move_distance, z + move_direction.z*move_distance});
-            }
-            if (event_buffer.find("ObjectMoveEvent") != event_buffer.end()) {
-                std::dynamic_pointer_cast<ObjectMoveEvent>(event_buffer["ObjectMoveEvent"])->add(held_id_,held_item->get_position());
-            } else {
-                ObjectMoveEvent move_event = ObjectMoveEvent(std::map<uint32_t, Vector3>{}, user->get_username());
-                move_event.add(held_id_,held_item->get_position());
-                event_buffer["ObjectMoveEvent"] = std::make_shared<ObjectMoveEvent>(move_event);
-            }
-        }
+        return;
     }
+    uint32_t nearest = game.get_world().raycast_nearest({game.get_camera().get_position(), game.get_camera().get_direction()});
+    INFO("Player " + username + " clicked with MoveTool and found id: " + std::to_string(nearest));
+    held_id_ = nearest;
 }
 
-void MoveTool::prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
+void MoveTool::on_drop(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) {
     held_id_ = 0;
-}
-
-bool MoveTool::in_use() const {
-    return held_id_ != 0;
-}
-
-std::string MoveTool::to_string() const {
-    std::string result = "MoveTool " + 
-        std::to_string(position_.x) + " " + std::to_string(position_.y) + " " + std::to_string(position_.z) + " " +
-        std::to_string(holding_distance_) + " " +
-        std::to_string(scale_) + " " +
-        std::to_string(quaternion_.x) + " " + std::to_string(quaternion_.y) + " " + std::to_string(quaternion_.z) + " " + std::to_string(quaternion_.w);
-    return result;
 }

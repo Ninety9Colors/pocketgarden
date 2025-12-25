@@ -4,14 +4,19 @@
 #include <memory>
 #include <cstdint>
 #include <vector>
+#include <queue>
 
 #include "raylib.h"
+#include "json.hpp"
+using json = nlohmann::json;
 
 #include "object/procedural/parameter.hpp"
 
 class Player;
 class World;
 class MainCamera;
+class Event;
+class Game;
 class Event;
 
 enum class ObjectType : uint8_t {
@@ -24,8 +29,7 @@ class Object3d {
 public:
     Object3d();
     Object3d(Quaternion quaternion, Vector3 position, float scale);
-    Object3d(const Object3d& rhs) noexcept;
-    Object3d& operator=(Object3d rhs) noexcept {swap(*this,rhs); return *this;};
+    Object3d(const Object3d& rhs) ;
     virtual ~Object3d();
 
     void set_id(uint32_t id) {id_ = id;}
@@ -33,9 +37,9 @@ public:
 
     virtual void generate_mesh();
 
-    virtual void draw() const;
-    virtual void draw(Matrix transform) const;
-    virtual void draw_offset(float x, float y, float z) const;
+    virtual void draw(Game& game) const;
+    virtual void draw(Game& game, Matrix transform) const;
+    virtual void draw_offset(Game& game, float x, float y, float z) const;
 
     virtual void set_quaternion(Quaternion quaternion);
     virtual Quaternion get_quaternion() const;
@@ -54,8 +58,14 @@ public:
 
     uint8_t get_type() const;
 
-    virtual std::string to_string() const = 0;
     friend void swap(Object3d& a, Object3d& b) noexcept;
+
+    virtual json to_json() const = 0;
+    virtual void from_json(const json& j) = 0;
+
+    // Item Methods
+    virtual void use(Game& game, const std::string username, const std::vector<bool>& keybinds, float dt);
+    virtual void on_drop(Game& game, std::string username, const std::vector<bool>& keybinds, float dt);
 protected:
     virtual void update_matrix(); // called automatically
 
@@ -75,25 +85,29 @@ class Item : public Object3d {
 public:
     Item();
     Item(Quaternion quaternion, Vector3 position, float scale);
-    virtual void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) = 0;
-    virtual void prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) = 0;
     virtual ~Item() {};
+    virtual void use(Game& game, const std::string username, const std::vector<bool>& keybinds, float dt) = 0;
+    virtual void on_drop(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) = 0;
 };
 
 class ParameterObject : public Object3d {
 public:
     ParameterObject();
+    ParameterObject(uint32_t seed);
     ParameterObject(Quaternion quaternion, Vector3 position, float scale);
+    ParameterObject(Quaternion quaternion, Vector3 position, float scale, uint32_t seed);
+    virtual ~ParameterObject() {};
 
+    // This function should do nothing if parameter map is empty
+    // Should be called explicitly after the object is created - lazy loading mesh?
     virtual void generate_mesh() = 0;
     
-    void set_parameters(ParameterMap map);
+    void set_parameter_map(ParameterMap map);
     void set_parameter(std::string name, float value);
+    void set_parameter(std::string name, Parameter parameter);
     const Parameter get_parameter(std::string name) const;
-
-    virtual ~ParameterObject() {};
 protected:
     virtual void initialize_parameters() = 0;
-
-    ParameterMap parameter_map_; 
+    ParameterMap parameter_map_;
+    uint32_t seed_;
 };

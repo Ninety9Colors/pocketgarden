@@ -9,6 +9,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include "raylib.h"
+#include "json.hpp"
+using json = nlohmann::json;
 
 #include "application.hpp"
 #include "logging.hpp"
@@ -22,19 +24,17 @@ constexpr int DEFAULT_SCREEN_WIDTH = 1280;
 constexpr int DEFAULT_SCREEN_HEIGHT = 720;
 constexpr int FONT_SIZE = 40;
 
-Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(false), port_focus_(false), username_focus_(false) {
+Application::Application() : shader_default_{0}, ip_({0}), port_({0}), username_({0}), ip_focus_(false), port_focus_(false), username_focus_(false) {
+    // TODO: Load settings from file
+    Settings::set("Camera Sensitivity",0.001f);
+    Settings::set("Log Level", 1);
+    
     DEBUG("Initializing window with size " + std::to_string(DEFAULT_SCREEN_WIDTH) + "," + std::to_string(DEFAULT_SCREEN_HEIGHT));
     InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "PocketGarden");
     SetWindowSize(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
     SetExitKey(KEY_NULL);
-    shader_default_ = std::shared_ptr<Shader>(
-        new Shader(LoadShader("shaders/default.vs","shaders/default.fs")),
-        [](Shader* s) {
-            UnloadShader(*s);
-            delete s;
-        }
-    );
-    shader_default_->locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(*shader_default_, "colorDiffuse");
+    shader_default_ = LoadShader("shaders/default.vs","shaders/default.fs");
+    shader_default_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_default_, "colorDiffuse");
 }
 
 void Application::run(Game& game) {
@@ -50,13 +50,13 @@ void Application::run(Game& game) {
     const int UI_UPDATE_INTERVAL = 1; // (seconds)
     uint64_t last_ui_update = 0;
 
-    int sun_position_loc = GetShaderLocation(*shader_default_,"sunPos");
-    int sun_color_loc = GetShaderLocation(*shader_default_,"sunColor");
-    int ambient_loc = GetShaderLocation(*shader_default_,"ambient");
+    int sun_position_loc = GetShaderLocation(shader_default_,"sunPos");
+    int sun_color_loc = GetShaderLocation(shader_default_,"sunColor");
+    int ambient_loc = GetShaderLocation(shader_default_,"ambient");
 
-    SetShaderValue(*shader_default_, sun_position_loc, (float[3]){0.0f,game.get_world()->get_sun().get_position().y,0.0f}, SHADER_UNIFORM_VEC3);
-    SetShaderValue(*shader_default_, sun_color_loc, (float[4]){1.0f,1.0f,1.0f,1.0f}, SHADER_UNIFORM_VEC4);
-    SetShaderValue(*shader_default_, ambient_loc, (float[4]){1.0f,1.0f,0.75f,1.0f}, SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader_default_, sun_position_loc, (float[3]){0.0f,game.get_world().get_sun().get_position().y,0.0f}, SHADER_UNIFORM_VEC3);
+    SetShaderValue(shader_default_, sun_color_loc, (float[4]){1.0f,1.0f,1.0f,1.0f}, SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader_default_, ambient_loc, (float[4]){1.0f,1.0f,0.75f,1.0f}, SHADER_UNIFORM_VEC4);
 
     std::string fps_buffer;
 
@@ -65,7 +65,6 @@ void Application::run(Game& game) {
             display_menu(game);
             continue;
         }
-
         uint64_t current_timestamp = std::time(nullptr);
         float dt = GetFrameTime(); // elapsed seconds of last frame (seconds)
         dt_tick += dt;
@@ -73,54 +72,54 @@ void Application::run(Game& game) {
         std::vector<bool> keybinds = {IsKeyDown(KEY_W), IsKeyDown(KEY_A), IsKeyDown(KEY_S), IsKeyDown(KEY_D), IsKeyDown(KEY_TAB), IsKeyDown(KEY_ESCAPE),
                                         IsMouseButtonPressed(MOUSE_LEFT_BUTTON), (GetMouseWheelMoveV().y > 0), (GetMouseWheelMoveV().y < 0), IsKeyPressed(KEY_SPACE), IsKeyDown(KEY_Q), IsKeyDown(KEY_E), IsKeyPressed(KEY_R)};
         game.poll_events();
-        
-        const auto player = game.get_current_player();
-        if (player == nullptr) {
-            WARN("Could not find player! May be waiting on SyncEvent");
+        if (game.get_world().get_player(game.get_current_username()) == std::nullopt) {
+            WARN("Could not find current username: " + game.get_current_username() + ", could be waiting on world SyncEvent");
+            game.tick(keybinds,current_timestamp,dt);
             continue;
         }
-
-        player->update(event_buffer_, main_camera, game.get_world(), keybinds, dt);
+        game.update_current_player(keybinds,dt);
+        game.update_main_camera(GetMouseDelta());
         if (dt_tick >= 1.0f/TPS) {
-            if (current_timestamp-last_weather_update >= WEATHER_UPDATE_INTERVAL && game.get_network()->is_host()) {
-                bool updated = game.get_world()->get_weather()->update();
+            if (current_timestamp-last_weather_update >= WEATHER_UPDATE_INTERVAL && game.get_network().is_host()) {
+                bool updated = game.get_world().get_weather().update();
                 if (updated) {
                     DEBUG("Updating weather information in world and shader...");
-                    event_buffer_["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(game.get_world()->get_weather()->get_weather_id());
-                    game.get_world()->get_weather()->update_sun(current_timestamp);
-                    game.get_world()->update_sun();
+                    game.queue_event_send(std::make_unique<WeatherUpdateEvent>(game.get_world().get_weather().get_weather_id()));
+                    game.get_world().get_weather().update_sun(current_timestamp);
+                    game.get_world().update_sun();
 
                     // Pass new lighting information to shader
-                    const Vector3 sun_position = game.get_world()->get_sun()->get_position();
+                    const Vector3 sun_position = game.get_world().get_sun().get_position();
                     float sun_pos[3] = {sun_position.x, sun_position.y, sun_position.z};
-                    SetShaderValue(*shader_default_, sun_position_loc, sun_pos, SHADER_UNIFORM_VEC3);
+                    SetShaderValue(shader_default_, sun_position_loc, sun_pos, SHADER_UNIFORM_VEC3);
                     float sun_color[4] = {1.0f,1.0f,(std::pow(std::max(sun_position.y,0.0f),2)/10000.0f),1.0f};
-                    SetShaderValue(*shader_default_, sun_color_loc, sun_color, SHADER_UNIFORM_VEC4);
+                    SetShaderValue(shader_default_, sun_color_loc, sun_color, SHADER_UNIFORM_VEC4);
 
                     float ambient_level = (std::pow(std::max(sun_position.y,0.0f),2)/10000.0f)*0.5f + 0.25f;
                     float ambient[4] = {ambient_level,ambient_level,ambient_level,1.0f};
-                    SetShaderValue(*shader_default_, ambient_loc, ambient, SHADER_UNIFORM_VEC4);
+                    SetShaderValue(shader_default_, ambient_loc, ambient, SHADER_UNIFORM_VEC4);
                 } else {
                     WARN("Failed to retrieve weather information");
                 }
                 last_weather_update = current_timestamp;
             }
-            tick(event_buffer_, game);
+            game.tick(keybinds,current_timestamp,dt);
             dt_tick = 0;
             total_ticks++;
         }
-        main_camera.update(player, GetMouseDelta());
-
-        float cam_pos[3] = {main_camera.get_position().x, main_camera.get_position().y, main_camera.get_position().z};
-        SetShaderValue(*shader_default_, shader_default_->locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
+        float cam_pos[3] = {game.get_camera().get_position().x, game.get_camera().get_position().y, game.get_camera().get_position().z};
+        SetShaderValue(shader_default_, shader_default_.locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
 
         BeginDrawing();
 
-        BeginMode3D(main_camera.get_camera());
+        BeginMode3D(game.get_camera().get_camera());
         ClearBackground(SKYBLUE);
-        game.get_world()->get_sun()->draw();
-        draw_players(game.get_current_user(), game.get_world()->get_players(), main_camera);
-        draw_objects(game.get_world()->get_objects());
+
+        // Draw Calls
+        game.get_world().get_sun().draw(game);
+        draw_players(game,game.get_current_username(), game.get_world().get_players());
+        draw_objects(game,game.get_world().get_objects());
+
         EndMode3D();
 
         // Crosshair
@@ -135,11 +134,11 @@ void Application::run(Game& game) {
         int fps_size = MeasureText(fps_buffer.c_str(),FONT_SIZE);
         GuiLabel((Rectangle){0,0,fps_size,FONT_SIZE},fps_buffer.c_str());
 
-        if (keybinds[4]) {display_scoreboard(game.get_world()->get_players());}
+        if (keybinds[4]) {display_scoreboard(game.get_world().get_players());}
         EndDrawing();
-        if (keybinds[5]) {game.disconnect();}
+        if (keybinds[5]) {game.close_game();}
     }
-    game.disconnect();
+    game.close_game();
 }
 
 void Application::display_menu(Game& game) {
@@ -176,46 +175,44 @@ void Application::display_menu(Game& game) {
     GuiTextBox(username_box, username_, 15+1, username_focus_);
     if (GuiButton((Rectangle){width/2-text_width/2, height/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Host")) {
         if (ip_[0] == '\0' || port_[0] == '\0' || username_[0] == '\0') {
-        } else if (game.host((const char*)username_,"test world.data",ip_,port_,shader_default_)) {
+        } else if (game.host((const char*)username_,"test world.json",ip_,port_)) {
             DisableCursor();
-            event_buffer_.clear();
         }
     } else if (GuiButton((Rectangle){width/2+text_width*0.1, height/2-FONT_SIZE/2+(FONT_SIZE*2), text_width*0.4, FONT_SIZE}, "Join")) {
         if (ip_[0] == '\0' || port_[0] == '\0' || username_[0] == '\0') {
         } else if (game.join((const char*)username_,ip_,port_)) {
             DisableCursor();
-            event_buffer_.clear();
         }
     }
     EndDrawing();
 }
 
-void Application::display_scoreboard(const std::vector<std::shared_ptr<Player>>& players) {
+void Application::display_scoreboard(const std::vector<Player>& players) {
     int width = GetScreenWidth();
     int height = GetScreenHeight();
     int lineHeight = FONT_SIZE + 4;
     int y_pos = 0;
     for (int i = 0; i < players.size(); ++i) {
-        if (players[i]->is_online()) {
-            std::string line = players[i]->get_username() + " (" +
-                        std::to_string((int)players[i]->get_position().x) + "," +
-                        std::to_string((int)players[i]->get_position().y) + "," +
-                        std::to_string((int)players[i]->get_position().z) + ")";
+        if (players[i].is_online()) {
+            std::string line = players[i].get_username() + " (" +
+                        std::to_string((int)players[i].get_position().x) + "," +
+                        std::to_string((int)players[i].get_position().y) + "," +
+                        std::to_string((int)players[i].get_position().z) + ")";
             DrawText(line.c_str(), width/2-MeasureText(line.c_str(), FONT_SIZE)/2, y_pos, FONT_SIZE, LIGHTGRAY);
             y_pos += lineHeight;
         }
     }
 }
 
-void Application::draw_objects(const std::map<uint32_t, std::shared_ptr<Object3d>>& objects) {
+void Application::draw_objects(Game& game, const std::map<uint32_t, std::unique_ptr<Object3d>>& objects) const {
     for (const auto& p : objects) {
-        p.second->draw();
+        p.second->draw(game);
     }
 }
 
-void Application::draw_players(std::string current_user, const std::vector<std::shared_ptr<Player>>& players, const MainCamera& main_camera) {
+void Application::draw_players(Game& game, std::string current_user, const std::vector<Player>& players) const {
     for (const auto &player : players) {
-        player->draw(current_user, main_camera);
+        player.draw(game);
     }
 }
 

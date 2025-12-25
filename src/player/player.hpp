@@ -18,17 +18,18 @@ class Player {
 public:
     Player();
     Player(std::string username, Vector3 position);
-    Player(std::string data);
-    ~Player();
+    Player(const json& j);
+    Player(const Player& rhs);
+    Player& operator=(Player rhs) {swap(*this,rhs);return *this;}
+    ~Player() {};
 
-    void draw(std::string current_user) const;
-    bool move(Vector3 direction, float dt);
+    void draw(Game& game) const;
+    void move(Vector3 direction, const std::vector<bool>& keybinds, float dt);
     void set_position(Vector3 position);
     
-    uint32_t try_pickup(Vector3 direction, std::shared_ptr<World> world, const std::vector<bool>& keybinds) const;
-    void set_item(std::shared_ptr<Item> item);
-    std::shared_ptr<Item> drop_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
-    void use_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt);
+    void set_item(std::unique_ptr<Object3d> item);
+    std::unique_ptr<Object3d> drop_item(Game& game, std::string username, const std::vector<bool>& keybinds, float dt);
+    void use_item(Game& game, const std::vector<bool>& keybinds, float dt);
 
     void set_online(bool online);
     bool is_online() const;
@@ -36,8 +37,12 @@ public:
     std::string get_username() const;
     const Cube& get_hitbox();
     Vector3 get_position() const;
+    float get_pickup_range() const;
 
-    std::string to_string() const;
+    json to_json() const;
+    void from_json(const json& j);
+
+    friend void swap(Player& a, Player& b);
 private:
     std::string username_;
     float speed_;
@@ -48,5 +53,5 @@ private:
     Vector3 position_; // Center of the bottom face of the hitbox
     Cube hitbox_;
     Cube head_;
-    std::unique_ptr<Item> selected_item_;
+    std::unique_ptr<Object3d> selected_item_;
 };

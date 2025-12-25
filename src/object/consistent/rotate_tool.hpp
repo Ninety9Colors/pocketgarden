@@ -15,22 +15,22 @@
 class RotateTool : public Item {
 public:
     RotateTool();
-    RotateTool(std::string data);
-    RotateTool(Vector3 position, float scale);
+    RotateTool(const json& j);
+    RotateTool(Quaternion quaternion, Vector3 position, float scale);
 
-    void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
-    void draw() const override;
-    void draw_offset(float x, float y, float z) const override;
+    void draw(Game& game) const override;
+    void draw(Game& game, Matrix transform) const override;
+    void draw_offset(Game& game, float x, float y, float z) const override;
 
-    void prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
+    void use(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) override;
+    void on_drop(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) override;
 
-    bool in_use() const;
+    void generate_mesh() override;
 
-    std::string to_string() const override;
+    json to_json() const override;
+    void from_json(const json& j);
 private:
     uint32_t held_id_;
-    std::weak_ptr<Object3d> held_item_;
-
     Vector3 axis_;
 
     float rotate_speed_; // radians per second

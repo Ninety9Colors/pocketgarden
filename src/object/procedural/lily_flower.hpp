@@ -11,15 +11,15 @@
 class LilyFlower : public ParameterObject {
 public:
     LilyFlower();
-    LilyFlower(float scale);
-    LilyFlower(Vector3 position, float scale);
-    LilyFlower(ParameterMap map, uint64_t seed, Quaternion quaternion, Vector3 position, float scale);
-    LilyFlower(std::string data);
+    LilyFlower(uint32_t seed);
+    LilyFlower(Quaternion quaternion, Vector3 position, float scale);
+    LilyFlower(Quaternion quaternion, Vector3 position, float scale, uint32_t seed);
+    LilyFlower(const json& j);
+    virtual ~LilyFlower() {};
 
-    void draw() const override;
-    void draw(Matrix transform) const override;
-    void draw_offset(float x, float y, float z) const override;
-    void set_shader(std::shared_ptr<Shader> shader) override;
+    void draw(Game& game) const override;
+    void draw(Game& game,Matrix transform) const override;
+    void draw_offset(Game& game,float x, float y, float z) const override;
 
     void update_matrix() override;
 
@@ -27,10 +27,10 @@ public:
     BoundingBox get_bounding_box(Matrix transform) const override;
 
     void generate_mesh() override;
-    void generate_mesh(uint64_t seed);
     void set_slices(std::pair<int,int> slices);
 
-    std::string to_string() const override;
+    json to_json() const override;
+    void from_json(const json& j) override;
 private:
     void initialize_parameters() override;
 
@@ -41,5 +41,4 @@ private:
     std::array<Matrix,3> lower_transforms_;
 
     std::pair<int,int> slices_;
-    uint64_t seed_;
 };

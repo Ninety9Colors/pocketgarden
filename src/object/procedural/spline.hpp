@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 
+#include "json.hpp"
+using json = nlohmann::json;
+
 #include "raylib.h"
 
 struct SplineNode {
@@ -12,7 +15,7 @@ struct SplineNode {
 class Spline {
 public:
     Spline();
-    Spline(std::string data);
+    Spline(const json& j);
 
     int size() const;
 
@@ -22,7 +25,8 @@ public:
     Vector3 get(float t) const;
     const SplineNode& get_node(int index) const;
 
-    std::string to_string() const;
+    json to_json() const;
+    void from_json(const json& j);
 private:
     void update_tangent(int index);
 

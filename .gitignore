@@ -1,3 +1,3 @@
 *.env
-test world.data
-*.data
+test world.json
+*.json

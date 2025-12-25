@@ -8,72 +8,71 @@
 
 #include "object/consistent/cube.hpp"
 #include "player/maincamera.hpp"
-#include "util.hpp"
+
 #include <ctime>
 
-SunTool::SunTool() : Item() {
-    UnloadMesh(mesh_);
-    mesh_ = GenMeshSphere(0.25f,8,8);
-    speed_ = 1.0f;
-    color_ = Color{200,200,0,255};
-    time_offset_ = 0;
-    material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
+SunTool::SunTool() : Item(), speed_(1.0f), color_(200,200,0,255), time_offset_(0) {
+    generate_mesh();
     update_matrix();
 }
 
-SunTool::SunTool(std::string data) : Item() {
-    std::vector<std::string> split = split_string(data);
-    assert(split[0] == "SunTool" && split.size() == 6);
-    position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
-    time_offset_ = std::stof(split[4]);
-    scale_ = std::stof(split[5]);
-    UnloadMesh(mesh_);
-    mesh_ = GenMeshSphere(0.25f,8,8);
-    speed_ = 1.0f;
-    color_ = Color{200,200,0,255};
-    time_offset_ = 0;
-    material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
+SunTool::SunTool(const json& j) {
+    from_json(j);
+    generate_mesh();
+    update_matrix();
+};
+
+SunTool::SunTool(Quaternion quaternion, Vector3 position, float scale) : Item(quaternion, position,scale), speed_(1.0f), color_(200,200,0,255), time_offset_(0) {
+    generate_mesh();
     update_matrix();
 }
 
-SunTool::SunTool(Vector3 position, float scale) : Item(position,scale) {
-    UnloadMesh(mesh_);
+void SunTool::generate_mesh() {
     mesh_ = GenMeshSphere(0.25f,8,8);
-    speed_ = 1.0f;
-    color_ = Color{200,200,0,255};
-    time_offset_ = 0;
     material_.maps[MATERIAL_MAP_DIFFUSE].color = color_;
-    update_matrix();
 }
 
-void SunTool::use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
-    if (keybinds[7]) {
-        int64_t current_timestamp = std::time(nullptr);
+json SunTool::to_json() const {
+    json j = {
+        {"type","SunTool"},
+        {"object_type",object_type_},
+        {"position",{{"x",position_.x},{"y",position_.y},{"z",position_.z}}},
+        {"speed",speed_},
+        {"time_offset",time_offset_},
+        {"scale",scale_},
+        {"color",{{"r",color_.r},{"g",color_.g},{"b",color_.b},{"a",color_.a}}},
+        {"quaternion",{{"x",quaternion_.x},{"y",quaternion_.y},{"z",quaternion_.z},{"w",quaternion_.w}}}
+    };
+    return j;
+}
+
+void SunTool::from_json(const json& j) {
+    object_type_ = j.at("object_type");
+    position_ = {j.at("position")["x"],j.at("position")["y"],j.at("position")["z"]};
+    speed_ = j.at("speed");
+    time_offset_ = j.at("time_offset");
+    scale_ = j.at("scale");
+    color_ = {j.at("color")["r"],j.at("color")["g"],j.at("color")["b"],j.at("color")["a"]};
+    quaternion_ = {j.at("quaternion")["x"],j.at("quaternion")["y"],j.at("quaternion")["z"],j.at("quaternion")["w"]};
+}
+
+void SunTool::use(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) {
+    if (!keybinds[7] && !keybinds[8])
+        return;
+    int64_t current_timestamp = std::time(nullptr);
+    if (keybinds[7])
         time_offset_ += (int)(600*speed_);
-        world->get_weather()->update_sun(current_timestamp+time_offset_);
-        world->update_sun();
-        event_buffer["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(world->get_weather()->get_weather_id(), time_offset_);
-    } else if (keybinds[8]) {
-        int64_t current_timestamp = std::time(nullptr);
+    else if (keybinds[8])
         time_offset_ -= (int)(600*speed_);
-        world->get_weather()->update_sun(current_timestamp+time_offset_);
-        world->update_sun();
-        event_buffer["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(world->get_weather()->get_weather_id(), time_offset_);
-    }
+    game.get_world().get_weather().update_sun(current_timestamp+time_offset_);
+    game.get_world().update_sun();
+    game.queue_event_send(std::make_unique<WeatherUpdateEvent>(game.get_world().get_weather().get_weather_id(),time_offset_));
 }
 
-void SunTool::prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
+void SunTool::on_drop(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) {
     time_offset_ = 0;
     uint64_t timestamp = std::time(nullptr);
-    world->get_weather()->update_sun(timestamp);
-    world->update_sun();
-    event_buffer["WeatherUpdateEvent"] = std::make_shared<WeatherUpdateEvent>(world->get_weather()->get_weather_id());
-}
-
-std::string SunTool::to_string() const {
-    std::string result = "SunTool " + 
-        std::to_string(position_.x) + " " + std::to_string(position_.y) + " " + std::to_string(position_.z) + " " +
-        std::to_string(time_offset_) + " " +
-        std::to_string(scale_);
-    return result;
+    game.get_world().get_weather().update_sun(timestamp);
+    game.get_world().update_sun();
+    game.queue_event_send(std::make_unique<WeatherUpdateEvent>(game.get_world().get_weather().get_weather_id()));
 }

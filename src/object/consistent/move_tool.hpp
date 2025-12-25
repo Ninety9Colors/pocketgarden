@@ -7,23 +7,23 @@
 #include "raylib.h"
 
 #include "object/object3d.hpp"
-#include "player/maincamera.hpp"
 #include "player/player.hpp"
-#include "world/world.hpp"
+#include "game.hpp"
 #include "event/event.hpp"
 
 class MoveTool : public Item {
 public:
     MoveTool();
-    MoveTool(Vector3 position, float scale);
+    MoveTool(const json& j);
+    MoveTool(Quaternion quaternion, Vector3 position, float scale);
 
-    void use(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
+    void use(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) override;
+    void on_drop(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) override;
 
-    void prepare_drop(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<Player> user, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) override;
+    void generate_mesh() override;
 
-    bool in_use() const;
-
-    std::string to_string() const override;
+    json to_json() const override;
+    void from_json(const json& j) override;
 private:
     uint32_t held_id_;
     float holding_distance_;

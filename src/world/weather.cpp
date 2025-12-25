@@ -12,6 +12,7 @@ Weather::Weather(float latitude, float longitude) : latitude_(latitude), longitu
     weather_id_ = 800;
     azimuth_ = 0.0;
     altitude_ = 0.0;
+    INFO("Default initialized weather");
 }
 
 Weather::~Weather() {

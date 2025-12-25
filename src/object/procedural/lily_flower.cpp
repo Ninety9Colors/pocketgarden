@@ -1,72 +1,76 @@
 #include <cassert>
 
 #include "object/procedural/lily_flower.hpp"
-#include "util.hpp"
 
 #include "raymath.h"
 
-LilyFlower::LilyFlower() : ParameterObject(), slices_(40,20) {
+constexpr int DEFAULT_SLICES_X = 40;
+constexpr int DEFAULT_SLICES_Y = 20;
+
+LilyFlower::LilyFlower() : LilyFlower(std::random_device{}()) {}
+LilyFlower::LilyFlower(uint32_t seed) : ParameterObject(seed), slices_(DEFAULT_SLICES_X, DEFAULT_SLICES_Y) {
+    upper_petal_ = std::make_unique<TaperedPetal>(seed);
+    lower_petal_ = std::make_unique<TaperedPetal>(seed);
     initialize_parameters();
-    std::random_device rd;
-    seed_ = rd();
-    upper_petal_ = std::make_unique<TaperedPetal>();
-    lower_petal_ = std::make_unique<TaperedPetal>();
 }
-LilyFlower::LilyFlower(float scale) : ParameterObject(scale), slices_(40,20) {
+LilyFlower::LilyFlower(Quaternion quaternion, Vector3 position, float scale) : LilyFlower(quaternion,position,scale,std::random_device{}()) {}
+LilyFlower::LilyFlower(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : ParameterObject(quaternion, position, scale,seed), slices_(DEFAULT_SLICES_X, DEFAULT_SLICES_Y) {
+    upper_petal_ = std::make_unique<TaperedPetal>(seed);
+    lower_petal_ = std::make_unique<TaperedPetal>(seed);
     initialize_parameters();
-    std::random_device rd;
-    seed_ = rd();
-    upper_petal_ = std::make_unique<TaperedPetal>();
-    lower_petal_ = std::make_unique<TaperedPetal>();
 }
-LilyFlower::LilyFlower(Vector3 position, float scale) : ParameterObject(position, scale), slices_(40,20) {
+LilyFlower::LilyFlower(const json& j) {
+    from_json(j);
     initialize_parameters();
-    std::random_device rd;
-    seed_ = rd();
-    upper_petal_ = std::make_unique<TaperedPetal>();
-    lower_petal_ = std::make_unique<TaperedPetal>();
-}
-LilyFlower::LilyFlower(ParameterMap map, uint64_t seed, Quaternion quaternion, Vector3 position, float scale) : ParameterObject(quaternion,position,scale), slices_(40,20) {
-    parameter_map_ = map;
-    seed_ = seed;
-    upper_petal_ = std::make_unique<TaperedPetal>();
-    lower_petal_ = std::make_unique<TaperedPetal>();
-}
-LilyFlower::LilyFlower(std::string data) : ParameterObject() {
-    std::vector<std::string> split = split_string(data);
-    assert(split[0] == "LilyFlower");
-    position_ = Vector3{std::stof(split[1]), std::stof(split[2]), std::stof(split[3])};
-    scale_ = std::stof(split[4]);
-    quaternion_ = Quaternion{std::stof(split[5]),std::stof(split[6]),std::stof(split[7]),std::stof(split[8])};
-    seed_ = std::stoull(split[9]);
-    parameter_map_ = ParameterMap(split[10]);
-    upper_petal_ = std::make_unique<TaperedPetal>(split[11]);
-    lower_petal_ = std::make_unique<TaperedPetal>(split[12]);
 }
 
-void LilyFlower::draw() const {
-    upper_petal_->draw(upper_transforms_[0]);
-    upper_petal_->draw(upper_transforms_[1]);
-    upper_petal_->draw(upper_transforms_[2]);
-    lower_petal_->draw(lower_transforms_[0]);
-    lower_petal_->draw(lower_transforms_[1]);
-    lower_petal_->draw(lower_transforms_[2]);
+json LilyFlower::to_json() const {
+    json j = {
+        {"type","LilyFlower"},
+        {"object_type",object_type_},
+        {"position",{{"x",position_.x},{"y",position_.y},{"z",position_.z}}},
+        {"scale",scale_},
+        {"quaternion",{{"x",quaternion_.x},{"y",quaternion_.y},{"z",quaternion_.z},{"w",quaternion_.w}}},
+        {"seed",seed_},
+        {"parameter_map",parameter_map_.to_json()},
+        {"slices",{{"first",slices_.first},{"second",slices_.second}}},
+        {"upper_petal",upper_petal_->to_json()},
+        {"lower_petal",lower_petal_->to_json()}
+    };
+    return j;
 }
-void LilyFlower::draw(Matrix transform) const {
-    upper_petal_->draw(MatrixMultiply(upper_transforms_[0], transform));
-    upper_petal_->draw(MatrixMultiply(upper_transforms_[1], transform));
-    upper_petal_->draw(MatrixMultiply(upper_transforms_[2], transform));
-    lower_petal_->draw(MatrixMultiply(lower_transforms_[0], transform));
-    lower_petal_->draw(MatrixMultiply(lower_transforms_[1], transform));
-    lower_petal_->draw(MatrixMultiply(lower_transforms_[2], transform));
+
+void LilyFlower::from_json(const json& j) {
+    object_type_ = j.at("object_type");
+    position_ = {j.at("position")["x"],j.at("position")["y"],j.at("position")["z"]};
+    scale_ = j.at("scale");
+    quaternion_ = {j.at("quaternion")["x"],j.at("quaternion")["y"],j.at("quaternion")["z"],j.at("quaternion")["w"]};
+    seed_ = j.at("seed");
+    parameter_map_ = ParameterMap{j.at("parameter_map")};
+    slices_ = {j.at("slices")["first"],j.at("slices")["second"]};
+    upper_petal_ = std::make_unique<TaperedPetal>(j.at("upper_petal"));
+    lower_petal_ = std::make_unique<TaperedPetal>(j.at("lower_petal"));
 }
-void LilyFlower::draw_offset(float x, float y, float z) const {
+
+void LilyFlower::draw(Game& game) const {
+    upper_petal_->draw(game,upper_transforms_[0]);
+    upper_petal_->draw(game,upper_transforms_[1]);
+    upper_petal_->draw(game,upper_transforms_[2]);
+    lower_petal_->draw(game,lower_transforms_[0]);
+    lower_petal_->draw(game,lower_transforms_[1]);
+    lower_petal_->draw(game,lower_transforms_[2]);
+}
+void LilyFlower::draw(Game& game,Matrix transform) const {
+    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[0], transform));
+    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[1], transform));
+    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[2], transform));
+    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[0], transform));
+    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[1], transform));
+    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[2], transform));
+}
+void LilyFlower::draw_offset(Game& game,float x, float y, float z) const {
     Matrix offset = MatrixTranslate(x,y,z);
-    draw(offset);
-}
-void LilyFlower::set_shader(std::shared_ptr<Shader> shader) {
-    upper_petal_->set_shader(shader);
-    lower_petal_->set_shader(shader);
+    draw(game,offset);
 }
 
 void LilyFlower::update_matrix() {
@@ -134,24 +138,10 @@ void LilyFlower::generate_mesh() {
     lower_petal_->generate_mesh();
     update_matrix();
 }
-void LilyFlower::generate_mesh(uint64_t seed) {
-    upper_petal_->generate_mesh(seed);
-    lower_petal_->generate_mesh(seed);
-    update_matrix();
-}
+
 void LilyFlower::set_slices(std::pair<int,int> slices) {
     upper_petal_->set_slices(slices);
     lower_petal_->set_slices(slices);
-}
-std::string LilyFlower::to_string() const {
-    return "LilyFlower " +
-        std::to_string(position_.x) + " " + std::to_string(position_.y) + " " + std::to_string(position_.z) + " " +
-        std::to_string(scale_) + " " +
-        std::to_string(quaternion_.x) + " " + std::to_string(quaternion_.y) + " " + std::to_string(quaternion_.z) + " " + std::to_string(quaternion_.w) + " " +
-        std::to_string(seed_) + " (" + 
-        parameter_map_.to_string() + ")(" +
-        upper_petal_->to_string() + ")(" +
-        lower_petal_->to_string() + ")";
 }
 void LilyFlower::initialize_parameters() {
     parameter_map_.set_parameter("PetalPitchUpper", Parameter{-90.0f,35.0f,80.0f});

@@ -1,33 +1,45 @@
 #define MAX_MATERIAL_MAPS 12
 
+#include "event/event.hpp"
 #include "object/object3d.hpp"
+#include "game.hpp"
 #include "rlgl.h"
 #include "raymath.h"
 
-Object3d::Object3d() : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(LoadMaterialDefault()), position_{0.0f,0.0f,0.0f}, scale_(1.0f), quaternion_{0.0f,0.0f,0.0f,1.0f} {
-    update_matrix();
+#include "logging.hpp"
+
+Object3d::Object3d() : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), mesh_{0}, material_{0}, position_{0.0f,0.0f,0.0f}, scale_(1.0f), quaternion_{0.0f,0.0f,0.0f,1.0f} {
+    material_ = LoadMaterialDefault();
 }
-Object3d::Object3d(Quaternion quaternion, Vector3 position, float scale) : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), mesh_(GenMeshCube(1.0f, 1.0f, 1.0f)), material_(LoadMaterialDefault()), position_(position), scale_(scale), quaternion_{quaternion} {
-    update_matrix();
+// Object3d::Object3d(const json& j) {
+//     from_json(j);
+//     generate_mesh();
+//     update_matrix();
+// }
+Object3d::Object3d(Quaternion quaternion, Vector3 position, float scale) : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), mesh_{0}, material_{0}, position_(position), scale_(scale), quaternion_{quaternion} {
+    INFO("Constructing object at " + std::to_string(position.x) + "," + std::to_string(position.y) + "," + std::to_string(position.z));
+    material_ = LoadMaterialDefault();
+    INFO(" - constructed material");
 }
-Object3d::Object3d(const Object3d& rhs) noexcept : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), quaternion_(rhs.quaternion_),position_(rhs.position_),mesh_(GenMeshCube(1.0f,1.0f,1.0f)),material_(LoadMaterialDefault()),scale_(rhs.scale_),transform_(rhs.transform_) {
-    update_matrix();
+Object3d::Object3d(const Object3d& rhs) : object_type_(rhs.object_type_), quaternion_(rhs.quaternion_),position_(rhs.position_),mesh_{0},material_{0},scale_(rhs.scale_),transform_(rhs.transform_) {
+    material_ = LoadMaterialDefault();
 }
 Object3d::~Object3d() {
-    UnloadMesh(mesh_);
-    UnloadMaterial(material_);
+    if (mesh_.indices != nullptr)
+        UnloadMesh(mesh_);
+    if (material_.params != nullptr)
+        UnloadMaterial(material_);
 }
 void Object3d::generate_mesh() {
-    UnloadMesh(mesh_);
     mesh_ = GenMeshCube(1.0f,1.0f,1.0f);
 }
-void Object3d::draw() const {
+void Object3d::draw(Game& game) const {
     DrawMesh(mesh_, material_, transform_);
 }
-void Object3d::draw(Matrix transform) const {
+void Object3d::draw(Game& game, Matrix transform) const {
     DrawMesh(mesh_, material_, transform);
 }
-void Object3d::draw_offset(float x, float y, float z) const {
+void Object3d::draw_offset(Game& game, float x, float y, float z) const {
     Matrix offset = MatrixAdd(transform_,Matrix{
         0,0,0,x,
         0,0,0,y,
@@ -141,21 +153,29 @@ void swap(Object3d& a, Object3d& b) noexcept {
     swap(a.id_,b.id_);
 }
 
+void Object3d::use(Game&, const std::string username, const std::vector<bool>& keybinds, float dt) {}
+void Object3d::on_drop(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) {}
+
 Item::Item() : Object3d() {
     object_type_ |= static_cast<uint8_t>(ObjectType::ITEM);
 }
 Item::Item(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {
     object_type_ |= static_cast<uint8_t>(ObjectType::ITEM);
 }
+ParameterObject::ParameterObject() : ParameterObject(std::random_device{}()) {}
+ParameterObject::ParameterObject(uint32_t seed) : Object3d(), seed_(seed) {}
+ParameterObject::ParameterObject(Quaternion quaternion, Vector3 position, float scale) : ParameterObject(quaternion,position,scale,std::random_device{}()) {}
+ParameterObject::ParameterObject(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : Object3d(quaternion,position,scale), seed_(seed) {}
 
-ParameterObject::ParameterObject() : Object3d() {};
-ParameterObject::ParameterObject(Quaternion quaternion, Vector3 position, float scale) : Object3d(quaternion, position, scale) {}
-
-void ParameterObject::set_parameters(ParameterMap map) {
+void ParameterObject::set_parameter_map(ParameterMap map) {
+    assert(map.contains_parameter("seed"));
     parameter_map_ = map;
 }
 void ParameterObject::set_parameter(std::string name, float value) {
     parameter_map_.set_parameter(name,value);
+}
+void ParameterObject::set_parameter(std::string name, Parameter parameter) {
+    parameter_map_.set_parameter(name,parameter);
 }
 const Parameter ParameterObject::get_parameter(std::string name) const {
     return parameter_map_.get_parameter(name);

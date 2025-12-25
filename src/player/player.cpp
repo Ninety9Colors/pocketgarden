@@ -8,11 +8,12 @@
 #include "object/consistent/rotate_tool.hpp"
 #include "object/procedural/tapered_petal.hpp"
 #include "player/player.hpp"
-#include "util.hpp"
 #include "world/world.hpp"
 #include "object/procedural/lily_flower.hpp"
+#include "util/factory.hpp"
 
 #include "raymath.h"
+#include "logging.hpp"
 
 constexpr float DEFAULT_PLAYER_SPEED = 4.0f;
 constexpr float DEFAULT_PLAYER_PICKUP_RANGE= 3.0f;
@@ -21,136 +22,84 @@ const Vector3 HEAD_OFFSET = {0.0f,1.5f,0.0f};
 const Vector3 ITEM_OFFSET = {0.0f,2.0f,0.0f};
 
 Player::Player() : position_(0.0f,0.0f,0.0f), selected_item_(nullptr), online_(false), pickup_range_(DEFAULT_PLAYER_PICKUP_RANGE), speed_(DEFAULT_PLAYER_SPEED), username_("No Username"), hitbox_({0.0f,0.0f,0.0f,1.0f},HITBOX_OFFSET, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},HEAD_OFFSET, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {};
-
-Player::Player(std::string username, Vector3 position) : position_(position), selected_item_(nullptr), online_(false), pickup_range_(DEFAULT_PLAYER_PICKUP_RANGE), speed_(DEFAULT_PLAYER_SPEED), username_(username), hitbox_({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HITBOX_OFFSET), {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HEAD_OFFSET), Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {};
-
-Player::Player(std::string data) : speed_(DEFAULT_PLAYER_SPEED), pickup_range_(DEFAULT_PLAYER_PICKUP_RANGE) {
-    // TODO: fix this implementation with the changes to members
-    std::vector<std::string> split = split_string(data);
-    assert(split[0] == "Player" && split.size() == 8);
-    username_ = split[1];
-    position_ = Vector3{std::stof(split[2]), std::stof(split[3]), std::stof(split[4])};
-    hitbox_ = Cube({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HITBOX_OFFSET),{1.0f,2.0f,1.0f},1.0f,WHITE);
-    head_ = Cube({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HEAD_OFFSET),{0.5f,0.5f,0.5f},1.0f,PINK);
-    online_ = std::stoi(split[5]) == 1;
-    if (split[6] != "null_item") {
-        if (get_first_word(split[6]) == "MoveTool") {
-            selected_item_ = std::make_unique<MoveTool>(split[6]);
-        } else if (get_first_word(split[6]) == "SunTool") {
-            selected_item_ = std::make_unique<SunTool>(split[6]);
-        } else if (get_first_word(split[6]) == "RotateTool") {
-            selected_item_ = std::make_unique<RotateTool>(split[6]);
-        }
-    }
-    std::vector<std::string> model_objects = split_string(split[7]);
-    for (std::string object_data : model_objects) {
-        if (get_first_word(object_data) == "Cube") {
-            add_to_model(std::make_unique<Cube>(object_data));
-        } else if (get_first_word(object_data) == "TaperedPetal") {
-            add_to_model(std::make_unique<TaperedPetal>(object_data));
-        } else if (get_first_word(object_data) == "LilyFlower") {
-            add_to_model(std::make_unique<LilyFlower>(object_data));
-        }
-    }
+Player::Player(std::string username, Vector3 position) : position_(position), selected_item_(nullptr), online_(false), pickup_range_(DEFAULT_PLAYER_PICKUP_RANGE), speed_(DEFAULT_PLAYER_SPEED), username_(username), hitbox_({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HITBOX_OFFSET), {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},Vector3Add(position_,HEAD_OFFSET), Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {
+    DEBUG("Constructed player with username: " + username);
 };
+Player::Player(const json& j) : hitbox_({0.0f,0.0f,0.0f,1.0f},HITBOX_OFFSET, {1.0f, 2.0f, 1.0f}, 1.0f, WHITE), head_({0.0f,0.0f,0.0f,1.0f},HEAD_OFFSET, Vector3{0.5f, 0.5f, 0.5f}, 1.0f,PINK) {from_json(j);}
+Player::Player(const Player& rhs) : position_(rhs.position_), selected_item_((rhs.selected_item_ == nullptr) ? nullptr : std::move(parse_object(rhs.selected_item_->to_json()))), online_(rhs.online_), pickup_range_(rhs.pickup_range_), speed_(rhs.speed_), username_(rhs.username_), hitbox_(rhs.hitbox_), head_(rhs.head_) {}
 
-Player::~Player() {
+void Player::from_json(const json& j) {
+    username_ = j.at("username");
+    position_ = Vector3{j.at("position")["x"],j.at("position")["y"],j.at("position")["z"]};
+    online_ = j.at("online");
+    selected_item_ = parse_object(j.at("item"));
+    speed_ = j.at("speed");
+    pickup_range_ = j.at("pickup_range");
+    set_position(position_);
 }
 
-void Player::draw(std::string current_user) const {
+json Player::to_json() const {
+    json j = {
+        {"type","Player"},
+        {"username",username_},
+        {"position",{{"x",position_.x},{"y",position_.y},{"z",position_.z}}},
+        {"online",online_},
+        {"item",(selected_item_==nullptr ? json{{"type","null_item"}} : selected_item_->to_json())},
+        {"speed",speed_},
+        {"pickup_range",pickup_range_}
+    };
+    return j;
+}
+
+void Player::draw(Game& game) const {
+    std::string current_user = game.get_current_username();
     if (username_ != current_user && online_)
-        head_.draw();
+        head_.draw(game);
     if (selected_item_ != nullptr && online_)
-        selected_item_->draw();
+        selected_item_->draw(game);
 }
 
-bool Player::move(Vector3 direction, const std::vector<bool>& keybinds, float dt) {
-    assert(keybinds.size() >= 4);
-    if (!online_ || (!keybinds[0] && !keybinds[1] && !keybinds[2] && !keybinds[3]))
-        return false;
+void Player::move(Vector3 direction, const std::vector<bool>& keybinds, float dt) {
     Vector3 left = Vector3{direction.z, 0.0f, -direction.x};
     float dx = (keybinds[0]*direction.x-keybinds[2]*direction.x-keybinds[3]*left.x+keybinds[1]*left.x);
     float dz = (keybinds[0]*direction.z-keybinds[2]*direction.z-keybinds[3]*left.z+keybinds[1]*left.z);
     float magnitude = sqrt(pow(dx,2.0) + pow(dz,2.0));
-    if (magnitude == 0) return false;
+    if (magnitude == 0) return;
     dx = dx/magnitude*dt*speed_;
     dz = dz/magnitude*dt*speed_;
 
-    position_ = Vector3Add(position_,{dx,0.0f,dz});
+    set_position(Vector3Add(position_,{dx,0.0f,dz}));
+}
+
+void Player::set_position(Vector3 position) {
+    position_ = position;
     hitbox_.set_position(Vector3Add(position_,HITBOX_OFFSET));
     head_.set_position(Vector3Add(position_,HEAD_OFFSET));
     if (selected_item_ != nullptr)
         selected_item_->set_position(Vector3Add(position_,ITEM_OFFSET));
-    return true;
 }
 
-uint32_t Player::try_pickup(MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds) const {
-    uint32_t id = 0;
-    if (keybinds[9]) {
-        Ray ray = Ray{camera.get_position(), camera.get_direction()};
-        float min_distance = std::numeric_limits<float>::infinity();
-        for (const auto& p : world->get_objects()) {
-            std::shared_ptr<Item> item = std::dynamic_pointer_cast<Item>(p.second);
-            if (item == nullptr) {
-                continue;
-            }
-            RayCollision c = GetRayCollisionBox(ray, p.second->get_bounding_box());
-            if (c.hit) {
-                float d = c.distance;
-                if (d < min_distance && d <= pickup_range_) {
-                    id = p.first;
-                    min_distance = d;
-                }
-            }
-        }
-    }
-    return id;
-}
-
-void Player::set_position(Vector3 position) {
-    hitbox_.set_position(Vector3{position.x, position.y+0.5f, position.z});
-}
-
-void Player::add_to_model(std::unique_ptr<Object3d>&& object) {
-    model_.push_back(std::move(object));
-}
-
-void Player::set_shader(std::shared_ptr<Shader> shader) {
-    shader_ = shader;
-    for (auto& object : model_) {
-        object->set_shader(shader_);
-    }
-    if (selected_item_ != nullptr) {
-        selected_item_->set_shader(shader_);
-    }
-}
-
-std::shared_ptr<Shader> Player::get_shader() const {
-    return shader_;
-}
-
-void Player::set_item(std::shared_ptr<Item> item) {
-    if (selected_item_ != nullptr && item.get() == selected_item_.get())
+void Player::set_item(std::unique_ptr<Object3d> item) {
+    if (item == nullptr || item.get() == selected_item_.get())
         return;
-    selected_item_previous_shader_ = item->get_shader();
-    selected_item_ = item;
-    selected_item_->set_position(Vector3{0.0f,0.0f,0.0f});
+    INFO("Player " + username_ + " set selected item to type: " + std::string(item->to_json()["type"]));
+    selected_item_ = std::move(item);
+    selected_item_->set_position(Vector3Add(position_,ITEM_OFFSET));
 }
 
-std::shared_ptr<Item> Player::drop_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
+std::unique_ptr<Object3d> Player::drop_item(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) {
     if (selected_item_ == nullptr)
         return nullptr;
-    std::shared_ptr<Item> item = selected_item_;
+    std::unique_ptr<Object3d> item = std::move(selected_item_);
     selected_item_ = nullptr;
-    item->prepare_drop(event_buffer,camera,shared_from_this(),world,keybinds,dt);
+    item->on_drop(game,username_,keybinds,dt);
     item->set_position(get_position());
-    item->set_shader(selected_item_previous_shader_ == nullptr ? shader_ : selected_item_previous_shader_);
-    return item;
+    return std::move(item);
 }
-void Player::use_item(std::map<std::string, std::shared_ptr<Event>>& event_buffer, const MainCamera& camera, std::shared_ptr<World> world, const std::vector<bool>& keybinds, float dt) {
+void Player::use_item(Game& game, const std::vector<bool>& keybinds, float dt) {
     if (selected_item_ == nullptr)
         return;
-    selected_item_->use(event_buffer, camera, shared_from_this(), world, keybinds, dt);
+    selected_item_->use(game,username_, keybinds, dt);
 }
 
 void Player::set_online(bool online) {
@@ -169,18 +118,21 @@ std::string Player::get_username() const {
 }
 
 Vector3 Player::get_position() const {
-    return Vector3{hitbox_.get_position().x, hitbox_.get_position().y - 0.5f, hitbox_.get_position().z};
+    return position_;
 }
 
-std::string Player::to_string() const {
-    std::string item_string = (selected_item_ == nullptr) ? "null_item" : selected_item_->to_string();
-    std::string result = "Player " + 
-        username_ + " " +
-        std::to_string(get_position().x) + " " + std::to_string(get_position().y) + " " + std::to_string(get_position().z) + " "
-        + std::to_string((int)online_) + " (" + item_string + ")(";
-    for (const auto& object : model_) {
-        result += "(" + object->to_string() + ")";
-    }
-    result += ")";
-    return result;
+float Player::get_pickup_range() const {
+    return pickup_range_;
+}
+
+void swap(Player& a, Player& b) {
+    using std::swap;
+    swap(a.username_,b.username_);
+    swap(a.speed_,b.speed_);
+    swap(a.pickup_range_,b.pickup_range_);
+    swap(a.online_,b.online_);
+    swap(a.position_,b.position_);
+    swap(a.hitbox_,b.hitbox_);
+    swap(a.head_,b.head_);
+    swap(a.selected_item_,b.selected_item_);
 }

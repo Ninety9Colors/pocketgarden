@@ -1,19 +1,23 @@
 #include <cassert>
 
 #include "object/procedural/spline.hpp"
-#include "util.hpp"
+
 
 #include "raymath.h"
 
 Spline::Spline() : nodes_() {}
-Spline::Spline(std::string data) {
-    std::vector<std::string> first_split = split_string(data);
-    assert(first_split[0] == "Spline");
-    std::vector<std::string> node_data = split_string(first_split[1]);
-    for (const std::string& s : node_data) {
-        std::vector<std::string> pos = split_string(s);
-        nodes_.push_back(SplineNode{Vector3{std::stof(pos[0]), std::stof(pos[1]), std::stof(pos[2])},Vector3{0,0,0}});
-    }
+json Spline::to_json() const {
+    json j = {
+        {"type","Spline"},
+        {"positions",{}}
+    };
+    for (const SplineNode& node : nodes_)
+        j.at("positions").push_back(json{{"x",node.position.x,},{"y",node.position.y},{"z",node.position.z}});
+    return j;
+}
+void Spline::from_json(const json& j) {
+    for (const auto& node : j.at("positions"))
+        nodes_.push_back(SplineNode{Vector3{node["x"],node["y"],node["z"]},Vector3{}});
     for (int i = 0; i < nodes_.size(); i++)
         update_tangent(i);
 }
@@ -73,15 +77,6 @@ Vector3 Spline::get(float t) const {
 const SplineNode& Spline::get_node(int index) const {
     assert(index >= 0 || index < nodes_.size());
     return nodes_[index];
-}
-
-std::string Spline::to_string() const {
-    std::string result = "Spline (";
-    for (const SplineNode& node : nodes_) {
-        result += "(" + std::to_string(node.position.x) + " " + std::to_string(node.position.y) + " " + std::to_string(node.position.z) + ")";
-    }
-    result += ")";
-    return result;
 }
 
 void Spline::update_tangent(int index) {

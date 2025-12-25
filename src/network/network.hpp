@@ -3,9 +3,10 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include "json.hpp"
+using json = nlohmann::json;
 
-#include "event/event.hpp"
-
+class Event;
 struct _ENetHost;
 typedef struct _ENetHost ENetHost;
 struct _ENetPeer;
@@ -17,9 +18,9 @@ public:
     ~Network();
 
     std::unique_ptr<Event> poll_events();
-    void send_packet(std::string data, bool reliable) const;
-    void send_packet_excluding(std::string data, bool reliable, std::string exclude) const;
-    void send_packet(std::string data, bool reliable, std::string target_username) const;
+    void send_packet(const json& data, bool reliable) const;
+    void send_packet_excluding(const json& data, bool reliable, std::string exclude) const;
+    void send_packet(const json& data, bool reliable, std::string target_username) const;
     bool host_server(std::string ip, std::string port);
     bool join_server(std::string ip, std::string port);
     bool is_online(std::string username) const;

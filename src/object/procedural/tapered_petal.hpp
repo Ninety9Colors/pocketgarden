@@ -8,24 +8,26 @@
 class TaperedPetal : public ParameterObject {
 public:
     TaperedPetal();
-    TaperedPetal(float scale);
-    TaperedPetal(Vector3 position, float scale);
-    TaperedPetal(ParameterMap map, uint64_t seed, Quaternion quaternion, Vector3 position, float scale);
-    TaperedPetal(std::string data);
+    TaperedPetal(uint32_t seed);
+    TaperedPetal(Quaternion quaternion, Vector3 position, float scale);
+    TaperedPetal(Quaternion quaternion, Vector3 position, float scale, uint32_t seed);
+    TaperedPetal(const json& j);
+    virtual ~TaperedPetal() {};
 
     void set_slices(std::pair<int,int> slices);
     void generate_mesh() override;
-    void generate_mesh(uint64_t seed);
 
-    Vector3 tip_vector() const;
+    Vector3 tip_vector() const; // root to tip
     float base_width() const;
 
-    std::string to_string() const override;
+    json to_json() const override;
+    void from_json(const json& j) override;
 private:
     float X(float u, float v) const;
     float Y(float u, float v) const;
     float Z(float u, float v) const;
+
     void initialize_parameters() override;
+
     std::pair<int,int> slices_;
-    uint64_t seed_;
 };

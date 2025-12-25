@@ -5,7 +5,8 @@
 
 #include "logging.hpp"
 #include "network/network.hpp"
-#include "util.hpp"
+#include "util/factory.hpp"
+#include "event/event.hpp"
 
 Network::Network() {
     mode_ = 0;
@@ -31,6 +32,7 @@ std::unique_ptr<Event> Network::poll_events() {
     std::string* username;
     if (enet_host_service(host_,&event,0) > 0) {
         std::string data;
+        json j;
         switch (event.type) {
         case ENET_EVENT_TYPE_CONNECT:
             DEBUG("New connection: " + std::to_string(event.peer->address.host) + ", " + std::to_string(event.peer->address.port));
@@ -38,39 +40,18 @@ std::unique_ptr<Event> Network::poll_events() {
         case ENET_EVENT_TYPE_RECEIVE:
             data = std::string((char*)event.packet->data, event.packet->dataLength-1);
             INFO("Packet of length " + std::to_string(event.packet->dataLength) + " containing {" + data + "} received from " + std::to_string(event.peer->address.host));
-            split = split_string(data);
-            if (split[0] == "IAmHostEvent") {
-                result = std::make_unique<IAmHostEvent>(split[1]);
-                username = new std::string(split[1]);
-                players_[split[1]] = event.peer;
+            j = json::parse(data);
+            result = std::move(parse_event(j));
+            if (j.at("type") == "IAmHostEvent") {
+                username = new std::string(j.at("host_username"));
+                players_[j.at("host_username")] = event.peer;
                 event.peer->data = (void*) (username);
-            } else if (split[0] == "ConnectEvent") {
-                result = std::make_unique<ConnectEvent>(split[1]);
+            } else if (j.at("type") == "ConnectEvent") {
                 if (is_host()) {
-                    username = new std::string(split[1]);
-                    players_[split[1]] = event.peer;
+                    username = new std::string(j.at("username"));
+                    players_[j.at("username")] = event.peer;
                     event.peer->data = (void*) (username);
                 }
-            } else if (split[0] == "SyncEvent") {
-                result = std::make_unique<SyncEvent>(data);
-            } else if (split[0] == "DisconnectEvent") {
-                result = std::make_unique<DisconnectEvent>(split[1]);
-            } else if (split[0] == "PlayerMoveEvent") {
-                result = std::make_unique<PlayerMoveEvent>(data);
-            } else if (split[0] == "ObjectMoveEvent") {
-                result = std::make_unique<ObjectMoveEvent>(data);
-            } else if (split[0] == "ObjectRotateEvent") {
-                result = std::make_unique<ObjectRotateEvent>(data);
-            } else if (split[0] == "ObjectRemoveEvent") {
-                result = std::make_unique<ObjectRemoveEvent>(data); 
-            } else if (split[0] == "ObjectLoadEvent") {
-                result = std::make_unique<ObjectLoadEvent>(data); 
-            } else if (split[0] == "ItemPickupEvent") {
-                result = std::make_unique<ItemPickupEvent>(data); 
-            } else if (split[0] == "ItemDropEvent") {
-                result = std::make_unique<ItemDropEvent>(data);
-            } else if (split[0] == "WeatherUpdateEvent") {
-                result = std::make_unique<WeatherUpdateEvent>(data);
             }
             enet_packet_destroy (event.packet);
             break;
@@ -85,15 +66,17 @@ std::unique_ptr<Event> Network::poll_events() {
                 mode_ = 0;
             }
             delete (std::string*)event.peer->data;
+            break;
         }
     }
     return std::move(result);
 }
 
-void Network::send_packet(std::string data, bool reliable) const {
+void Network::send_packet(const json& data, bool reliable) const {
     if (mode_ == 0)
         return;
-    ENetPacket* packet = enet_packet_create(data.c_str(), data.size()+1, reliable);
+    std::string data_string = data.dump();
+    ENetPacket* packet = enet_packet_create(data_string.c_str(), data_string.size()+1, reliable);
     if (mode_ == 1) {
         for (const auto& pair : players_) {
             assert(pair.second != nullptr);
@@ -103,13 +86,14 @@ void Network::send_packet(std::string data, bool reliable) const {
         assert(server_ != nullptr);
         enet_peer_send(server_, 0, packet);
     }
-    INFO("Sent packet with: " + data);
+    INFO("Sent packet with: " + data_string);
 }
 
-void Network::send_packet_excluding(std::string data, bool reliable, std::string exclude) const {
+void Network::send_packet_excluding(const json& data, bool reliable, std::string exclude) const {
     if (mode_ == 0)
         return;
-    ENetPacket* packet = enet_packet_create(data.c_str(), data.size()+1, reliable);
+    std::string data_string = data.dump();
+    ENetPacket* packet = enet_packet_create(data_string.c_str(), data_string.size()+1, reliable);
     if (mode_ == 1) {
         for (const auto& pair : players_) {
             assert(pair.second != nullptr);
@@ -118,23 +102,29 @@ void Network::send_packet_excluding(std::string data, bool reliable, std::string
             enet_peer_send(pair.second, 0, packet);
         }
     } else if (mode_ == 2) {
+        WARN("Client excluded packets not implemented yet");
         // RelayEvent
     }
+    INFO("Sent packet excluding " + exclude + ": " + data_string);
 }
 
-void Network::send_packet(std::string data, bool reliable, std::string target_username) const {
+void Network::send_packet(const json& data, bool reliable, std::string target_username) const {
     if (mode_ == 0)
         return;
-    ENetPacket* packet = enet_packet_create(data.c_str(), data.size()+1, reliable);
+    std::string data_string = data.dump();
+    ENetPacket* packet = enet_packet_create(data_string.c_str(), data_string.size()+1, reliable);
     if (mode_ == 1) {
         assert(players_.find(target_username) != players_.end());
         enet_peer_send(players_.at(target_username), 0, packet);
     } else if (mode_ == 2) {
+        WARN("Client targetted packets not implemented yet");
         // RelayEvent
     }
+    INFO("Sent packet targetting " + target_username + ": " + data_string);
 }
 
 bool Network::host_server(std::string ip, std::string port) {
+    INFO("Attemping to host server with ip: " + ip + ", port " + port);
     ENetAddress address;
     address.host = ENET_HOST_ANY;
     address.port = std::stoi(port);

@@ -6,10 +6,7 @@
 #include "logging.hpp"
 #include <cassert>
 
-Game::Game() : event_buffer_(), main_camera_(), world_(), network_(), (false), current_username_("") {
-    // TODO: Load settings from file
-    INFO("Initializing Settings");
-    Settings::set("Camera Sensitivity",0.001f);
+Game::Game() : world_(), network_(), main_camera_(), event_buffer_receive_(), event_buffer_send_(), in_world_(false), current_username_("") {
 };
 
 bool Game::in_world() const {
@@ -17,13 +14,22 @@ bool Game::in_world() const {
 }
 
 bool Game::host(std::string current_user, std::string save_file, char* ip, char* port) {
+    INFO("Game.host called, attempting to start world:");
     current_username_ = current_user;
     world_.load_world(save_file);
+    INFO(" - Loaded world");
     world_.load_player(current_user);
+    INFO(" - Loaded current user");
     bool success = network_.host_server(ip, port);
     if (success) {
+        INFO("Successfully hosted with ip: " + std::string(ip) + ", and port: " + std::string(port));
         in_world_ = true;
+        world_.disconnect_players();
         world_.get_player(current_user)->get().set_online(true);
+        event_buffer_receive_.clear();
+        event_buffer_send_.clear();
+    } else {
+        INFO("Failed to host with ip: " + std::string(ip) + ", and port: " + std::string(port));
     }
     return success;
 }
@@ -32,9 +38,12 @@ bool Game::join(std::string current_user, char* ip, char* port) {
     current_username_ = current_user;
     bool success = network_.join_server(ip, port);
     if (success) {
-        ConnectEvent event (current_user_);
-        network_->send_packet(event.make_packet(), event.reliable());
+        INFO("Successfully connected to ip: " + std::string(ip) + ", and port: " + std::string(port));
+        ConnectEvent event (current_user);
+        network_.send_packet(event.to_json(), event.reliable());
         in_world_ = true;
+        event_buffer_receive_.clear();
+        event_buffer_send_.clear();
     }
     return success;
 }
@@ -51,72 +60,74 @@ void Game::poll_events() {
     auto event = network_.poll_events();
     if (event == nullptr)
         return;
-    event_buffer_.push_back(event);
+    event_buffer_receive_.push_back(std::move(event));
 }
 
-void Game::tick(uint64_t current_timestamp) {
-    auto player = world_.get_player(current_username_);
-    if (!player) {
-        CRITICAL("Could not find current player, but trying to run a game tick!");
+void Game::tick(const std::vector<bool>& keybinds, uint64_t current_timestamp, float dt) {
+    while (!event_buffer_receive_.empty()) {
+        INFO("Tick receiving event: " + std::string(event_buffer_receive_.front()->to_json()["type"]));
+        event_buffer_receive_.front()->receive(*this,current_timestamp,keybinds,dt,network_.is_host());
+        event_buffer_receive_.pop_front();
+    }
+    while (!event_buffer_send_.empty()) {
+        INFO("Tick sending event: " + std::string(event_buffer_send_.front()->to_json()["type"]));
+        network_.send_packet(event_buffer_send_.front()->to_json(),event_buffer_send_.front()->reliable());
+        event_buffer_send_.pop_front();
+    }
+}
+
+void Game::update_current_player(const std::vector<bool>& keybinds, float dt) {
+    // Player Movement
+    if (main_camera_.get_mode() != CAMERA_CUSTOM) return;
+    auto current_player = world_.get_player(current_username_);
+    if (!current_player) {
+        CRITICAL("Trying to update current player that does not exist!");
         return;
     }
-    while (!event_buffer_.empty()) {
-        event_buffer_.front()->receive(game,current_timestamp);
-        network_.send_packet(event_buffer_.front()->make_packet(),event_buffer_.front()->reliable());
-        event_buffer_.pop_front();
+    if (current_player->get().is_online() && (keybinds[0] || keybinds[1] || keybinds[2] || keybinds[3])) {
+        current_player->get().move(main_camera_.get_direction(),keybinds,dt);
+        event_buffer_send_.push_back(std::make_unique<PlayerMoveEvent>(current_username_,current_player->get().get_position()));
+    }
+    // Item Usage
+    if (!keybinds[9]) {
+        current_player->get().use_item(*this, keybinds, dt);
+        return;
+    }
+    // Item Pickups
+    Ray ray = Ray(main_camera_.get_position(),main_camera_.get_direction());
+    uint32_t pickup_id = world_.raycast_nearest(ray,current_player->get().get_pickup_range(),static_cast<uint8_t>(ObjectType::ITEM));
+    std::unique_ptr<Object3d> dropped = current_player->get().drop_item(*this,current_username_,keybinds,dt);
+    if (dropped != nullptr) {
+        json j = dropped->to_json();
+        uint32_t id = world_.load_object(std::move(dropped));
+        event_buffer_send_.push_back(std::make_unique<ItemDropEvent>(current_username_));
+        event_buffer_send_.push_back(std::make_unique<ObjectLoadEvent>(id,j,current_username_));
+    }
+    if (pickup_id != 0) {
+        std::unique_ptr<Object3d> picked_up = std::move(world_.transfer_object(pickup_id));
+        json j = picked_up->to_json();
+        current_player->get().set_item(std::move(picked_up));
+        INFO("picked up item with id: " + std::to_string(pickup_id));
+        event_buffer_send_.push_back(std::make_unique<ItemPickupEvent>(j,current_username_));
+        event_buffer_send_.push_back(std::make_unique<ObjectRemoveEvent>(pickup_id,current_username_));
     }
 }
 
-void Game::update_current_player() {
-    bool moved = move(camera, keybinds, dt);
-    uint32_t pickup_id = try_pickup(camera, world, keybinds);
-    use_item(event_buffer, camera, world, keybinds, dt);
-    if (moved) {
-        event_buffer["PlayerMoveEvent"] = std::make_shared<PlayerMoveEvent>(shared_from_this());
-    }
-    if (pickup_id != 0) {
-        std::shared_ptr<Item> dropped = drop_item(event_buffer,camera,world,keybinds,dt);
-        if (dropped != nullptr) {
-            uint32_t id = world->load_object(dropped, dropped->get_shader());
-            event_buffer["ItemDropEvent"] = std::make_shared<ItemDropEvent>(shared_from_this());
-            if (event_buffer.find("ObjectLoadEvent") == event_buffer.end()) {
-                std::shared_ptr<ObjectLoadEvent> load_event = std::make_shared<ObjectLoadEvent>(std::map<uint32_t,std::shared_ptr<Object3d>>{}, get_username());
-                load_event->add(id, dropped);
-                event_buffer["ObjectLoadEvent"] = load_event;
-            } else {
-                std::dynamic_pointer_cast<ObjectLoadEvent>(event_buffer["ObjectLoadEvent"])->add(id, dropped);
-            }
-        }
-        std::shared_ptr<Item> item = std::dynamic_pointer_cast<Item>(world->get_objects().at(pickup_id));
-        set_item(item);
-        world->remove_object(pickup_id);
-        event_buffer["ItemPickupEvent"] = std::make_shared<ItemPickupEvent>(item, get_username());
-        if (event_buffer.find("ObjectRemoveEvent") == event_buffer.end()) {
-            std::shared_ptr<ObjectRemoveEvent> remove_event = std::make_shared<ObjectRemoveEvent>(std::vector<uint32_t>{}, get_username());
-            remove_event->add(pickup_id);
-            event_buffer["ObjectRemoveEvent"] = std::move(remove_event);
-        } else {
-            std::dynamic_pointer_cast<ObjectRemoveEvent>(event_buffer["ObjectRemoveEvent"])->add(pickup_id);
-        }
-    } else if (keybinds[9]) {
-        std::shared_ptr<Item> dropped = drop_item(event_buffer,camera,world,keybinds,dt);
-        if (dropped == nullptr)
-            return;
-        event_buffer["ItemDropEvent"] = std::make_shared<ItemDropEvent>(shared_from_this());
-        uint32_t id = world->load_object(dropped, dropped->get_shader());
-        if (event_buffer.find("ObjectLoadEvent") == event_buffer.end()) {
-            std::shared_ptr<ObjectLoadEvent> load_event = std::make_shared<ObjectLoadEvent>(std::map<uint32_t,std::shared_ptr<Object3d>>{}, get_username());
-            load_event->add(id, dropped);
-            event_buffer["ObjectLoadEvent"] = load_event;
-        } else {
-            std::dynamic_pointer_cast<ObjectLoadEvent>(event_buffer["ObjectLoadEvent"])->add(id, dropped);
-        }
-    }
+void Game::update_main_camera(Vector2 mouse_delta) {
+    main_camera_.update(world_.get_player(current_username_)->get().get_position(),mouse_delta);
+}
+
+void Game::queue_event_send(std::unique_ptr<Event> event) {
+    event_buffer_send_.push_back(std::move(event));
+}
+void Game::queue_event_receive(std::unique_ptr<Event> event) {
+    event_buffer_receive_.push_back(std::move(event));
 }
 
 void Game::close_game() {
+    if (!in_world_) return;
     if (network_.is_host())
-        world_.save_world("test world.data");
+        world_.save_world("test world.json");
     network_.disconnect();
     in_world_ = false;
     EnableCursor();
@@ -126,6 +137,10 @@ const Network& Game::get_network() const {
     return network_;
 };
 
-const World& Game::get_world() const {
+MainCamera& Game::get_camera() {
+    return main_camera_;
+}
+
+World& Game::get_world() {
     return world_;
 };

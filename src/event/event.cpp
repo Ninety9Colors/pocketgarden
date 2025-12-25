@@ -2,9 +2,6 @@
 #include <cstdint>
 #include <memory>
 
-#include "raylib.h"
-#include "raymath.h"
-
 #include "event/event.hpp"
 #include "game.hpp"
 #include "player/maincamera.hpp"
@@ -13,327 +10,348 @@
 #include "object/consistent/rotate_tool.hpp"
 #include "object/procedural/tapered_petal.hpp"
 #include "player/player.hpp"
-#include "util.hpp"
+#include "util/factory.hpp"
 #include "object/object3d.hpp"
 #include "object/procedural/lily_flower.hpp"
 
-IAmHostEvent::IAmHostEvent(std::string username) : username_(username) {}
+#include "raylib.h"
+#include "raymath.h"
+
+#include "logging.hpp"
+
+Event::Event() {}
+
+IAmHostEvent::IAmHostEvent(std::string host_username) : host_username_(host_username) {}
+IAmHostEvent::IAmHostEvent(const json& j) {from_json(j);}
 IAmHostEvent::~IAmHostEvent() {}
 
-std::string IAmHostEvent::make_packet() const {
-    std::string packet = "IAmHostEvent " + username_;
-    return packet;
+json IAmHostEvent::to_json() const {
+    json j = {
+        {"type","IAmHostEvent"},
+        {"host_username",host_username_}
+    };
+    return j;
+}
+
+void IAmHostEvent::from_json(const json& j) {
+    host_username_ = j.at("host_username");
 }
 
 bool IAmHostEvent::reliable() const {
     return true;
 };
 
-void IAmHostEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    if (network->is_host()) {
+void IAmHostEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    if (is_host) {
     } else {
-        assert(world->get_player(username_) != nullptr);
-        world->get_player(username_)->on_join();
+        assert(game.get_world().get_player(host_username_) != std::nullopt);
+        game.get_world().get_player(host_username_)->get().set_online(true);
     }
 }
 
 ConnectEvent::ConnectEvent(std::string username) : username_(username) {}
+ConnectEvent::ConnectEvent(const json& j) {from_json(j);}
 ConnectEvent::~ConnectEvent() {}
 
-std::string ConnectEvent::make_packet() const {
-    std::string packet = "ConnectEvent " + username_;
-    return packet;
+json ConnectEvent::to_json() const {
+    json j = {
+        {"type","ConnectEvent"},
+        {"username",username_}
+    };
+    return j;
 }
+
+void ConnectEvent::from_json(const json& j) {
+    username_ = j.at("username");
+}
+
 bool ConnectEvent::reliable() const {
     return true;
 };
-void ConnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    if (network->is_host()) {
-        world->load_player(username_, shader);
-        world->get_player(username_)->on_join();
-        SyncEvent sync {world};
-        IAmHostEvent server_connect (receiving_user);
-        WeatherUpdateEvent weather_update (world->get_weather()->get_weather_id());
-        network->send_packet(sync.make_packet(), sync.reliable(), username_);
-        network->send_packet(weather_update.make_packet(), weather_update.reliable(), username_);
-        network->send_packet_excluding(make_packet(),reliable(),username_);
-        network->send_packet(server_connect.make_packet(),server_connect.reliable(),username_);
+void ConnectEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    if (is_host) {
+        game.get_world().load_player(username_);
+        game.get_world().get_player(username_)->get().set_online(true);
+        SyncEvent sync {game.get_world()};
+        IAmHostEvent server_connect {game.get_current_username()};
+        WeatherUpdateEvent weather_update {game.get_world().get_weather().get_weather_id()};
+        game.get_network().send_packet(sync.to_json(), sync.reliable(), username_);
+        game.get_network().send_packet(weather_update.to_json(), weather_update.reliable(), username_);
+        game.get_network().send_packet(server_connect.to_json(),server_connect.reliable(),username_);
+
+        game.get_network().send_packet_excluding(to_json(),reliable(),username_);
     } else {
-        world->load_player(username_, shader);
-        world->get_player(username_)->on_join();
+        game.get_world().load_player(username_);
+        game.get_world().get_player(username_)->get().set_online(true);            
     }
 }
 
 DisconnectEvent::DisconnectEvent(std::string username) : username_(username) {}
+DisconnectEvent::DisconnectEvent(const json& j) {from_json(j);}
 DisconnectEvent::~DisconnectEvent() {}
 
-std::string DisconnectEvent::make_packet() const {
-    std::string packet = "DisconnectEvent " + username_;
-    return packet;
+json DisconnectEvent::to_json() const {
+    json j = {
+        {"type","DisconnectEvent"},
+        {"username",username_}
+    };
+    return j;
 }
+
+void DisconnectEvent::from_json(const json& j) {
+    username_ = j.at("username");
+}
+
 bool DisconnectEvent::reliable() const {
     return true;
 };
-void DisconnectEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    assert(world->get_player(username_) != nullptr);
-    if (network->is_host()) {
-        world->get_player(username_)->on_disconnect();
-        network->send_packet(make_packet(), reliable());
+void DisconnectEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    assert(game.get_world().get_player(username_) != std::nullopt);
+    if (is_host) {
+        game.get_world().get_player(username_)->get().set_online(false);
+        game.get_network().send_packet(to_json(), reliable());
     } else {
-        world->get_player(username_)->on_disconnect();
+        game.get_world().get_player(username_)->get().set_online(false);
     }
 }
 
-SyncEvent::SyncEvent(std::string packet) {
-    world_string_ = get_without_first_word(packet);
-}
-
-SyncEvent::SyncEvent(std::shared_ptr<World> world) {
-    world_string_ = world->to_string();
-}
-
+SyncEvent::SyncEvent(const World& world) : world_json_(world.to_json()) {}
+SyncEvent::SyncEvent(const json& j) {from_json(j);}
 SyncEvent::~SyncEvent() {};
 
-std::string SyncEvent::make_packet() const {
-    return "SyncEvent " + world_string_;
+json SyncEvent::to_json() const {
+    json j = {
+        {"type","SyncEvent"},
+        {"data",world_json_}
+    };
+    return j;
 };
+
+void SyncEvent::from_json(const json& j) {
+    world_json_ = j.at("data");
+}
 
 bool SyncEvent::reliable() const {
     return true;
 };
 
-void SyncEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    world->reset_world();
-    world->from_string(world_string_, shader);
+void SyncEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    game.get_world().clear_world();
+    game.get_world().from_json(world_json_);
 };
 
-PlayerMoveEvent::PlayerMoveEvent(std::shared_ptr<Player> player) : username_(""), x_(), y_(), z_(), player_(player) {}
-PlayerMoveEvent::PlayerMoveEvent(std::string packet) {
-    std::vector<std::string> split = split_string(packet);
-    username_ = split[1];
-    x_ = std::stof(split[2]);
-    y_ = std::stof(split[3]);
-    z_ = std::stof(split[4]);
-}
+PlayerMoveEvent::PlayerMoveEvent(std::string username, Vector3 position) : username_(username), position_(std::make_unique<Vector3>(position)) {}
+PlayerMoveEvent::PlayerMoveEvent(const json& j) {from_json(j);}
 PlayerMoveEvent::~PlayerMoveEvent(){};
 
-std::string PlayerMoveEvent::make_packet() const {
-    if (username_ == "") {
-       return "PlayerMoveEvent " + player_->get_username() + " " + std::to_string(player_->get_position().x) + " " + std::to_string(player_->get_position().y) + " " + std::to_string(player_->get_position().z);
-    } else {
-        return "PlayerMoveEvent " + username_ + " " + std::to_string(x_) + " " + std::to_string(y_) + " " + std::to_string(z_);
-    }
+json PlayerMoveEvent::to_json() const {
+    json j = {
+        {"type","PlayerMoveEvent"},
+        {"username",username_},
+        {"position",{{"x",position_->x},{"y",position_->y},{"z",position_->z}}}
+    };
+    return j;
 }
+
+void PlayerMoveEvent::from_json(const json& j) {
+    username_ = j.at("username");
+    position_ = std::make_unique<Vector3>(j.at("position")["x"],j.at("position")["y"],j.at("position")["z"]);
+}
+
 bool PlayerMoveEvent::reliable() const {
     return false;
 };
-void PlayerMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    world->get_player(username_)->set_position(Vector3{x_,y_,z_});
-    if (network->is_host()) {
-        network->send_packet_excluding(make_packet(), reliable(), username_);
+void PlayerMoveEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    game.get_world().get_player(username_)->get().set_position(*position_);
+    if (is_host) {
+        game.get_network().send_packet_excluding(to_json(),reliable(),username_);
     }
 }
 
-ObjectMoveEvent::ObjectMoveEvent(std::map<uint32_t, Vector3> objects, std::string sender) : objects_(std::move(objects)), sender_(sender) {};
-ObjectMoveEvent::ObjectMoveEvent(std::string packet){
-    std::vector<std::string> split = split_string(packet);
-    sender_ = split[1];
-    for (int i = 2; i < split.size(); i++) {
-        std::vector<std::string> update = split_string(split[i]);
-        objects_[std::stoi(update[0])] = Vector3{std::stof(update[1]), std::stof(update[2]), std::stof(update[3])};
-    }
-}
+ObjectMoveEvent::ObjectMoveEvent(uint32_t id, Vector3 position, std::string sender) : id_(id), position_(std::make_unique<Vector3>(position)), sender_(sender) {};
+ObjectMoveEvent::ObjectMoveEvent(const json& j) {from_json(j);}
 ObjectMoveEvent::~ObjectMoveEvent() {};
 
-std::string ObjectMoveEvent::make_packet() const {
-    std::string result = "ObjectMoveEvent " + sender_ + " ";
-    for (const auto& p : objects_)
-        result += "(" + std::to_string(p.first) + " " + std::to_string(p.second.x) + " " + std::to_string(p.second.y) + " " + std::to_string(p.second.z) + ")";
-    return result;
+json ObjectMoveEvent::to_json() const {
+    json j = {
+        {"type","ObjectMoveEvent"},
+        {"id",id_},
+        {"position",{{"x",position_->x},{"y",position_->y},{"z",position_->z}}},
+        {"sender",sender_}
+    };
+    return j;
 }
+
+void ObjectMoveEvent::from_json(const json& j) {
+    id_ = j.at("id");
+    position_ = std::make_unique<Vector3>(j.at("position")["x"],j.at("position")["y"],j.at("position")["z"]);
+    sender_ = j.at("sender");
+}
+
 bool ObjectMoveEvent::reliable() const {return false;}
 
-void ObjectMoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    for (const auto& p : objects_)
-        world->update_object(p.first, p.second);
-    if (network->is_host()) {
-        network->send_packet_excluding(make_packet(), reliable(), sender_);
+void ObjectMoveEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    game.get_world().move_object(id_, *position_);
+    if (is_host) {
+        game.get_network().send_packet_excluding(to_json(), reliable(), sender_);
     }
-}
-void ObjectMoveEvent::add(uint32_t id, Vector3 position){
-    objects_[id] = position;
 }
 
-ObjectRotateEvent::ObjectRotateEvent(std::map<uint32_t, Quaternion> objects, std::string sender) : objects_(std::move(objects)), sender_(sender) {};
-ObjectRotateEvent::ObjectRotateEvent(std::string packet){
-    std::vector<std::string> split = split_string(packet);
-    sender_ = split[1];
-    for (int i = 2; i < split.size(); i++) {
-        std::vector<std::string> update = split_string(split[i]);
-        objects_[std::stoi(update[0])] = Quaternion{std::stof(update[1]), std::stof(update[2]), std::stof(update[3]), std::stof(update[4])};
-    }
-}
+ObjectRotateEvent::ObjectRotateEvent(uint32_t id, Quaternion quaternion, std::string sender) : id_(id), quaternion_(std::make_unique<Quaternion>(quaternion)), sender_(sender) {};
+ObjectRotateEvent::ObjectRotateEvent(const json& j) {from_json(j);}
 ObjectRotateEvent::~ObjectRotateEvent() {};
-
-std::string ObjectRotateEvent::make_packet() const {
-    std::string result = "ObjectRotateEvent " + sender_ + " ";
-    for (const auto& p : objects_)
-        result += "(" + std::to_string(p.first) + " " + std::to_string(p.second.x) + " " + std::to_string(p.second.y) + " " + std::to_string(p.second.z) + " " + std::to_string(p.second.w) +")";
-    return result;
+json ObjectRotateEvent::to_json() const {
+    json j = {
+        {"type","ObjectRotateEvent"},
+        {"id",id_},
+        {"quaternion",{{"x",quaternion_->x},{"y",quaternion_->y},{"z",quaternion_->z},{"w",quaternion_->w}}},
+        {"sender",sender_}
+    };
+    return j;
 }
+
+void ObjectRotateEvent::from_json(const json& j) {
+    id_ = j.at("id");
+    quaternion_ = std::make_unique<Quaternion>(j.at("quaternion")["x"],j.at("quaternion")["y"],j.at("quaternion")["z"],j.at("quaternion")["w"]);
+    sender_ = j.at("sender");
+}
+
 bool ObjectRotateEvent::reliable() const {return false;}
 
-void ObjectRotateEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    for (const auto& p : objects_)
-        world->update_object(p.first, p.second);
-    if (network->is_host()) {
-        network->send_packet_excluding(make_packet(), reliable(), sender_);
+void ObjectRotateEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    game.get_world().set_object_quaternion(id_, *quaternion_);
+    if (is_host) {
+        game.get_network().send_packet_excluding(to_json(), reliable(), sender_);
     }
 }
-void ObjectRotateEvent::add(uint32_t id, Quaternion quaternion){
-    objects_[id] = quaternion;
+
+ObjectRemoveEvent::ObjectRemoveEvent(uint32_t id, std::string sender) : id_(id), sender_(sender) {}
+ObjectRemoveEvent::ObjectRemoveEvent(const json& j) {from_json(j);}
+ObjectRemoveEvent::~ObjectRemoveEvent() {}
+json ObjectRemoveEvent::to_json() const {
+    json j = {
+        {"type","ObjectRemoveEvent"},
+        {"id",id_},
+        {"sender",sender_}
+    };
+    return j;
 }
 
-ObjectRemoveEvent::ObjectRemoveEvent(std::vector<uint32_t> indices, std::string sender) : indices_(std::move(indices)), sender_(sender) {}
-ObjectRemoveEvent::ObjectRemoveEvent(std::string packet) {
-    std::vector<std::string> split = split_string(packet);
-    sender_ = split[1];
-    for (int i = 2; i < split.size(); i++)
-        add(std::stoi(split[i]));
+void ObjectRemoveEvent::from_json(const json& j) {
+    id_ = j.at("id");
+    sender_ = j.at("sender");
 }
-ObjectRemoveEvent::~ObjectRemoveEvent() {}
-std::string ObjectRemoveEvent::make_packet() const {
-    std::string result = "ObjectRemoveEvent " + sender_;
-    for (uint32_t index : indices_)
-        result += " " + std::to_string(index);
-    return result;
-}
+
 bool ObjectRemoveEvent::reliable() const {return true;}
 
-void ObjectRemoveEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    for (uint32_t index : indices_)
-        world->remove_object(index);
-    if (network->is_host())
-        network->send_packet_excluding(make_packet(), reliable(), sender_);
+void ObjectRemoveEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    game.get_world().delete_object(id_);
+    if (is_host)
+        game.get_network().send_packet_excluding(to_json(), reliable(), sender_);
 }
 
-void ObjectRemoveEvent::add(uint32_t id) {
-    indices_.push_back(id);
-}
-
-ObjectLoadEvent::ObjectLoadEvent(std::map<uint32_t, std::shared_ptr<Object3d>> objects, std::string sender) : objects_{std::move(objects)}, sender_(sender) {}
-ObjectLoadEvent::ObjectLoadEvent(std::string packet) {
-    std::vector<std::string> split = split_string(packet);
-    sender_ = split[1];
-    for (int i = 2; i < split.size(); i++) {
-        std::vector<std::string> a = split_string(split[i]);
-        std::string type = get_first_word(a[1]);
-        std::shared_ptr<Object3d> object;
-        if (type == "Cube") {
-            object = std::make_shared<Cube>(a[1]);
-        } else if (type == "MoveTool") {
-            object = std::make_shared<MoveTool>(a[1]);
-        } else if (type=="SunTool") {
-            object = std::make_shared<SunTool>(a[1]);
-        } else if (type=="RotateTool") {
-            object = std::make_shared<RotateTool>(a[1]);
-        } else if (type=="TaperedPetal") {
-            object = std::make_shared<TaperedPetal>(a[1]);
-        } else if (type=="LilyFlower") {
-            object = std::make_shared<LilyFlower>(a[1]);
-        }
-        add((uint32_t) std::stoi(a[0]), std::move(object));
-    }
-}
+ObjectLoadEvent::ObjectLoadEvent(uint32_t id, json object_json, std::string sender) : id_(id), object_json_(object_json), sender_(sender) {}
+ObjectLoadEvent::ObjectLoadEvent(const json& j) {from_json(j);}
 ObjectLoadEvent::~ObjectLoadEvent() {}
-std::string ObjectLoadEvent::make_packet() const {
-    std::string result = "ObjectLoadEvent " + sender_ + " ";
-    for (const auto& p : objects_)
-        result += "(" + std::to_string(p.first) + " (" + p.second->to_string() + "))";
-    return result;
+json ObjectLoadEvent::to_json() const {
+    assert(object_json_.is_object());
+    json j = {
+        {"type","ObjectLoadEvent"},
+        {"id",id_},
+        {"data",object_json_},
+        {"sender",sender_}
+    };
+    return j;
 }
+
+void ObjectLoadEvent::from_json(const json& j) {
+    id_ = j.at("id");
+    object_json_ = j.at("data");
+    sender_ = j.at("sender");
+}
+
 bool ObjectLoadEvent::reliable() const {
     return true;
 }
-void ObjectLoadEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    for (const auto& p : objects_)
-        world->load_object(p.second, p.first, shader);
-    if (network->is_host())
-        network->send_packet_excluding(make_packet(), reliable(), sender_);
-}
-void ObjectLoadEvent::add(uint32_t id, std::shared_ptr<Object3d> object) {
-    assert(objects_.find(id) == objects_.end());
-    objects_[id] = object;
+void ObjectLoadEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    game.get_world().load_object(std::move(parse_object(object_json_)),id_);
+    if (is_host)
+        game.get_network().send_packet_excluding(to_json(), reliable(), sender_);
 }
 
-ItemPickupEvent::ItemPickupEvent(std::shared_ptr<Item> item, std::string player) : item_(std::move(item)), player_(player) {}
-ItemPickupEvent::ItemPickupEvent(std::string packet) {
-    std::vector<std::string> split = split_string(packet);
-    std::string type = get_first_word(split[2]);
-    player_ = split[1];
-    if (type == "MoveTool") {
-        item_ = std::make_shared<MoveTool>(split[2]);
-    } else if (type == "SunTool") {
-        item_ = std::make_shared<SunTool>(split[2]);
-    } else if (type == "RotateTool") {
-        item_ = std::make_shared<RotateTool>(split[2]);
-    }
-}
+ItemPickupEvent::ItemPickupEvent(json item_json, std::string username) : item_json_(item_json), username_(username) {}
+ItemPickupEvent::ItemPickupEvent(const json& j) {from_json(j);}
 ItemPickupEvent::~ItemPickupEvent() {}
-std::string ItemPickupEvent::make_packet() const {
-    std::string result = "ItemPickupEvent " + player_ + " (" + item_->to_string() + ")";
-    return result;
+json ItemPickupEvent::to_json() const {
+    assert(item_json_.is_object());
+    json j = {
+        {"type","ItemPickupEvent"},
+        {"data",item_json_},
+        {"player",username_}
+    };
+    return j;
+}
+void ItemPickupEvent::from_json(const json& j) {
+    item_json_ = j.at("data");
+    username_ = j.at("player");
 }
 bool ItemPickupEvent::reliable() const {
     return true;
 }
-void ItemPickupEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    item_->set_shader(shader);
-    world->get_player(player_)->set_item(item_);
-    if (network->is_host())
-        network->send_packet_excluding(make_packet(), reliable(), player_);
+void ItemPickupEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    auto player = game.get_world().get_player(username_);
+    assert(player != std::nullopt);
+    player->get().set_item(std::move(parse_object(item_json_)));
+    if (is_host)
+        game.get_network().send_packet_excluding(to_json(), reliable(), username_);
 }
 
-ItemDropEvent::ItemDropEvent(const std::shared_ptr<Player>& player) : player_(player->get_username()) {}
-ItemDropEvent::ItemDropEvent(std::string packet) {
-    std::vector<std::string> split = split_string(packet);
-    player_ = split[1];
-}
+ItemDropEvent::ItemDropEvent(std::string username) : username_(username) {}
+ItemDropEvent::ItemDropEvent(const json& j) {from_json(j);}
 ItemDropEvent::~ItemDropEvent() {}
-std::string ItemDropEvent::make_packet() const {
-    std::string result = "ItemDropEvent " + player_;
-    return result;
+
+json ItemDropEvent::to_json() const {
+    json j = {
+        {"type","ItemDropEvent"},
+        {"username",username_}
+    };
+    return j;
+}
+void ItemDropEvent::from_json(const json& j) {
+    username_ = j.at("username");
 }
 bool ItemDropEvent::reliable() const {
     return true;
 }
-void ItemDropEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    world->get_player(player_)->drop_item(event_buffer, camera, world, keybinds, dt);
-    if (network->is_host())
-        network->send_packet_excluding(make_packet(), reliable(), player_);
+void ItemDropEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    auto player = game.get_world().get_player(username_);
+    assert(player != std::nullopt);
+    player->get().drop_item(game,username_,keybinds,dt);
+    if (is_host)
+        game.get_network().send_packet_excluding(to_json(), reliable(), username_);
 }
 
-WeatherUpdateEvent::WeatherUpdateEvent(int id) : weather_id_(id), timestamp_offset_(0) {}
 WeatherUpdateEvent::WeatherUpdateEvent(int id, int timestamp_offset) : weather_id_(id), timestamp_offset_(timestamp_offset) {}
-WeatherUpdateEvent::WeatherUpdateEvent(std::string packet) {
-    std::vector<std::string> split = split_string(packet);
-    weather_id_ = std::stoi(split[1]);
-    timestamp_offset_ = std::stoi(split[2]);
-}
+WeatherUpdateEvent::WeatherUpdateEvent(const json& j) {from_json(j);}
 WeatherUpdateEvent::~WeatherUpdateEvent() {}
-std::string WeatherUpdateEvent::make_packet() const {
-    return "WeatherUpdateEvent " + std::to_string(weather_id_) + " " + std::to_string(timestamp_offset_);
+json WeatherUpdateEvent::to_json() const {
+    json j = {
+        {"type","WeatherUpdateEvent"},
+        {"weather_id",weather_id_},
+        {"timestamp_offset",timestamp_offset_}
+    };
+    return j;
+}
+void WeatherUpdateEvent::from_json(const json& j) {
+    weather_id_ = j.at("weather_id");
+    timestamp_offset_ = j.at("timestamp_offset");
 }
 bool WeatherUpdateEvent::reliable() const {
     return true;
 }
-void WeatherUpdateEvent::receive(std::string receiving_user, std::shared_ptr<World> world, std::shared_ptr<Network> network, Game& game, uint64_t current_timestamp, std::map<std::string, std::shared_ptr<Event>>& event_buffer, MainCamera& camera, const std::vector<bool>& keybinds, float dt, std::shared_ptr<Shader> shader) {
-    if (!network->is_host()) {
-        game.get_world()->get_weather()->set_weather_id(weather_id_);
-        game.get_world()->get_weather()->update_sun(current_timestamp+timestamp_offset_);
-        game.get_world()->update_sun();
-    } else {
-        game.get_world()->get_weather()->update_sun(current_timestamp+timestamp_offset_);
-        game.get_world()->update_sun();
-    }
+void WeatherUpdateEvent::receive(Game& game, uint64_t current_timestamp, const std::vector<bool>& keybinds, float dt, bool is_host) {
+    if (!is_host)
+        game.get_world().get_weather().set_weather_id(weather_id_);
+    game.get_world().get_weather().update_sun(current_timestamp+timestamp_offset_);
+    game.get_world().update_sun();
 }

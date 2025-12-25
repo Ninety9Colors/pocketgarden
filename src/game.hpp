@@ -9,6 +9,7 @@
 #include "player/player.hpp"
 #include "world/world.hpp"
 #include "player/maincamera.hpp"
+#include "event/event.hpp"
 
 class Game {
 public:
@@ -24,17 +25,22 @@ public:
     std::optional<std::reference_wrapper<Player>> get_current_player();
 
     void poll_events();
-    void tick(uint64_t current_timestamp);
-    void update_current_player(std::deque<std::unique_ptr<Event>>& event_buffer, const std::vector<bool>& keybinds, float dt);
+    void tick(const std::vector<bool>& keybinds, uint64_t current_timestamp, float dt);
+    void update_current_player(const std::vector<bool>& keybinds, float dt);
+    void update_main_camera(Vector2 mouse_delta);
+    void queue_event_send(std::unique_ptr<Event> event);
+    void queue_event_receive(std::unique_ptr<Event> event);
 
     const Network& get_network() const;
-    const World& get_world() const;
+    MainCamera& get_camera();
+    World& get_world();
 private:
     bool in_world_;
     World world_;
     std::string current_username_;
 
-    std::deque<std::unique_ptr<Event>> event_buffer_;
+    std::deque<std::unique_ptr<Event>> event_buffer_receive_;
+    std::deque<std::unique_ptr<Event>> event_buffer_send_;
 
     MainCamera main_camera_;
     Network network_;
