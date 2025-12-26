@@ -58,6 +58,13 @@ void Player::draw(Game& game) const {
     if (selected_item_ != nullptr && online_)
         selected_item_->draw(game);
 }
+void Player::draw(Game& game, Material material) const {
+    std::string current_user = game.get_current_username();
+    if (username_ != current_user && online_)
+        head_.draw(game,material);
+    if (selected_item_ != nullptr && online_)
+        selected_item_->draw(game,material);
+}
 
 void Player::move(Vector3 direction, const std::vector<bool>& keybinds, float dt) {
     Vector3 left = Vector3{direction.z, 0.0f, -direction.x};

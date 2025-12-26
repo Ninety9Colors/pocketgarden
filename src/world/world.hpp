@@ -48,7 +48,7 @@ public:
     const std::vector<Player>& get_players() const;
     const std::map<uint32_t,std::unique_ptr<Object3d>>& get_objects() const;
     std::optional<std::reference_wrapper<Player>> get_player(std::string username);
-    Weather get_weather();
+    Weather& get_weather();
     const Cube& get_sun() const;
     void update_sun();
 private:

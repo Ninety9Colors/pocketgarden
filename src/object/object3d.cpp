@@ -3,6 +3,7 @@
 #include "event/event.hpp"
 #include "object/object3d.hpp"
 #include "game.hpp"
+#include "application.hpp"
 #include "rlgl.h"
 #include "raymath.h"
 
@@ -10,6 +11,7 @@
 
 Object3d::Object3d() : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), mesh_{0}, material_{0}, position_{0.0f,0.0f,0.0f}, scale_(1.0f), quaternion_{0.0f,0.0f,0.0f,1.0f} {
     material_ = LoadMaterialDefault();
+    material_.shader = Application::get_shader_default();
 }
 // Object3d::Object3d(const json& j) {
 //     from_json(j);
@@ -19,25 +21,31 @@ Object3d::Object3d() : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), 
 Object3d::Object3d(Quaternion quaternion, Vector3 position, float scale) : object_type_(static_cast<uint8_t>(ObjectType::DEFAULT)), mesh_{0}, material_{0}, position_(position), scale_(scale), quaternion_{quaternion} {
     INFO("Constructing object at " + std::to_string(position.x) + "," + std::to_string(position.y) + "," + std::to_string(position.z));
     material_ = LoadMaterialDefault();
+    material_.shader = Application::get_shader_default();
     INFO(" - constructed material");
 }
 Object3d::Object3d(const Object3d& rhs) : object_type_(rhs.object_type_), quaternion_(rhs.quaternion_),position_(rhs.position_),mesh_{0},material_{0},scale_(rhs.scale_),transform_(rhs.transform_) {
     material_ = LoadMaterialDefault();
+    material_.shader = Application::get_shader_default();
 }
 Object3d::~Object3d() {
     if (mesh_.indices != nullptr)
         UnloadMesh(mesh_);
-    if (material_.params != nullptr)
-        UnloadMaterial(material_);
 }
 void Object3d::generate_mesh() {
     mesh_ = GenMeshCube(1.0f,1.0f,1.0f);
 }
 void Object3d::draw(Game& game) const {
-    DrawMesh(mesh_, material_, transform_);
+    draw(game,material_);
+}
+void Object3d::draw(Game& game, Material material) const {
+    DrawMesh(mesh_,material,transform_);
 }
 void Object3d::draw(Game& game, Matrix transform) const {
-    DrawMesh(mesh_, material_, transform);
+    draw(game,transform,material_);
+}
+void Object3d::draw(Game& game, Matrix transform, Material material) const {
+    DrawMesh(mesh_, material, transform);
 }
 void Object3d::draw_offset(Game& game, float x, float y, float z) const {
     Matrix offset = MatrixAdd(transform_,Matrix{
@@ -46,7 +54,7 @@ void Object3d::draw_offset(Game& game, float x, float y, float z) const {
         0,0,0,z,
         0,0,0,0
     });
-    DrawMesh(mesh_, material_, offset);
+    draw(game,offset);
 }
 
 void Object3d::set_quaternion(Quaternion quaternion) {
@@ -136,6 +144,10 @@ BoundingBox Object3d::get_bounding_box(Matrix transform) const {
     box.max = maxVertex;
 
     return box;
+}
+
+void Object3d::set_material(Material material) {
+    material_ = material;
 }
 
 uint8_t Object3d::get_type() const {

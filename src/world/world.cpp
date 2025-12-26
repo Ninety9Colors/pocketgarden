@@ -8,6 +8,7 @@
 #include "object/procedural/tapered_petal.hpp"
 #include "world/world.hpp"
 #include "util/factory.hpp"
+#include "application.hpp"
 #include <cstdint>
 
 #include <algorithm>
@@ -19,6 +20,7 @@
 constexpr float SUN_RADIUS = 100.0f;
 
 World::World() : spawn_point_{0.0f,0.0f,0.0f},next_id_(1),sun_(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f,SUN_RADIUS,0.0f}, Vector3{1.0f,1.0f,1.0f}, 10.0f, WHITE),weather_(30.2672f, -97.7431f) {
+    sun_.set_material(LoadMaterialDefault());
     INFO("Default initialized world");
 };
 
@@ -243,7 +245,7 @@ std::optional<std::reference_wrapper<Player>> World::get_player(std::string user
     return std::nullopt;
 }
 
-Weather World::get_weather() {
+Weather& World::get_weather() {
     return weather_;
 }
 
@@ -258,6 +260,21 @@ void World::update_sun() {
     double y = std::sin(altitude);
     double z = -std::cos(azimuth) * std::cos(altitude);
     double magnitude = std::sqrt(x*x + y*y + z*z);
-
     sun_.set_position(Vector3{(float)(x/magnitude)*SUN_RADIUS,(float)(y/magnitude)*SUN_RADIUS,(float)(z/magnitude)*SUN_RADIUS});
+
+    // Pass new lighting information to shader
+    Shader shader_default = Application::get_shader_default();
+    int sun_position_loc = GetShaderLocation(shader_default,"sunPos");
+    int sun_color_loc = GetShaderLocation(shader_default,"sunColor");
+    int ambient_loc = GetShaderLocation(shader_default,"ambient");
+
+    const Vector3 sun_position = sun_.get_position();
+    float sun_pos[3] = {sun_position.x, sun_position.y, sun_position.z};
+    SetShaderValue(shader_default, sun_position_loc, sun_pos, SHADER_UNIFORM_VEC3);
+    float sun_color[4] = {1.0f,1.0f,(std::pow(std::max(sun_position.y,0.0f),2)/10000.0f),1.0f};
+    SetShaderValue(shader_default, sun_color_loc, sun_color, SHADER_UNIFORM_VEC4);
+
+    float ambient_level = (std::pow(std::max(sun_position.y,0.0f),2)/10000.0f)*0.5f + 0.25f;
+    float ambient[4] = {ambient_level,ambient_level,ambient_level,1.0f};
+    SetShaderValue(shader_default, ambient_loc, ambient, SHADER_UNIFORM_VEC4);
 }

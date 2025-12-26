@@ -18,9 +18,8 @@ public:
     RotateTool(const json& j);
     RotateTool(Quaternion quaternion, Vector3 position, float scale);
 
-    void draw(Game& game) const override;
-    void draw(Game& game, Matrix transform) const override;
-    void draw_offset(Game& game, float x, float y, float z) const override;
+    void draw(Game& game, Material material_) const override;
+    void draw(Game& game, Matrix transform, Material material_) const override;
 
     void use(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) override;
     void on_drop(Game& game, std::string username, const std::vector<bool>& keybinds, float dt) override;

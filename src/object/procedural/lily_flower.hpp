@@ -17,9 +17,8 @@ public:
     LilyFlower(const json& j);
     virtual ~LilyFlower() {};
 
-    void draw(Game& game) const override;
-    void draw(Game& game,Matrix transform) const override;
-    void draw_offset(Game& game,float x, float y, float z) const override;
+    void draw(Game& game, Material material) const override;
+    void draw(Game& game,Matrix transform, Material material) const override;
 
     void update_matrix() override;
 

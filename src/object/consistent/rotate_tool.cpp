@@ -89,24 +89,17 @@ void RotateTool::on_drop(Game& game, std::string username, const std::vector<boo
     held_id_ = 0;
 }
 
-void RotateTool::draw(Game& game) const {
-    Item::draw(game);
+void RotateTool::draw(Game& game, Material material) const {
+    Item::draw(game,material);
     if (held_id_ == 0) return;
     Vector3 pos = game.get_world().get_object_position(held_id_);
     BoundingBox bb = game.get_world().get_object_bounding_box(held_id_);
     DrawLine3D(pos, Vector3Add(pos,axis_*Vector3Distance(bb.max, bb.min)*2), WHITE);
 }
-void RotateTool::draw(Game& game, Matrix transform) const {
-    Item::draw(game,transform);
+void RotateTool::draw(Game& game, Matrix transform, Material material) const {
+    Item::draw(game,transform,material);
     if (held_id_ == 0) return;
     Vector3 pos = game.get_world().get_object_position(held_id_);
     BoundingBox bb = game.get_world().get_object_bounding_box(held_id_);
     DrawLine3D(pos, Vector3Add(pos,axis_*Vector3Distance(bb.max, bb.min)*2), WHITE);
-}
-void RotateTool::draw_offset(Game& game,float x, float y, float z) const {
-    Item::draw_offset(game,x,y,z);
-    if (held_id_ == 0) return;
-    Vector3 pos = game.get_world().get_object_position(held_id_);
-    BoundingBox bb = game.get_world().get_object_bounding_box(held_id_);
-    DrawLine3D(pos, Vector3Add(pos+Vector3{x,y,z},axis_*Vector3Distance(bb.max, bb.min)*2), WHITE);
 }

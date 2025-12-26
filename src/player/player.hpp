@@ -24,6 +24,8 @@ public:
     ~Player() {};
 
     void draw(Game& game) const;
+    void draw(Game& game, Material material) const;
+
     void move(Vector3 direction, const std::vector<bool>& keybinds, float dt);
     void set_position(Vector3 position);
     

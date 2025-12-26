@@ -24,7 +24,8 @@ constexpr int DEFAULT_SCREEN_WIDTH = 1280;
 constexpr int DEFAULT_SCREEN_HEIGHT = 720;
 constexpr int FONT_SIZE = 40;
 
-Application::Application() : shader_default_{0}, ip_({0}), port_({0}), username_({0}), ip_focus_(false), port_focus_(false), username_focus_(false) {
+Shader Application::shader_default_ {0};
+Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(false), port_focus_(false), username_focus_(false) {
     // TODO: Load settings from file
     Settings::set("Camera Sensitivity",0.001f);
     Settings::set("Log Level", 1);
@@ -87,17 +88,6 @@ void Application::run(Game& game) {
                     game.queue_event_send(std::make_unique<WeatherUpdateEvent>(game.get_world().get_weather().get_weather_id()));
                     game.get_world().get_weather().update_sun(current_timestamp);
                     game.get_world().update_sun();
-
-                    // Pass new lighting information to shader
-                    const Vector3 sun_position = game.get_world().get_sun().get_position();
-                    float sun_pos[3] = {sun_position.x, sun_position.y, sun_position.z};
-                    SetShaderValue(shader_default_, sun_position_loc, sun_pos, SHADER_UNIFORM_VEC3);
-                    float sun_color[4] = {1.0f,1.0f,(std::pow(std::max(sun_position.y,0.0f),2)/10000.0f),1.0f};
-                    SetShaderValue(shader_default_, sun_color_loc, sun_color, SHADER_UNIFORM_VEC4);
-
-                    float ambient_level = (std::pow(std::max(sun_position.y,0.0f),2)/10000.0f)*0.5f + 0.25f;
-                    float ambient[4] = {ambient_level,ambient_level,ambient_level,1.0f};
-                    SetShaderValue(shader_default_, ambient_loc, ambient, SHADER_UNIFORM_VEC4);
                 } else {
                     WARN("Failed to retrieve weather information");
                 }
@@ -209,10 +199,19 @@ void Application::draw_objects(Game& game, const std::map<uint32_t, std::unique_
         p.second->draw(game);
     }
 }
-
+void Application::draw_objects(Game& game, const std::map<uint32_t, std::unique_ptr<Object3d>>& objects, Material material) const {
+    for (const auto& p : objects) {
+        p.second->draw(game, material);
+    }
+}
 void Application::draw_players(Game& game, std::string current_user, const std::vector<Player>& players) const {
     for (const auto &player : players) {
         player.draw(game);
+    }
+}
+void Application::draw_players(Game& game, std::string current_user, const std::vector<Player>& players, Material material) const {
+    for (const auto &player : players) {
+        player.draw(game, material);
     }
 }
 

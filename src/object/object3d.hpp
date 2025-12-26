@@ -37,9 +37,11 @@ public:
 
     virtual void generate_mesh();
 
-    virtual void draw(Game& game) const;
-    virtual void draw(Game& game, Matrix transform) const;
-    virtual void draw_offset(Game& game, float x, float y, float z) const;
+    void draw(Game& game) const;
+    void draw(Game& game, Matrix transform) const;
+    void draw_offset(Game& game, float x, float y, float z) const;
+    virtual void draw(Game& game, Material material_) const;
+    virtual void draw(Game& game, Matrix transform, Material material_) const;
 
     virtual void set_quaternion(Quaternion quaternion);
     virtual Quaternion get_quaternion() const;
@@ -55,6 +57,8 @@ public:
 
     virtual BoundingBox get_bounding_box() const;
     virtual BoundingBox get_bounding_box(Matrix transform) const;
+
+    virtual void set_material(Material material);
 
     uint8_t get_type() const;
 

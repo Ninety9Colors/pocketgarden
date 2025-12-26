@@ -52,25 +52,21 @@ void LilyFlower::from_json(const json& j) {
     lower_petal_ = std::make_unique<TaperedPetal>(j.at("lower_petal"));
 }
 
-void LilyFlower::draw(Game& game) const {
-    upper_petal_->draw(game,upper_transforms_[0]);
-    upper_petal_->draw(game,upper_transforms_[1]);
-    upper_petal_->draw(game,upper_transforms_[2]);
-    lower_petal_->draw(game,lower_transforms_[0]);
-    lower_petal_->draw(game,lower_transforms_[1]);
-    lower_petal_->draw(game,lower_transforms_[2]);
+void LilyFlower::draw(Game& game, Material material) const {
+    upper_petal_->draw(game,upper_transforms_[0],material);
+    upper_petal_->draw(game,upper_transforms_[1],material);
+    upper_petal_->draw(game,upper_transforms_[2],material);
+    lower_petal_->draw(game,lower_transforms_[0],material);
+    lower_petal_->draw(game,lower_transforms_[1],material);
+    lower_petal_->draw(game,lower_transforms_[2],material);
 }
-void LilyFlower::draw(Game& game,Matrix transform) const {
-    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[0], transform));
-    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[1], transform));
-    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[2], transform));
-    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[0], transform));
-    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[1], transform));
-    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[2], transform));
-}
-void LilyFlower::draw_offset(Game& game,float x, float y, float z) const {
-    Matrix offset = MatrixTranslate(x,y,z);
-    draw(game,offset);
+void LilyFlower::draw(Game& game,Matrix transform, Material material) const {
+    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[0], transform),material);
+    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[1], transform),material);
+    upper_petal_->draw(game,MatrixMultiply(upper_transforms_[2], transform),material);
+    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[0], transform),material);
+    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[1], transform),material);
+    lower_petal_->draw(game,MatrixMultiply(lower_transforms_[2], transform),material);
 }
 
 void LilyFlower::update_matrix() {
