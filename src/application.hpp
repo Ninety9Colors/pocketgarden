@@ -21,8 +21,10 @@ public:
     void exit();
     
     static Shader get_shader_default() {return shader_default_;}
+    static Shader get_shader_rain() {return shader_rain_;}
 private:
     static Shader shader_default_;
+    static Shader shader_rain_;
 
     char ip_[16];
     char port_[6];

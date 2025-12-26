@@ -1,17 +1,26 @@
 #include <cmath>
 #include <fstream>
 
-#define CPPHTTPLIB_OPENSSL_SUPPORT
-#include "httplib.h"
 #include "json.hpp"
+using json = nlohmann::json;
 
+#include "raylib.h"
+#include "raymath.h"
+
+#include "application.hpp"
+#include "game.hpp"
 #include "logging.hpp"
 #include "world/weather.hpp"
+#include "world/request.hpp"
 
 Weather::Weather(float latitude, float longitude) : latitude_(latitude), longitude_(longitude) {
     weather_id_ = 800;
     azimuth_ = 0.0;
     altitude_ = 0.0;
+    rain_mesh_ = GenMeshCube(0.1f,0.25f,0.1f);
+    rain_mat_ = LoadMaterialDefault();
+    rain_mat_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
+    rain_mat_.shader = Application::get_shader_rain();
     INFO("Default initialized weather");
 }
 
@@ -29,25 +38,18 @@ bool Weather::update() {
     } else {
         return false;
     }
-    httplib::SSLClient cli("api.openweathermap.org", 443);
-    cli.set_follow_location(true);
-    auto res = cli.Get(url.c_str());
-    if (!res || res->status != 200)
-        return false;
-    DEBUG("Received query: " + res->body);
-    try {
-        auto json = nlohmann::json::parse(res->body);
-        weather_id_ = json["weather"][0]["id"];
-        INFO("Set weather id to: " + std::to_string(weather_id_));
-    } catch(const std::exception& e) {
+    std::optional<json> j = get_url(url);
+    if (j == std::nullopt) {
         return false;
     }
+    weather_id_ = j.value().at("weather")[0]["id"];
+    INFO("Set weather id to: " + std::to_string(weather_id_));
     return true;
 }
 
 void Weather::update_sun(uint64_t current_timestamp) {
     constexpr auto clamp = [](double x) { return std::max(-1.0, std::min(1.0, x)); };
-    constexpr double PI = 3.14159265358979323846f;
+    // constexpr double PI = 3.14159265358979323846f;
     double julian_day = current_timestamp / 86400.0 + 2440587.5;
     double T = (julian_day - 2451545.0) / 36525.0; // julian century
     double L0 = std::fmod(280.46646 + T * (36000.76983 + T * 0.0003032), 360.0); // mean longitude
@@ -78,6 +80,26 @@ void Weather::update_sun(uint64_t current_timestamp) {
     altitude_ = h_rad;
     INFO("Azimuth: " + std::to_string(azimuth_*180.0/PI) + " Altitude: " + std::to_string(altitude_*180.0/PI));
 }
+
+void Weather::draw(Game& game, uint64_t timestamp, uint64_t nano_seconds) const {
+    float ss = nano_seconds/(1e9f);
+    float rain_direction[3] = {0.0f,-1.0f,-0.25f};
+    float rain_speed = 100.0f;
+    uint32_t seconds = timestamp%(10000);
+    
+    int s_loc = GetShaderLocation(rain_mat_.shader,"seconds");
+    SetShaderValue(rain_mat_.shader,s_loc,&seconds,SHADER_UNIFORM_INT);
+    int ss_loc = GetShaderLocation(rain_mat_.shader,"subseconds");
+    SetShaderValue(rain_mat_.shader,ss_loc,&ss,SHADER_UNIFORM_FLOAT);
+    int speed_loc = GetShaderLocation(rain_mat_.shader,"rainSpeed");
+    SetShaderValue(rain_mat_.shader,speed_loc,&rain_speed,SHADER_UNIFORM_FLOAT);
+    int rd_loc = GetShaderLocation(rain_mat_.shader,"rainDirection");
+    SetShaderValue(rain_mat_.shader,rd_loc,rain_direction,SHADER_UNIFORM_VEC3);
+
+    Quaternion q = QuaternionFromVector3ToVector3(Vector3{0.0f,-1.0f,0.0f},Vector3Normalize(Vector3{rain_direction[0],rain_direction[1],rain_direction[2]}));
+    Matrix transform = MatrixMultiply(QuaternionToMatrix(q),MatrixTranslate(0.0f,10.0f,0.0f));
+    DrawMesh(rain_mesh_,rain_mat_,transform);
+} 
 
 void Weather::set_location(float latitude, float longitude) {
     latitude_ = latitude;

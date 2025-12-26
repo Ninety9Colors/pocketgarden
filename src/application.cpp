@@ -25,6 +25,7 @@ constexpr int DEFAULT_SCREEN_HEIGHT = 720;
 constexpr int FONT_SIZE = 40;
 
 Shader Application::shader_default_ {0};
+Shader Application::shader_rain_ {0};
 Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(false), port_focus_(false), username_focus_(false) {
     // TODO: Load settings from file
     Settings::set("Camera Sensitivity",0.001f);
@@ -36,6 +37,7 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
     SetExitKey(KEY_NULL);
     shader_default_ = LoadShader("shaders/default.vs","shaders/default.fs");
     shader_default_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_default_, "colorDiffuse");
+    shader_rain_ = LoadShader("shaders/rain.vs","shaders/rain.fs");
 }
 
 void Application::run(Game& game) {
@@ -67,6 +69,8 @@ void Application::run(Game& game) {
             continue;
         }
         uint64_t current_timestamp = std::time(nullptr);
+        uint64_t nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::high_resolution_clock::now()-std::chrono::floor<std::chrono::seconds>(std::chrono::high_resolution_clock::now())).count();
         float dt = GetFrameTime(); // elapsed seconds of last frame (seconds)
         dt_tick += dt;
 
@@ -109,6 +113,7 @@ void Application::run(Game& game) {
         game.get_world().get_sun().draw(game);
         draw_players(game,game.get_current_username(), game.get_world().get_players());
         draw_objects(game,game.get_world().get_objects());
+        game.get_world().get_weather().draw(game,current_timestamp,nanoseconds);
 
         EndMode3D();
 
