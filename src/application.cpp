@@ -38,6 +38,9 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
     shader_default_ = LoadShader("shaders/default.vs","shaders/default.fs");
     shader_default_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_default_, "colorDiffuse");
     shader_rain_ = LoadShader("shaders/rain.vs","shaders/rain.fs");
+    shader_rain_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_rain_, "colorDiffuse");
+    shader_rain_.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader_rain_, "mvp");
+    shader_rain_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader_rain_, "instanceTransform");
 }
 
 void Application::run(Game& game) {
@@ -92,6 +95,7 @@ void Application::run(Game& game) {
                     game.queue_event_send(std::make_unique<WeatherUpdateEvent>(game.get_world().get_weather().get_weather_id()));
                     game.get_world().get_weather().update_sun(current_timestamp);
                     game.get_world().update_sun();
+                    game.get_world().get_weather().update_weather_transform(game);
                 } else {
                     WARN("Failed to retrieve weather information");
                 }

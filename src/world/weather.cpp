@@ -13,14 +13,14 @@ using json = nlohmann::json;
 #include "world/weather.hpp"
 #include "world/request.hpp"
 
-Weather::Weather(float latitude, float longitude) : latitude_(latitude), longitude_(longitude) {
+Weather::Weather(float latitude, float longitude) : rain_distance_{15.0f},rain_transforms_{},rain_speed_{40.0f},rain_direction_{0.0f,-1.0f,-0.25f},latitude_(latitude), longitude_(longitude) {
     weather_id_ = 800;
     azimuth_ = 0.0;
     altitude_ = 0.0;
-    rain_mesh_ = GenMeshCube(0.1f,0.25f,0.1f);
+    rain_mesh_ = GenMeshCube(0.01f,0.25f,0.01f);
     rain_mat_ = LoadMaterialDefault();
-    rain_mat_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
     rain_mat_.shader = Application::get_shader_rain();
+    rain_mat_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
     INFO("Default initialized weather");
 }
 
@@ -83,8 +83,6 @@ void Weather::update_sun(uint64_t current_timestamp) {
 
 void Weather::draw(Game& game, uint64_t timestamp, uint64_t nano_seconds) const {
     float ss = nano_seconds/(1e9f);
-    float rain_direction[3] = {0.0f,-1.0f,-0.25f};
-    float rain_speed = 100.0f;
     uint32_t seconds = timestamp%(10000);
     
     int s_loc = GetShaderLocation(rain_mat_.shader,"seconds");
@@ -92,14 +90,41 @@ void Weather::draw(Game& game, uint64_t timestamp, uint64_t nano_seconds) const 
     int ss_loc = GetShaderLocation(rain_mat_.shader,"subseconds");
     SetShaderValue(rain_mat_.shader,ss_loc,&ss,SHADER_UNIFORM_FLOAT);
     int speed_loc = GetShaderLocation(rain_mat_.shader,"rainSpeed");
-    SetShaderValue(rain_mat_.shader,speed_loc,&rain_speed,SHADER_UNIFORM_FLOAT);
+    SetShaderValue(rain_mat_.shader,speed_loc,&rain_speed_,SHADER_UNIFORM_FLOAT);
     int rd_loc = GetShaderLocation(rain_mat_.shader,"rainDirection");
-    SetShaderValue(rain_mat_.shader,rd_loc,rain_direction,SHADER_UNIFORM_VEC3);
+    SetShaderValue(rain_mat_.shader,rd_loc,rain_direction_,SHADER_UNIFORM_VEC3);
 
-    Quaternion q = QuaternionFromVector3ToVector3(Vector3{0.0f,-1.0f,0.0f},Vector3Normalize(Vector3{rain_direction[0],rain_direction[1],rain_direction[2]}));
-    Matrix transform = MatrixMultiply(QuaternionToMatrix(q),MatrixTranslate(0.0f,10.0f,0.0f));
-    DrawMesh(rain_mesh_,rain_mat_,transform);
+    // for (int i = 0; i < rain_transforms_.size(); i++) {
+    //     DrawMesh(rain_mesh_,rain_mat_,rain_transforms_[i]);
+    // }
+    DrawMeshInstanced(rain_mesh_,rain_mat_,rain_transforms_.data(),rain_transforms_.size());
 } 
+
+void Weather::update_weather_transform(Game& game) {
+    // 2xx and 5xx is thunder/rain, 3xx is drizzle
+    INFO("Updating rain matrices for instancing...");
+    constexpr int RAIN_RADIUS = 10;
+    constexpr int RAINBOX_SIDE_LENGTH = RAIN_RADIUS*2*5;
+    Vector3 center = game.get_current_player()->get().get_position();
+    Vector3 rain_d = Vector3{rain_direction_[0],rain_direction_[1],rain_direction_[2]};
+    bool is_raining = true;
+    // bool is_raining = weather_id_/100 == 2 || weather_id_/100 == 5 || weather_id_/100 == 3;
+    int transform_count = is_raining ? RAINBOX_SIDE_LENGTH*RAINBOX_SIDE_LENGTH : 0;
+    rain_transforms_.resize(transform_count);
+    INFO("Resizing to " + std::to_string(transform_count) + " matrices");
+    if (!transform_count) return;
+    Quaternion q = QuaternionFromVector3ToVector3(Vector3{0.0f,-1.0f,0.0f},Vector3Normalize(Vector3{rain_direction_[0],rain_direction_[1],rain_direction_[2]}));
+    Matrix rotate = QuaternionToMatrix(q);
+    for (int i = 0; i < RAINBOX_SIDE_LENGTH; i++) {
+        for (int j = 0; j < RAINBOX_SIDE_LENGTH; j++) {
+            int indice = i*RAINBOX_SIDE_LENGTH + j;
+            Vector3 rain_pos = Vector3{(i-RAINBOX_SIDE_LENGTH/2)*0.2f,0.0f,(j-RAINBOX_SIDE_LENGTH/2)*0.2f} + Vector3Scale(Vector3Normalize(Vector3Negate(rain_d)),rain_distance_);
+            rain_transforms_[indice] = MatrixMultiply(rotate,MatrixTranslate(rain_pos.x,rain_pos.y,rain_pos.z));
+            if (indice == 0 || indice == transform_count-1)
+                INFO(std::to_string(rain_pos.x) + "," + std::to_string(rain_pos.y) + "," + std::to_string(rain_pos.z));
+        }
+    }
+}
 
 void Weather::set_location(float latitude, float longitude) {
     latitude_ = latitude;

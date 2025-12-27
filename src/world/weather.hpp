@@ -2,6 +2,7 @@
 #include <string>
 
 class Game;
+#include "raymath.h"
 
 class Weather {
 public:
@@ -14,6 +15,7 @@ public:
     void update_sun(uint64_t current_timestamp);
 
     void draw(Game& game,uint64_t timestamp,uint64_t nano_seconds) const;
+    void update_weather_transform(Game& game);
 
     int get_weather_id() const;
     float get_latitude() const;
@@ -23,6 +25,10 @@ public:
 private:
     Mesh rain_mesh_;
     Material rain_mat_;
+    std::vector<Matrix> rain_transforms_;
+    float rain_direction_[3];
+    float rain_speed_;
+    float rain_distance_;
     
     int weather_id_;
 
