@@ -13,11 +13,11 @@ using json = nlohmann::json;
 #include "world/weather.hpp"
 #include "world/request.hpp"
 
-Weather::Weather(float latitude, float longitude) : rain_distance_{15.0f},rain_transforms_{},rain_speed_{40.0f},rain_direction_{0.0f,-1.0f,-0.25f},latitude_(latitude), longitude_(longitude) {
+Weather::Weather(float latitude, float longitude) : rain_distance_{30.0f},rain_transforms_{},rain_speed_{10.0f},rain_direction_{0.0f,-1.0f,-0.25f},latitude_(latitude), longitude_(longitude) {
     weather_id_ = 800;
     azimuth_ = 0.0;
     altitude_ = 0.0;
-    rain_mesh_ = GenMeshCube(0.01f,0.25f,0.01f);
+    rain_mesh_ = GenMeshCube(0.01f,0.1f,0.01f);
     rain_mat_ = LoadMaterialDefault();
     rain_mat_.shader = Application::get_shader_rain();
     rain_mat_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
@@ -84,6 +84,8 @@ void Weather::update_sun(uint64_t current_timestamp) {
 void Weather::draw(Game& game, uint64_t timestamp, uint64_t nano_seconds) const {
     float ss = nano_seconds/(1e9f);
     uint32_t seconds = timestamp%(10000);
+    Vector3 pos = game.get_current_player()->get().get_position();
+    float pos_array[3] = {pos.x,pos.y,pos.z};
     
     int s_loc = GetShaderLocation(rain_mat_.shader,"seconds");
     SetShaderValue(rain_mat_.shader,s_loc,&seconds,SHADER_UNIFORM_INT);
@@ -93,6 +95,8 @@ void Weather::draw(Game& game, uint64_t timestamp, uint64_t nano_seconds) const 
     SetShaderValue(rain_mat_.shader,speed_loc,&rain_speed_,SHADER_UNIFORM_FLOAT);
     int rd_loc = GetShaderLocation(rain_mat_.shader,"rainDirection");
     SetShaderValue(rain_mat_.shader,rd_loc,rain_direction_,SHADER_UNIFORM_VEC3);
+    int player_loc = GetShaderLocation(rain_mat_.shader,"playerPosition");
+    SetShaderValue(rain_mat_.shader,player_loc,pos_array,SHADER_UNIFORM_VEC3);
 
     // for (int i = 0; i < rain_transforms_.size(); i++) {
     //     DrawMesh(rain_mesh_,rain_mat_,rain_transforms_[i]);
@@ -103,7 +107,7 @@ void Weather::draw(Game& game, uint64_t timestamp, uint64_t nano_seconds) const 
 void Weather::update_weather_transform(Game& game) {
     // 2xx and 5xx is thunder/rain, 3xx is drizzle
     INFO("Updating rain matrices for instancing...");
-    constexpr int RAIN_RADIUS = 10;
+    constexpr int RAIN_RADIUS = 30;
     constexpr int RAINBOX_SIDE_LENGTH = RAIN_RADIUS*2*5;
     Vector3 center = game.get_current_player()->get().get_position();
     Vector3 rain_d = Vector3{rain_direction_[0],rain_direction_[1],rain_direction_[2]};
