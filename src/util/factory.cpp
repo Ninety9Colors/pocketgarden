@@ -5,6 +5,7 @@
 #include <object/consistent/move_tool.hpp>
 #include <object/consistent/rotate_tool.hpp>
 #include <object/consistent/sun_tool.hpp>
+#include <object/consistent/weather_tool.hpp>
 #include <object/procedural/lily_flower.hpp>
 #include <object/procedural/tapered_petal.hpp>
 
@@ -21,6 +22,8 @@ std::unique_ptr<Object3d> parse_object(const json& j) {
         result = std::make_unique<RotateTool>(j);
     } else if (type == "SunTool") {
         result = std::make_unique<SunTool>(j);
+    } else if (type == "WeatherTool") {
+        result = std::make_unique<WeatherTool>(j);
     } else if (type == "LilyFlower") {
         result = std::make_unique<LilyFlower>(j);
         result->generate_mesh();

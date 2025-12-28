@@ -6,6 +6,7 @@ using json = nlohmann::json;
 
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 
 #include "application.hpp"
 #include "game.hpp"
@@ -13,7 +14,18 @@ using json = nlohmann::json;
 #include "world/weather.hpp"
 #include "world/request.hpp"
 
-Weather::Weather(float latitude, float longitude) : rain_distance_{30.0f},rain_transforms_{},rain_speed_{10.0f},rain_direction_{0.0f,-1.0f,-0.25f},latitude_(latitude), longitude_(longitude) {
+Weather::Weather(float latitude, float longitude) : rain_distance_{20.0f},
+                                                    rain_transforms_{},
+                                                    rain_speed_{10.0f},
+                                                    rain_direction_{0.0f,-1.0f,-0.25f},
+                                                    snow_distance_{15.0f},
+                                                    snow_speed_{0.6f},
+                                                    snow_direction_{-0.5f,-1.0f,0.0f},
+                                                    snow_sway_{0.15f},
+                                                    fog_far_plane_{10000.0f},
+                                                    fog_color_{0.5f,0.8f,0.9f,1.0f},
+                                                    latitude_(latitude), 
+                                                    longitude_(longitude) {
     weather_id_ = 800;
     azimuth_ = 0.0;
     altitude_ = 0.0;
@@ -21,6 +33,30 @@ Weather::Weather(float latitude, float longitude) : rain_distance_{30.0f},rain_t
     rain_mat_ = LoadMaterialDefault();
     rain_mat_.shader = Application::get_shader_rain();
     rain_mat_.maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
+
+    snow_mesh_ = GenMeshCube(0.01f,0.01f,0.01f);
+    snow_mat_ = LoadMaterialDefault();
+    snow_mat_.shader = Application::get_shader_snow();
+    snow_mat_.maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+
+    quad_mesh_ = Mesh{0};
+    quad_mesh_.vertexCount = 6;
+    quad_mesh_.triangleCount = 2;
+    quad_mesh_.vertices = (float*)MemAlloc(sizeof(float)*6*3);
+    memcpy(quad_mesh_.vertices,(float[]){
+        // pos    
+        -1, -1, 0,
+        1, -1, 0,
+        1,  1, 0,
+
+        -1, -1, 0,
+        1,  1, 0,
+        -1,  1, 0,
+    },sizeof(float)*6*3);
+
+    UploadMesh(&quad_mesh_,false);
+    quad_mat_ = LoadMaterialDefault();
+    quad_mat_.shader = Application::get_shader_fog();
     INFO("Default initialized weather");
 }
 
@@ -87,45 +123,104 @@ void Weather::draw(Game& game, uint64_t timestamp, uint64_t nano_seconds) const 
     Vector3 pos = game.get_current_player()->get().get_position();
     float pos_array[3] = {pos.x,pos.y,pos.z};
     
-    int s_loc = GetShaderLocation(rain_mat_.shader,"seconds");
-    SetShaderValue(rain_mat_.shader,s_loc,&seconds,SHADER_UNIFORM_INT);
-    int ss_loc = GetShaderLocation(rain_mat_.shader,"subseconds");
-    SetShaderValue(rain_mat_.shader,ss_loc,&ss,SHADER_UNIFORM_FLOAT);
-    int speed_loc = GetShaderLocation(rain_mat_.shader,"rainSpeed");
-    SetShaderValue(rain_mat_.shader,speed_loc,&rain_speed_,SHADER_UNIFORM_FLOAT);
-    int rd_loc = GetShaderLocation(rain_mat_.shader,"rainDirection");
-    SetShaderValue(rain_mat_.shader,rd_loc,rain_direction_,SHADER_UNIFORM_VEC3);
-    int player_loc = GetShaderLocation(rain_mat_.shader,"playerPosition");
-    SetShaderValue(rain_mat_.shader,player_loc,pos_array,SHADER_UNIFORM_VEC3);
+    if (is_raining()) {
+        int s_loc = GetShaderLocation(rain_mat_.shader,"seconds");
+        SetShaderValue(rain_mat_.shader,s_loc,&seconds,SHADER_UNIFORM_INT);
+        int ss_loc = GetShaderLocation(rain_mat_.shader,"subseconds");
+        SetShaderValue(rain_mat_.shader,ss_loc,&ss,SHADER_UNIFORM_FLOAT);
+        int speed_loc = GetShaderLocation(rain_mat_.shader,"rainSpeed");
+        SetShaderValue(rain_mat_.shader,speed_loc,&rain_speed_,SHADER_UNIFORM_FLOAT);
+        int rd_loc = GetShaderLocation(rain_mat_.shader,"rainDirection");
+        SetShaderValue(rain_mat_.shader,rd_loc,rain_direction_,SHADER_UNIFORM_VEC3);
+        int player_loc = GetShaderLocation(rain_mat_.shader,"playerPosition");
+        SetShaderValue(rain_mat_.shader,player_loc,pos_array,SHADER_UNIFORM_VEC3);
 
-    // for (int i = 0; i < rain_transforms_.size(); i++) {
-    //     DrawMesh(rain_mesh_,rain_mat_,rain_transforms_[i]);
-    // }
-    DrawMeshInstanced(rain_mesh_,rain_mat_,rain_transforms_.data(),rain_transforms_.size());
+        // for (int i = 0; i < rain_transforms_.size(); i++) {
+        //     DrawMesh(rain_mesh_,rain_mat_,rain_transforms_[i]);
+        // }
+        DrawMeshInstanced(rain_mesh_,rain_mat_,rain_transforms_.data(),rain_transforms_.size());
+    } else if (is_snowing()) {
+        int s_loc = GetShaderLocation(snow_mat_.shader,"seconds");
+        SetShaderValue(snow_mat_.shader,s_loc,&seconds,SHADER_UNIFORM_INT);
+        int ss_loc = GetShaderLocation(snow_mat_.shader,"subseconds");
+        SetShaderValue(snow_mat_.shader,ss_loc,&ss,SHADER_UNIFORM_FLOAT);
+        int speed_loc = GetShaderLocation(snow_mat_.shader,"snowSpeed");
+        SetShaderValue(snow_mat_.shader,speed_loc,&snow_speed_,SHADER_UNIFORM_FLOAT);
+        int sway_loc = GetShaderLocation(snow_mat_.shader,"snowSway");
+        SetShaderValue(snow_mat_.shader,sway_loc,&snow_sway_,SHADER_UNIFORM_FLOAT);
+        int rd_loc = GetShaderLocation(snow_mat_.shader,"snowDirection");
+        SetShaderValue(snow_mat_.shader,rd_loc,snow_direction_,SHADER_UNIFORM_VEC3);
+        int player_loc = GetShaderLocation(snow_mat_.shader,"playerPosition");
+        SetShaderValue(snow_mat_.shader,player_loc,pos_array,SHADER_UNIFORM_VEC3);
+
+        // for (int i = 0; i < rain_transforms_.size(); i++) {
+        //     DrawMesh(rain_mesh_,rain_mat_,rain_transforms_[i]);
+        // }
+        DrawMeshInstanced(snow_mesh_,snow_mat_,rain_transforms_.data(),rain_transforms_.size());
+    }
 } 
 
+void Weather::draw_post(Game& game,uint64_t timestamp,uint64_t nano_seconds,const RenderTexture2D& target) const {
+    SetShaderValueTexture(quad_mat_.shader, GetShaderLocation(quad_mat_.shader, "depthTexture"), target.depth);
+    SetShaderValueTexture(quad_mat_.shader, GetShaderLocation(quad_mat_.shader, "colorTexture"), target.texture);
+    SetShaderValue(quad_mat_.shader,GetShaderLocation(quad_mat_.shader,"colorTexture"),&target.texture,SHADER_UNIFORM_SAMPLER2D);
+    SetShaderValue(quad_mat_.shader,GetShaderLocation(quad_mat_.shader,"depthTexture"),&target.depth,SHADER_UNIFORM_SAMPLER2D);
+    SetShaderValue(quad_mat_.shader,GetShaderLocation(quad_mat_.shader,"fogFarPlane"),&fog_far_plane_,SHADER_UNIFORM_FLOAT);
+    SetShaderValue(quad_mat_.shader,GetShaderLocation(quad_mat_.shader,"fogColor"),fog_color_,SHADER_UNIFORM_VEC4);
+    DrawMesh(quad_mesh_,quad_mat_,MatrixIdentity());
+}
+
 void Weather::update_weather_transform(Game& game) {
-    // 2xx and 5xx is thunder/rain, 3xx is drizzle
+    // https://openweathermap.org/weather-conditions
     INFO("Updating rain matrices for instancing...");
-    constexpr int RAIN_RADIUS = 30;
-    constexpr int RAINBOX_SIDE_LENGTH = RAIN_RADIUS*2*5;
+    constexpr int RADIUS = 30;
+    constexpr int SIDE_LENGTH = RADIUS*2*5;
     Vector3 center = game.get_current_player()->get().get_position();
-    Vector3 rain_d = Vector3{rain_direction_[0],rain_direction_[1],rain_direction_[2]};
-    bool is_raining = true;
-    // bool is_raining = weather_id_/100 == 2 || weather_id_/100 == 5 || weather_id_/100 == 3;
-    int transform_count = is_raining ? RAINBOX_SIDE_LENGTH*RAINBOX_SIDE_LENGTH : 0;
+    int transform_count = is_raining()||is_snowing() ? SIDE_LENGTH*SIDE_LENGTH : 0;
     rain_transforms_.resize(transform_count);
     INFO("Resizing to " + std::to_string(transform_count) + " matrices");
-    if (!transform_count) return;
-    Quaternion q = QuaternionFromVector3ToVector3(Vector3{0.0f,-1.0f,0.0f},Vector3Normalize(Vector3{rain_direction_[0],rain_direction_[1],rain_direction_[2]}));
+
+    Vector3 direction_vec;
+    float* direction;
+    float distance = is_snowing() ? snow_distance_ : rain_distance_;
+    if (is_snowing()) {
+        fog_far_plane_ = 150.0f;
+        fog_color_[0] = 0.9f;
+        fog_color_[1] = 0.9f;
+        fog_color_[2] = 0.9f;
+        fog_color_[3] = 1.0f;
+        direction = snow_direction_;
+        direction_vec = Vector3{snow_direction_[0],snow_direction_[1],snow_direction_[2]};
+    } else if (is_raining()) {
+        fog_far_plane_ = 75.0f;
+        fog_color_[0] = 0.1f;
+        fog_color_[1] = 0.15f;
+        fog_color_[2] = 0.4f;
+        fog_color_[3] = 1.0f;
+        direction = rain_direction_;
+        direction_vec = Vector3{rain_direction_[0],rain_direction_[1],rain_direction_[2]};
+    } else if (is_foggy()) {
+        fog_far_plane_ = 50.0f;
+        fog_color_[0] = 0.7f;
+        fog_color_[1] = 0.7f;
+        fog_color_[2] = 0.7f;
+        fog_color_[3] = 1.0f;
+        return;
+    } else if (!transform_count) {
+        fog_far_plane_ = 10000.0f;
+        fog_color_[0] = 0.5f;
+        fog_color_[1] = 0.8f;
+        fog_color_[2] = 0.9f;
+        fog_color_[3] = 1.0f;
+        return;
+    }
+    Quaternion q = QuaternionFromVector3ToVector3(Vector3{0.0f,-1.0f,0.0f},Vector3Normalize(direction_vec));
     Matrix rotate = QuaternionToMatrix(q);
-    for (int i = 0; i < RAINBOX_SIDE_LENGTH; i++) {
-        for (int j = 0; j < RAINBOX_SIDE_LENGTH; j++) {
-            int indice = i*RAINBOX_SIDE_LENGTH + j;
-            Vector3 rain_pos = Vector3{(i-RAINBOX_SIDE_LENGTH/2)*0.2f,0.0f,(j-RAINBOX_SIDE_LENGTH/2)*0.2f} + Vector3Scale(Vector3Normalize(Vector3Negate(rain_d)),rain_distance_);
-            rain_transforms_[indice] = MatrixMultiply(rotate,MatrixTranslate(rain_pos.x,rain_pos.y,rain_pos.z));
-            if (indice == 0 || indice == transform_count-1)
-                INFO(std::to_string(rain_pos.x) + "," + std::to_string(rain_pos.y) + "," + std::to_string(rain_pos.z));
+    for (int i = 0; i < SIDE_LENGTH; i++) {
+        for (int j = 0; j < SIDE_LENGTH; j++) {
+            int indice = i*SIDE_LENGTH + j;
+            Vector3 pos = Vector3{(i-SIDE_LENGTH/2)*0.2f-direction_vec.x*distance,0.0f,(j-SIDE_LENGTH/2)*0.2f-direction_vec.z*distance} + Vector3Scale(Vector3Normalize(Vector3Negate(direction_vec)),distance);
+            rain_transforms_[indice] = MatrixMultiply(rotate,MatrixTranslate(pos.x,pos.y,pos.z));
         }
     }
 }
@@ -147,3 +242,6 @@ float Weather::get_latitude() const {return latitude_;}
 float Weather::get_longitude() const {return longitude_;}
 double Weather::get_azimuth() const {return azimuth_;}
 double Weather::get_altitude() const {return altitude_;}
+bool Weather::is_raining() const {return weather_id_/100 == 2 || weather_id_/100 == 5 || weather_id_/100 == 3;}
+bool Weather::is_snowing() const {return weather_id_/100 == 6;}
+bool Weather::is_foggy() const {return weather_id_/100 == 7;}

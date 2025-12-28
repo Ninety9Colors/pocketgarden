@@ -12,4 +12,5 @@ out vec4 finalColor;
 
 void main() {
     finalColor = colorDiffuse;
+    // finalColor = vec4(vec3(gl_FragCoord.w*0.5),1.);
 }

@@ -41,11 +41,11 @@ void main() {
     currTransform[3][0] += x_offset;
     currTransform[3][2] += z_offset;
 
-    float distanceToGround = instanceTransform[3][1]/abs(normalize(rainDirection).y);
-
     // RNG noise for rain
     uvec2 seed = uvec2(uint(abs(100.*currTransform[3][0]+10000.)),uint(100.*abs(currTransform[3][2]+10000.)));
     float rngOffset = fract(hash21(seed));
+
+    float distanceToGround = instanceTransform[3][1]/abs(normalize(rainDirection).y);
 
     float rainDistance = mod(rngOffset+mod((float(seconds)+subseconds),distanceToGround/rainSpeed)/(distanceToGround/rainSpeed),1.0)*distanceToGround;
 

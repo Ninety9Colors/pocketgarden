@@ -4,6 +4,7 @@
 #include "object/procedural/lily_flower.hpp"
 #include "object/consistent/move_tool.hpp"
 #include "object/consistent/sun_tool.hpp"
+#include "object/consistent/weather_tool.hpp"
 #include "object/consistent/rotate_tool.hpp"
 #include "object/procedural/tapered_petal.hpp"
 #include "world/world.hpp"
@@ -41,6 +42,7 @@ void World::load_world(std::string save_file) {
         load_object(std::make_unique<MoveTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 0.0f}, 1.0f));
         load_object(std::make_unique<SunTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 3.0f}, 1.0f));
         load_object(std::make_unique<RotateTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 4.0f}, 1.0f));
+        load_object(std::make_unique<WeatherTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 5.0f}, 1.0f));
         INFO("Default world loaded!");
     }
     file.close();

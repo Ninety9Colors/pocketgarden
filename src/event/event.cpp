@@ -354,4 +354,5 @@ void WeatherUpdateEvent::receive(Game& game, uint64_t current_timestamp, const s
         game.get_world().get_weather().set_weather_id(weather_id_);
     game.get_world().get_weather().update_sun(current_timestamp+timestamp_offset_);
     game.get_world().update_sun();
+    game.get_world().get_weather().update_weather_transform(game);
 }

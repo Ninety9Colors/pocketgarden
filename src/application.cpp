@@ -9,6 +9,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include "raylib.h"
+#include "rlgl.h"
 #include "json.hpp"
 using json = nlohmann::json;
 
@@ -20,12 +21,17 @@ using json = nlohmann::json;
 #include "object/procedural/spline.hpp"
 #include "settings.hpp"
 
+static RenderTexture2D LoadRenderTextureDepthTex(int width, int height);
+static void UnloadRenderTextureDepthTex(RenderTexture2D target);
+
 constexpr int DEFAULT_SCREEN_WIDTH = 1280;
 constexpr int DEFAULT_SCREEN_HEIGHT = 720;
 constexpr int FONT_SIZE = 40;
 
 Shader Application::shader_default_ {0};
 Shader Application::shader_rain_ {0};
+Shader Application::shader_snow_ {0};
+Shader Application::shader_fog_ {0};
 Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(false), port_focus_(false), username_focus_(false) {
     // TODO: Load settings from file
     Settings::set("Camera Sensitivity",0.001f);
@@ -37,10 +43,16 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
     SetExitKey(KEY_NULL);
     shader_default_ = LoadShader("shaders/default.vs","shaders/default.fs");
     shader_default_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_default_, "colorDiffuse");
+
+    shader_fog_ = LoadShader("shaders/fog.vs","shaders/fog.fs");
+
     shader_rain_ = LoadShader("shaders/rain.vs","shaders/rain.fs");
     shader_rain_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_rain_, "colorDiffuse");
-    shader_rain_.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader_rain_, "mvp");
     shader_rain_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader_rain_, "instanceTransform");
+
+    shader_snow_ = LoadShader("shaders/snow.vs","shaders/snow.fs");
+    shader_snow_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_snow_, "colorDiffuse");
+    shader_snow_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader_snow_, "instanceTransform");
 }
 
 void Application::run(Game& game) {
@@ -65,6 +77,8 @@ void Application::run(Game& game) {
     SetShaderValue(shader_default_, ambient_loc, (float[4]){1.0f,1.0f,0.75f,1.0f}, SHADER_UNIFORM_VEC4);
 
     std::string fps_buffer;
+
+    RenderTexture2D target = LoadRenderTextureDepthTex(DEFAULT_SCREEN_WIDTH,DEFAULT_SCREEN_HEIGHT);
 
     while (!WindowShouldClose()) {
         if (!game.in_world()) {
@@ -107,20 +121,20 @@ void Application::run(Game& game) {
         }
         float cam_pos[3] = {game.get_camera().get_position().x, game.get_camera().get_position().y, game.get_camera().get_position().z};
         SetShaderValue(shader_default_, shader_default_.locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
+        BeginTextureMode(target);
+            ClearBackground(SKYBLUE);
+            // Draw Calls
+            BeginMode3D(game.get_camera().get_camera());
+            game.get_world().get_weather().draw(game,current_timestamp,nanoseconds);
+            game.get_world().get_sun().draw(game);
+            draw_players(game,game.get_current_username(), game.get_world().get_players());
+            draw_objects(game,game.get_world().get_objects());
+            EndMode3D();
+        EndTextureMode();
 
         BeginDrawing();
-
-        BeginMode3D(game.get_camera().get_camera());
-        ClearBackground(SKYBLUE);
-
-        // Draw Calls
-        game.get_world().get_sun().draw(game);
-        draw_players(game,game.get_current_username(), game.get_world().get_players());
-        draw_objects(game,game.get_world().get_objects());
-        game.get_world().get_weather().draw(game,current_timestamp,nanoseconds);
-
-        EndMode3D();
-
+        // Post processing
+        game.get_world().get_weather().draw_post(game,current_timestamp,nanoseconds,target);
         // Crosshair
         DrawCircle(GetScreenWidth()/2,GetScreenHeight()/2,3,WHITE);
 
@@ -227,4 +241,56 @@ void Application::draw_players(Game& game, std::string current_user, const std::
 void Application::exit() {
     DEBUG("Closing Window");
     CloseWindow();
+}
+
+static RenderTexture2D LoadRenderTextureDepthTex(int width, int height)
+{
+    RenderTexture2D target = { 0 };
+
+    target.id = rlLoadFramebuffer(); // Load an empty framebuffer
+
+    if (target.id > 0)
+    {
+        rlEnableFramebuffer(target.id);
+
+        // Create color texture (default to RGBA)
+        target.texture.id = rlLoadTexture(0, width, height, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
+        target.texture.width = width;
+        target.texture.height = height;
+        target.texture.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+        target.texture.mipmaps = 1;
+
+        // Create depth texture buffer (instead of raylib default renderbuffer)
+        target.depth.id = rlLoadTextureDepth(width, height, false);
+        target.depth.width = width;
+        target.depth.height = height;
+        target.depth.format = 19;       // DEPTH_COMPONENT_24BIT: Not defined in raylib
+        target.depth.mipmaps = 1;
+
+        // Attach color texture and depth texture to FBO
+        rlFramebufferAttach(target.id, target.texture.id, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
+        rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
+
+        // Check if fbo is complete with attachments (valid)
+        if (rlFramebufferComplete(target.id)) INFO("FBO: [ID "+ std::to_string(target.id) + "] Framebuffer object created successfully");
+
+        rlDisableFramebuffer();
+    }
+    else WARN("FBO: Framebuffer object can not be created");
+
+    return target;
+}
+
+static void UnloadRenderTextureDepthTex(RenderTexture2D target)
+{
+    if (target.id > 0)
+    {
+        // Color texture attached to FBO is deleted
+        rlUnloadTexture(target.texture.id);
+        rlUnloadTexture(target.depth.id);
+
+        // NOTE: Depth texture is automatically
+        // queried and deleted before deleting framebuffer
+        rlUnloadFramebuffer(target.id);
+    }
 }
