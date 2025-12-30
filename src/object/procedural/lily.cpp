@@ -163,36 +163,61 @@ static void generate_stem_segment(std::vector<float>& vertices,
                                     std::vector<unsigned char>& colors,
                                     std::vector<unsigned short>& indices,
                                     Vector3 start_pos,
-                                    Vector3 end_pos) {
+                                    Vector3 end_pos,
+                                    Vector3 start_dir,
+                                    Vector3 end_dir,
+                                    int start_id,
+                                    int end_id,
+                                    std::map<int,std::pair<int,Vector3>>& previous_vertexes) {
     Vector3 direction = Vector3Normalize(Vector3Subtract(end_pos,start_pos));
-    Vector3 normal = Vector3Normalize(Vector3Perpendicular(direction));
+    Vector3 normal;
 
     float length = Vector3Length(Vector3Subtract(end_pos,start_pos));
     float width = 0.025f;
     float step_size = 0.1f;
     int vertexes_per_unit = 8;
-    for (int step = 1; step < int(length/step_size); step++) {
+
+    int start_vertex_index = vertices.size()/3;
+    if (previous_vertexes.find(start_id) != previous_vertexes.end()) {
+        start_vertex_index = previous_vertexes[start_id].first;
+        normal = Vector3RotateByQuaternion(previous_vertexes[start_id].second,QuaternionFromVector3ToVector3(start_dir,end_dir));
+    } else {
+        normal = Vector3Normalize(Vector3Perpendicular(direction));
+    }
+
+    int steps = std::max(int(length/step_size),1);
+    for (int step = 1; step <= steps; step++) {
         Vector3 stem_pos = Vector3Add(start_pos,Vector3Scale(direction,step*step_size));
         Vector3 stem_pos_prev = Vector3Add(start_pos,Vector3Scale(direction,step_size*(step-1)));
+        if (step == steps)
+            stem_pos = end_pos;
+
         // Generate circle of vertices for prev pos
-        int bottom_vertex_index = vertices.size()/3;
-        for (int rot = 0; rot < vertexes_per_unit; rot++) {
-            float angle = float(rot)/float(vertexes_per_unit)*2.0f*PI;
-            Vector3 sideways_direction = Vector3Normalize(Vector3RotateByAxisAngle(normal,direction,angle));
-            Vector3 vertex_pos = Vector3Add(Vector3Scale(sideways_direction,width),stem_pos_prev);
-            vertices.push_back(vertex_pos.x);
-            vertices.push_back(vertex_pos.y);
-            vertices.push_back(vertex_pos.z);
+        int bottom_vertex_index = start_vertex_index;
+        if (step == 1 && start_vertex_index != vertices.size()/3) {
+        } else if (step > 1) {
+            bottom_vertex_index = vertices.size()/3-vertexes_per_unit;
+        } else {
+            for (int rot = 0; rot < vertexes_per_unit; rot++) {
+                float angle = float(rot)/float(vertexes_per_unit)*2.0f*PI;
+                Vector3 sideways_direction = Vector3Normalize(Vector3RotateByAxisAngle(normal,direction,angle));
+                Vector3 vertex_pos = Vector3Add(Vector3Scale(sideways_direction,width),stem_pos_prev);
+                vertices.push_back(vertex_pos.x);
+                vertices.push_back(vertex_pos.y);
+                vertices.push_back(vertex_pos.z);
 
-            normals.push_back(sideways_direction.x);
-            normals.push_back(sideways_direction.y);
-            normals.push_back(sideways_direction.z);
+                normals.push_back(sideways_direction.x);
+                normals.push_back(sideways_direction.y);
+                normals.push_back(sideways_direction.z);
 
-            Color stem_color = DARKGREEN;
-            colors.push_back((uint8_t)stem_color.r);
-            colors.push_back((uint8_t)stem_color.g);
-            colors.push_back((uint8_t)stem_color.b);
-            colors.push_back((uint8_t)stem_color.a);
+                Color stem_color = DARKGREEN;
+                colors.push_back((uint8_t)stem_color.r);
+                colors.push_back((uint8_t)stem_color.g);
+                colors.push_back((uint8_t)stem_color.b);
+                colors.push_back((uint8_t)stem_color.a);
+            }
+            previous_vertexes[start_id].first = bottom_vertex_index;
+            previous_vertexes[start_id].second = normal;
         }
 
         // Generate circle of vertices for curr pos
@@ -215,10 +240,13 @@ static void generate_stem_segment(std::vector<float>& vertices,
             colors.push_back((uint8_t)stem_color.b);
             colors.push_back((uint8_t)stem_color.a);
         }
-
+        if (step == steps) {
+            previous_vertexes[end_id].first = top_vertex_index;
+            previous_vertexes[end_id].second = normal;
+        }
         // Connecting the vertices with triangles
         for (int quad = 0; quad < vertexes_per_unit; quad++) {
-            unsigned short bottom_left = bottom_vertex_index+quad;
+            unsigned short bottom_left = bottom_vertex_index+(quad)%vertexes_per_unit;
             unsigned short bottom_right = bottom_vertex_index+(quad+1)%vertexes_per_unit;
             unsigned short top_left = top_vertex_index+quad;
             unsigned short top_right = top_vertex_index+(quad+1)%vertexes_per_unit;
@@ -231,74 +259,13 @@ static void generate_stem_segment(std::vector<float>& vertices,
             indices.push_back(top_right);
         }
     }
-    Vector3 stem_pos = end_pos;
-    Vector3 stem_pos_prev;
-    if (int(length/step_size))
-        stem_pos_prev = Vector3Add(start_pos,Vector3Scale(direction,step_size*(int(length/step_size)-1)));
-    else
-        stem_pos_prev = start_pos;
-    // Generate circle of vertices for prev pos
-    int bottom_vertex_index = vertices.size()/3;
-    for (int rot = 0; rot < vertexes_per_unit; rot++) {
-        float angle = float(rot)/float(vertexes_per_unit)*2.0f*PI;
-        Vector3 sideways_direction = Vector3Normalize(Vector3RotateByAxisAngle(normal,direction,angle));
-        Vector3 vertex_pos = Vector3Add(Vector3Scale(sideways_direction,width),stem_pos_prev);
-        vertices.push_back(vertex_pos.x);
-        vertices.push_back(vertex_pos.y);
-        vertices.push_back(vertex_pos.z);
-
-        normals.push_back(sideways_direction.x);
-        normals.push_back(sideways_direction.y);
-        normals.push_back(sideways_direction.z);
-
-        Color stem_color = DARKGREEN;
-        colors.push_back((uint8_t)stem_color.r);
-        colors.push_back((uint8_t)stem_color.g);
-        colors.push_back((uint8_t)stem_color.b);
-        colors.push_back((uint8_t)stem_color.a);
-    }
-
-    // Generate circle of vertices for curr pos
-    int top_vertex_index = vertices.size()/3;
-    for (int rot = 0; rot < vertexes_per_unit; rot++) {
-        float angle = float(rot)/float(vertexes_per_unit)*2.0f*PI;
-        Vector3 sideways_direction = Vector3Normalize(Vector3RotateByAxisAngle(normal,direction,angle));
-        Vector3 vertex_pos = Vector3Add(Vector3Scale(sideways_direction,width),stem_pos);
-        vertices.push_back(vertex_pos.x);
-        vertices.push_back(vertex_pos.y);
-        vertices.push_back(vertex_pos.z);
-
-        normals.push_back(sideways_direction.x);
-        normals.push_back(sideways_direction.y);
-        normals.push_back(sideways_direction.z);
-
-        Color stem_color = DARKGREEN;
-        colors.push_back((uint8_t)stem_color.r);
-        colors.push_back((uint8_t)stem_color.g);
-        colors.push_back((uint8_t)stem_color.b);
-        colors.push_back((uint8_t)stem_color.a);
-    }
-
-    // Connecting the vertices with triangles
-    for (int quad = 0; quad < vertexes_per_unit; quad++) {
-        unsigned short bottom_left = bottom_vertex_index+quad;
-        unsigned short bottom_right = bottom_vertex_index+(quad+1)%vertexes_per_unit;
-        unsigned short top_left = top_vertex_index+quad;
-        unsigned short top_right = top_vertex_index+(quad+1)%vertexes_per_unit;
-        indices.push_back(bottom_left);
-        indices.push_back(bottom_right);
-        indices.push_back(top_left);
-
-        indices.push_back(top_left);
-        indices.push_back(bottom_right);
-        indices.push_back(top_right);
-    }
 }
-
 struct StackFrame {
     Vector3 prev_pos;
     Vector3 pos;
     std::shared_ptr<LNode> node;
+    int id;
+    int prev_id;
 };
 
 void Lily::generate_mesh() {
@@ -312,24 +279,27 @@ void Lily::generate_mesh() {
 
     std::deque<StackFrame> dfs {};
     assert(lsystem_.get_base() != nullptr);
-    dfs.push_back({Vector3{0,0,0},Vector3{0,0,0},lsystem_.get_base()});
+    dfs.push_back({Vector3{0,0,0},Vector3{0,0,0},lsystem_.get_base(),0,-1});
+    int next_id = 1;
+    std::map<int,std::pair<int,Vector3>> previous_vertexes {};
+
     flower_transforms_.clear();
     flower_transforms_base_.clear();
     while (!dfs.empty()) {
         auto top = dfs.back();
         if (top.node->type == "Stem") {
-            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos);
+            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos,top.node->parent->direction,top.node->direction,top.prev_id,top.id,previous_vertexes);
         } else if (top.node->type == "Flower") {
-            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos);
+            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos,top.node->parent->direction,top.node->direction,top.prev_id,top.id,previous_vertexes);
+            Vector3 flower_pos = Vector3Subtract(top.pos,Vector3Scale(top.node->direction,0.05f));
             Matrix rot = QuaternionToMatrix(QuaternionFromVector3ToVector3(Vector3{0,1,0},top.node->direction));
-            Matrix translate = MatrixTranslate(top.pos.x,top.pos.y,top.pos.z);
+            Matrix translate = MatrixTranslate(flower_pos.x,flower_pos.y,flower_pos.z);
             flower_transforms_.push_back(MatrixIdentity());
             flower_transforms_base_.push_back({rot,translate});
         }
-
         dfs.pop_back();
         for (auto child : top.node->children) {
-            dfs.push_back({top.pos,Vector3Add(top.pos,child->position),child});
+            dfs.push_back({top.pos,Vector3Add(top.pos,child->position),child,next_id++,top.id});
         }
     }
 
