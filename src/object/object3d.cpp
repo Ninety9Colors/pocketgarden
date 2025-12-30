@@ -57,6 +57,14 @@ void Object3d::draw_offset(Game& game, float x, float y, float z) const {
     draw(game,offset);
 }
 
+void Object3d::draw_instanced(Game& game, const Matrix* transforms, int matrix_count) const {
+    draw_instanced(game,material_,transforms,matrix_count);
+}
+
+void Object3d::draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const {
+    DrawMeshInstanced(mesh_,material,transforms,matrix_count);
+}
+
 void Object3d::set_quaternion(Quaternion quaternion) {
     quaternion_ = quaternion;
     update_matrix();
@@ -192,3 +200,7 @@ void ParameterObject::set_parameter(std::string name, Parameter parameter) {
 const Parameter ParameterObject::get_parameter(std::string name) const {
     return parameter_map_.get_parameter(name);
 }
+LSystemObject::LSystemObject() : LSystemObject(std::random_device{}()) {}
+LSystemObject::LSystemObject(uint32_t seed) : Object3d(), seed_(seed), stage_(0) {}
+LSystemObject::LSystemObject(Quaternion quaternion, Vector3 position, float scale) : LSystemObject(quaternion,position,scale,std::random_device{}()) {}
+LSystemObject::LSystemObject(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : Object3d(quaternion,position,scale), seed_(seed), stage_(0) {}

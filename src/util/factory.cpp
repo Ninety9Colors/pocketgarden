@@ -7,11 +7,13 @@
 #include <object/consistent/sun_tool.hpp>
 #include <object/consistent/weather_tool.hpp>
 #include <object/procedural/lily_flower.hpp>
+#include <object/procedural/lily.hpp>
 #include <object/procedural/tapered_petal.hpp>
 
 #include "logging.hpp"
 
 std::unique_ptr<Object3d> parse_object(const json& j) {
+    INFO("Parsing object " + j.dump(4));
     std::string type = j.at("type");
     std::unique_ptr<Object3d> result = nullptr;
     if (type == "Cube") {
@@ -26,6 +28,11 @@ std::unique_ptr<Object3d> parse_object(const json& j) {
         result = std::make_unique<WeatherTool>(j);
     } else if (type == "LilyFlower") {
         result = std::make_unique<LilyFlower>(j);
+        result->generate_mesh();
+    } else if (type == "Lily") {
+        auto lily = std::make_unique<Lily>(j);
+        lily->initialize();
+        result = std::move(lily);
         result->generate_mesh();
     } else if (type == "TaperedPetal") {
         result = std::make_unique<TaperedPetal>(j);

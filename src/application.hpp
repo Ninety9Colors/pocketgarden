@@ -21,11 +21,13 @@ public:
     void exit();
     
     static Shader get_shader_default() {return shader_default_;}
+    static Shader get_shader_instanced() {return shader_instanced_;}
     static Shader get_shader_rain() {return shader_rain_;}
     static Shader get_shader_snow() {return shader_snow_;}
     static Shader get_shader_fog() {return shader_fog_;}
 private:
     static Shader shader_default_;
+    static Shader shader_instanced_;
     static Shader shader_rain_;
     static Shader shader_snow_;
     static Shader shader_fog_;

@@ -246,10 +246,6 @@ void TaperedPetal::generate_mesh() {
     }
 
     for (int i = 0; i < mesh_.vertexCount; i++) {
-        int index = i*3;
-        Vector3 vertex = {mesh_.vertices[index], mesh_.vertices[index+1], mesh_.vertices[index+2]};
-    }
-    for (int i = 0; i < mesh_.vertexCount; i++) {
         int normal_index = i*3;
         Vector3 norm = {mesh_.normals[normal_index], mesh_.normals[normal_index+1], mesh_.normals[normal_index+2]};
         norm = Vector3Normalize(norm);
@@ -395,8 +391,6 @@ void TaperedPetal::initialize_parameters() {
 
     parameter_map_.set_parameter("Curvature", Parameter{0.1f,0.175f,0.35f});
     parameter_map_.seed_gaussian("Curvature",rng);
-
-
 
     parameter_map_.set_parameter("BaseHue", Parameter{250.0f,340.0f,440.0f});
     parameter_map_.seed_gaussian("BaseHue",rng);

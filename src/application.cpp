@@ -29,6 +29,7 @@ constexpr int DEFAULT_SCREEN_HEIGHT = 720;
 constexpr int FONT_SIZE = 40;
 
 Shader Application::shader_default_ {0};
+Shader Application::shader_instanced_ {0};
 Shader Application::shader_rain_ {0};
 Shader Application::shader_snow_ {0};
 Shader Application::shader_fog_ {0};
@@ -43,6 +44,13 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
     SetExitKey(KEY_NULL);
     shader_default_ = LoadShader("shaders/default.vs","shaders/default.fs");
     shader_default_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_default_, "colorDiffuse");
+    shader_default_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader_default_, "instanceTransform");
+
+    shader_instanced_ = LoadShader("shaders/instanced.vs","shaders/instanced.fs");
+    shader_instanced_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_instanced_, "colorDiffuse");
+    shader_instanced_.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader_instanced_, "mvp");
+    shader_instanced_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader_instanced_, "matModel");
+    shader_instanced_.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader_instanced_, "viewPos");
 
     shader_fog_ = LoadShader("shaders/fog.vs","shaders/fog.fs");
 
@@ -72,9 +80,17 @@ void Application::run(Game& game) {
     int sun_color_loc = GetShaderLocation(shader_default_,"sunColor");
     int ambient_loc = GetShaderLocation(shader_default_,"ambient");
 
+    int sun_position_loc_instanced = GetShaderLocation(shader_instanced_,"sunPos");
+    int sun_color_loc_instanced = GetShaderLocation(shader_instanced_,"sunColor");
+    int ambient_loc_instanced = GetShaderLocation(shader_instanced_,"ambient");
+
     SetShaderValue(shader_default_, sun_position_loc, (float[3]){0.0f,game.get_world().get_sun().get_position().y,0.0f}, SHADER_UNIFORM_VEC3);
     SetShaderValue(shader_default_, sun_color_loc, (float[4]){1.0f,1.0f,1.0f,1.0f}, SHADER_UNIFORM_VEC4);
     SetShaderValue(shader_default_, ambient_loc, (float[4]){1.0f,1.0f,0.75f,1.0f}, SHADER_UNIFORM_VEC4);
+
+    SetShaderValue(shader_instanced_, sun_position_loc_instanced, (float[3]){0.0f,game.get_world().get_sun().get_position().y,0.0f}, SHADER_UNIFORM_VEC3);
+    SetShaderValue(shader_instanced_, sun_color_loc_instanced, (float[4]){1.0f,1.0f,1.0f,1.0f}, SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader_instanced_, ambient_loc_instanced, (float[4]){1.0f,1.0f,0.75f,1.0f}, SHADER_UNIFORM_VEC4);
 
     std::string fps_buffer;
 
@@ -121,6 +137,8 @@ void Application::run(Game& game) {
         }
         float cam_pos[3] = {game.get_camera().get_position().x, game.get_camera().get_position().y, game.get_camera().get_position().z};
         SetShaderValue(shader_default_, shader_default_.locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
+        SetShaderValue(shader_instanced_, shader_instanced_.locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
+        
         BeginTextureMode(target);
             ClearBackground(SKYBLUE);
             // Draw Calls

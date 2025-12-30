@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "object/procedural/lily_flower.hpp"
+#include "object/procedural/lily.hpp"
 #include "object/consistent/move_tool.hpp"
 #include "object/consistent/sun_tool.hpp"
 #include "object/consistent/weather_tool.hpp"
@@ -36,7 +37,11 @@ void World::load_world(std::string save_file) {
     } else {
         INFO("Could not find save file, loading default world...");
         load_object(std::make_unique<Cube>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f,0.0f,0.0f},Vector3{1.0f,1.0f,1.0f}, 1.0f, RED));
-        auto flower = std::make_unique<LilyFlower>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f,0.0f,0.0f}, 1.0f);
+        auto flower = std::make_unique<Lily>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f,0.0f,0.0f}, 1.0f);
+        flower->initialize();
+        flower->advance_stage();
+        flower->advance_stage();
+        flower->advance_stage();
         flower->generate_mesh();
         load_object(std::move(flower));
         load_object(std::make_unique<MoveTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 0.0f}, 1.0f));

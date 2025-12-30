@@ -19,6 +19,10 @@ public:
 
     void draw(Game& game, Material material) const override;
     void draw(Game& game,Matrix transform, Material material) const override;
+    void draw_instanced(Game& game, const Matrix* transforms, int matrix_count) const override {
+        draw_instanced(game,material_,transforms,matrix_count);
+    }
+    void draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const override;
 
     void update_matrix() override;
 
