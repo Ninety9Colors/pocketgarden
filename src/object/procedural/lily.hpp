@@ -29,6 +29,10 @@ private:
     std::unique_ptr<LilyFlower> flower_;
     std::vector<Matrix> flower_transforms_;
     std::vector<std::pair<Matrix,Matrix>> flower_transforms_base_;
+
+    std::unique_ptr<TaperedPetal> leaf_;
+    std::vector<Matrix> leaf_transforms_;
+    std::vector<std::pair<Matrix,Matrix>> leaf_transforms_base_;
     // LSystem lsystem_;
     // std::map<std::pair<int,int>, RuleSet> stage_transitions_;
     

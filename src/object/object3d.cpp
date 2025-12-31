@@ -62,7 +62,11 @@ void Object3d::draw_instanced(Game& game, const Matrix* transforms, int matrix_c
 }
 
 void Object3d::draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const {
-    DrawMeshInstanced(mesh_,material,transforms,matrix_count);
+    for (int i = 0; i < matrix_count; i++) {
+        DrawMesh(mesh_,material,transforms[i]);
+    }
+    // TODO: Fix instanced draw
+    // DrawMeshInstanced(mesh_,material,transforms,matrix_count);
 }
 
 void Object3d::set_quaternion(Quaternion quaternion) {

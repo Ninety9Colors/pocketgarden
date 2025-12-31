@@ -22,7 +22,7 @@ public:
 
     json to_json() const override;
     void from_json(const json& j) override;
-private:
+protected:
     float X(float u, float v) const;
     float Y(float u, float v) const;
     float Z(float u, float v) const;
@@ -30,4 +30,31 @@ private:
     void initialize_parameters() override;
 
     std::pair<int,int> slices_;
+};
+
+class TaperedLeaf : public TaperedPetal {
+public:
+    TaperedLeaf();
+    TaperedLeaf(uint32_t seed);
+    TaperedLeaf(Quaternion quaternion, Vector3 position, float scale);
+    TaperedLeaf(Quaternion quaternion, Vector3 position, float scale, uint32_t seed);
+    TaperedLeaf(const json& j);
+    virtual ~TaperedLeaf() {};
+
+    // void set_slices(std::pair<int,int> slices);
+    // void generate_mesh() override;
+
+    // Vector3 tip_vector() const; // root to tip
+    // float base_width() const;
+
+    json to_json() const override;
+    void from_json(const json& j) override;
+private:
+    // float X(float u, float v) const;
+    // float Y(float u, float v) const;
+    // float Z(float u, float v) const;
+
+    void initialize_parameters() override;
+
+    // std::pair<int,int> slices_;
 };

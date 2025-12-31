@@ -9,9 +9,9 @@
 #include "logging.hpp"
 
 Lily::Lily() : Lily(std::random_device{}()) {}
-Lily::Lily(uint32_t seed) : LSystemObject(seed), flower_(std::make_unique<LilyFlower>(seed)) {}
+Lily::Lily(uint32_t seed) : LSystemObject(seed), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
 Lily::Lily(Quaternion quaternion, Vector3 position, float scale) : Lily(quaternion,position,scale,std::random_device{}()) {}
-Lily::Lily(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : LSystemObject(quaternion,position,scale,seed), flower_(std::make_unique<LilyFlower>(seed)) {}
+Lily::Lily(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : LSystemObject(quaternion,position,scale,seed), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
 Lily::Lily(const json& j) {from_json(j);}
 
 // Should regenerate mesh if needed
@@ -24,7 +24,7 @@ void Lily::advance_stage() {
     } else if (stage_ == 2) {
         stage_++;
         std::mt19937_64 rng (std::mt19937_64{seed_}());
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 5; i++)
             lsystem_.apply_ruleset(stage_transitions_[std::pair<int,int>{2,3}],rng);
         generate_mesh();
     } else if (stage_ == 3) {
@@ -39,6 +39,7 @@ void Lily::advance_stage() {
 // Should be called explicitly after the object is created
 void Lily::initialize() {
     flower_->generate_mesh();
+    leaf_->generate_mesh();
 
     if (lsystem_.get_base() == nullptr) {
         lsystem_ = LSystem(std::make_shared<LNode>("Seed",position_,Vector3{0,1,0},std::vector<std::shared_ptr<LNode>>{},nullptr));
@@ -68,28 +69,48 @@ void Lily::initialize() {
     RuleSet two_to_three {};
         std::function<std::vector<std::shared_ptr<LNode>>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> juvenile = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
             std::uniform_real_distribution gen (0.0,1.0);
+            int stem_children = 0;
+            for (auto c : node->children)
+                stem_children += (c->type=="Stem");
+            bool is_tip = !stem_children;
             float roll1 = gen(rng);
-            if (roll1 < 0.3f)
-                return std::vector<std::shared_ptr<LNode>>{};
-            std::uniform_real_distribution angle (0.0f,2*PI);
-            Vector3 perp = Vector3Perpendicular(node->direction);
-            perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
-            std::uniform_real_distribution tilt (0.0f,15.0f*DEG2RAD);
-            Vector3 new_direction = Vector3Normalize(Vector3RotateByAxisAngle(node->direction,perp,tilt(rng)));
-
-            float roll = gen(rng);
-            float length;
-            if (roll < 0.05) {
-                length = 0.05f;
-            } else if (roll < 0.8) {
-                length = 0.15f;
-            } else {
-                length = 0.3f;
-            }
-            std::shared_ptr<LNode> new_stem = std::make_shared<LNode>("Stem",Vector3Scale(new_direction,length),new_direction,node->children,node);
-            node->children.clear();
             std::vector<std::shared_ptr<LNode>> result {};
-            result.push_back(new_stem);
+            if (roll1 < 0.7f) {
+                std::uniform_real_distribution angle (0.0f,2*PI);
+                Vector3 perp = Vector3Perpendicular(node->direction);
+                perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
+                std::uniform_real_distribution tilt (0.0f,15.0f*DEG2RAD);
+                Vector3 new_direction = Vector3Normalize(Vector3RotateByAxisAngle(node->direction,perp,tilt(rng)));
+
+                float roll = gen(rng);
+                float length;
+                if (roll < 0.05) {
+                    length = 0.025f;
+                } else if (roll < 0.8) {
+                    length = 0.075f;
+                } else {
+                    length = 0.06f;
+                }
+                std::shared_ptr<LNode> new_stem = std::make_shared<LNode>("Stem",Vector3Scale(new_direction,length),new_direction,node->children,node);
+                node->children.clear();
+                result.push_back(new_stem);
+                is_tip = false;
+            }
+
+            if (is_tip)
+                return std::vector<std::shared_ptr<LNode>>{};
+            float roll = gen(rng);
+            if (roll < 0.8) { // Branch and leaf
+                std::uniform_real_distribution angle (0.0f,2*PI);
+                Vector3 perp = Vector3Perpendicular(node->direction);
+                perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
+                std::uniform_real_distribution tilt (45.0f*DEG2RAD,90.0f*DEG2RAD);
+                Vector3 leaf_dir = Vector3RotateByAxisAngle(node->direction,perp,tilt(rng));
+                float length = 0.05f;
+
+                std::shared_ptr<LNode> leaf = std::make_shared<LNode>("Leaf",Vector3Scale(leaf_dir,length),leaf_dir,std::vector<std::shared_ptr<LNode>>{},node);
+                result.push_back(leaf);
+            }
             return result;
         };
         two_to_three.add_rule("Stem",Rule(juvenile));
@@ -130,6 +151,7 @@ void Lily::initialize() {
 void Lily::draw(Game& game, Material material) const {
     DrawMesh(mesh_,material_,transform_);
     flower_->draw_instanced(game,flower_transforms_.data(),flower_transforms_.size());
+    leaf_->draw_instanced(game,leaf_transforms_.data(),leaf_transforms_.size());
 }
 
 json Lily::to_json() const {
@@ -141,6 +163,7 @@ json Lily::to_json() const {
         {"quaternion",{{"x",quaternion_.x},{"y",quaternion_.y},{"z",quaternion_.z},{"w",quaternion_.w}}},
         {"seed",seed_},
         {"flower",flower_->to_json()},
+        {"leaf",leaf_->to_json()},
         {"stage",stage_},
         {"lsystem",lsystem_.to_json()}
     };
@@ -154,6 +177,7 @@ void Lily::from_json(const json& j) {
     quaternion_ = {j.at("quaternion")["x"],j.at("quaternion")["y"],j.at("quaternion")["z"],j.at("quaternion")["w"]};
     seed_ = j.at("seed");
     flower_ = std::make_unique<LilyFlower>(j.at("flower"));
+    leaf_ = std::make_unique<TaperedPetal>(j.at("leaf"));
     stage_ = j.at("stage");
     lsystem_ = LSystem(j.at("lsystem"));
 }
@@ -168,12 +192,13 @@ static void generate_stem_segment(std::vector<float>& vertices,
                                     Vector3 end_dir,
                                     int start_id,
                                     int end_id,
-                                    std::map<int,std::pair<int,Vector3>>& previous_vertexes) {
+                                    std::map<int,std::pair<int,Vector3>>& previous_vertexes,
+                                    Color color,
+                                    float width = 0.025f) {
     Vector3 direction = Vector3Normalize(Vector3Subtract(end_pos,start_pos));
     Vector3 normal;
 
     float length = Vector3Length(Vector3Subtract(end_pos,start_pos));
-    float width = 0.025f;
     float step_size = 0.1f;
     int vertexes_per_unit = 8;
 
@@ -210,11 +235,10 @@ static void generate_stem_segment(std::vector<float>& vertices,
                 normals.push_back(sideways_direction.y);
                 normals.push_back(sideways_direction.z);
 
-                Color stem_color = DARKGREEN;
-                colors.push_back((uint8_t)stem_color.r);
-                colors.push_back((uint8_t)stem_color.g);
-                colors.push_back((uint8_t)stem_color.b);
-                colors.push_back((uint8_t)stem_color.a);
+                colors.push_back((uint8_t)color.r);
+                colors.push_back((uint8_t)color.g);
+                colors.push_back((uint8_t)color.b);
+                colors.push_back((uint8_t)color.a);
             }
             previous_vertexes[start_id].first = bottom_vertex_index;
             previous_vertexes[start_id].second = normal;
@@ -234,11 +258,10 @@ static void generate_stem_segment(std::vector<float>& vertices,
             normals.push_back(sideways_direction.y);
             normals.push_back(sideways_direction.z);
 
-            Color stem_color = DARKGREEN;
-            colors.push_back((uint8_t)stem_color.r);
-            colors.push_back((uint8_t)stem_color.g);
-            colors.push_back((uint8_t)stem_color.b);
-            colors.push_back((uint8_t)stem_color.a);
+            colors.push_back((uint8_t)color.r);
+            colors.push_back((uint8_t)color.g);
+            colors.push_back((uint8_t)color.b);
+            colors.push_back((uint8_t)color.a);
         }
         if (step == steps) {
             previous_vertexes[end_id].first = top_vertex_index;
@@ -283,19 +306,37 @@ void Lily::generate_mesh() {
     int next_id = 1;
     std::map<int,std::pair<int,Vector3>> previous_vertexes {};
 
+    Color stem_color = ColorFromHSV(leaf_->get_parameter("BaseHue").value,leaf_->get_parameter("BaseSaturation").value,leaf_->get_parameter("BaseValue").value);
     flower_transforms_.clear();
     flower_transforms_base_.clear();
+    leaf_transforms_.clear();
+    leaf_transforms_base_.clear();
     while (!dfs.empty()) {
         auto top = dfs.back();
         if (top.node->type == "Stem") {
-            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos,top.node->parent->direction,top.node->direction,top.prev_id,top.id,previous_vertexes);
+            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos,top.node->parent->direction,top.node->direction,top.prev_id,top.id,previous_vertexes,stem_color);
         } else if (top.node->type == "Flower") {
-            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos,top.node->parent->direction,top.node->direction,top.prev_id,top.id,previous_vertexes);
+            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos,top.node->parent->direction,top.node->direction,top.prev_id,top.id,previous_vertexes,stem_color);
             Vector3 flower_pos = Vector3Subtract(top.pos,Vector3Scale(top.node->direction,0.05f));
             Matrix rot = QuaternionToMatrix(QuaternionFromVector3ToVector3(Vector3{0,1,0},top.node->direction));
             Matrix translate = MatrixTranslate(flower_pos.x,flower_pos.y,flower_pos.z);
             flower_transforms_.push_back(MatrixIdentity());
             flower_transforms_base_.push_back({rot,translate});
+        } else if (top.node->type == "Leaf") {
+            generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos,top.node->parent->direction,top.node->direction,top.prev_id,top.id,previous_vertexes,stem_color,0.001f);
+            Vector3 leaf_pos = Vector3Subtract(top.pos,Vector3Scale(top.node->direction,0.001f));
+            Quaternion stem_to_vertical = QuaternionFromVector3ToVector3(top.node->parent->direction,{0,1,0});
+            Vector3 tip_vector_hoz = Vector3Normalize({leaf_->tip_vector().x,0,leaf_->tip_vector().z});
+            Vector3 leaf_vector_hoz = Vector3RotateByQuaternion(top.node->direction,stem_to_vertical);
+            leaf_vector_hoz.y = 0;
+            leaf_vector_hoz = Vector3Normalize(leaf_vector_hoz);
+            float angle_vertical = atan2f(Vector3CrossProduct(tip_vector_hoz,leaf_vector_hoz).y,Vector3DotProduct(tip_vector_hoz,leaf_vector_hoz));
+            Quaternion rot_vertical = QuaternionFromAxisAngle({0,1,0},angle_vertical);
+
+            Matrix rot = QuaternionToMatrix(QuaternionMultiply(QuaternionInvert(stem_to_vertical),rot_vertical));
+            Matrix translate = MatrixTranslate(leaf_pos.x,leaf_pos.y,leaf_pos.z);
+            leaf_transforms_.push_back(MatrixIdentity());
+            leaf_transforms_base_.push_back({rot,translate});
         }
         dfs.pop_back();
         for (auto child : top.node->children) {
@@ -337,5 +378,15 @@ void Lily::update_matrix() {
         float scale = roll(rng);
         Matrix transform = MatrixMultiply(MatrixMultiply(MatrixScale(scale_,scale_,scale_),MatrixScale(scale, scale, scale)),MatrixMultiply(MatrixMultiply(base_rotate,QuaternionToMatrix(quaternion_)), MatrixTranslate(position_.x+flower_offset.x, position_.y+flower_offset.y, position_.z+flower_offset.z)));
         flower_transforms_[i] = transform;
+    }
+    for (int i = 0; i < leaf_transforms_.size(); i++) {
+        Matrix base_rotate = leaf_transforms_base_[i].first;
+        Matrix base_offset = leaf_transforms_base_[i].second;
+        Vector3 leaf_offset = Vector3Scale(Vector3{base_offset.m12,base_offset.m13,base_offset.m14},scale_);
+        leaf_offset = Vector3RotateByQuaternion(leaf_offset,quaternion_);
+
+        float scale = roll(rng)*1.5f;
+        Matrix transform = MatrixMultiply(MatrixMultiply(MatrixScale(scale_,scale_,scale_),MatrixScale(scale, scale, scale)),MatrixMultiply(MatrixMultiply(base_rotate,QuaternionToMatrix(quaternion_)), MatrixTranslate(position_.x+leaf_offset.x, position_.y+leaf_offset.y, position_.z+leaf_offset.z)));
+        leaf_transforms_[i] = transform;
     }
 }
