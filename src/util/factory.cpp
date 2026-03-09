@@ -37,6 +37,9 @@ std::unique_ptr<Object3d> parse_object(const json& j) {
     } else if (type == "TaperedPetal") {
         result = std::make_unique<TaperedPetal>(j);
         result->generate_mesh();
+    } else if (type == "TaperedLeaf") {
+        result = std::make_unique<TaperedLeaf>(j);
+        result->generate_mesh();
     } else if (type == "null_item") {
         result = nullptr;
     } else {
