@@ -46,21 +46,21 @@ void World::load_world(std::string save_file) {
         load_object(std::move(flower));
 
         // Lily spam!:
-        for (int x = 1; x <= 50; x++) {
-            uint32_t seed = std::random_device{}();
-            for (int y = 1; y <= 3; y++) {
-                auto f = std::make_unique<Lily>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{x,0.0f,y}, 0.5f,seed);
-                f->initialize();
-                for (int k = 0; k < y; k++)
-                    f->advance_stage();
-                f->generate_mesh();
-                load_object(std::move(f));
-            }
-        }
-        load_object(std::make_unique<MoveTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 0.0f}, 1.0f));
-        load_object(std::make_unique<SunTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 3.0f}, 1.0f));
-        load_object(std::make_unique<RotateTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 4.0f}, 1.0f));
-        load_object(std::make_unique<WeatherTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 5.0f}, 1.0f));
+        // for (int x = 1; x <= 50; x++) {
+        //     uint32_t seed = std::random_device{}();
+        //     for (int y = 1; y <= 3; y++) {
+        //         auto f = std::make_unique<Lily>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{x,0.0f,y}, 0.5f,seed);
+        //         f->initialize();
+        //         for (int k = 0; k < y; k++)
+        //             f->advance_stage();
+        //         f->generate_mesh();
+        //         load_object(std::move(f));
+        //     }
+        // }
+        // load_object(std::make_unique<MoveTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 0.0f}, 1.0f));
+        // load_object(std::make_unique<SunTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 3.0f}, 1.0f));
+        // load_object(std::make_unique<RotateTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 4.0f}, 1.0f));
+        // load_object(std::make_unique<WeatherTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 5.0f}, 1.0f));
         INFO("Default world loaded!");
     }
     file.close();
