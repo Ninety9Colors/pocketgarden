@@ -4,4 +4,4 @@
 #include <array>
 #include <string>
 
-std::vector<std::pair<std::array<float,3>,std::array<unsigned char,3>>> parse_xyz(std::string filename);
+std::pair<std::vector<std::array<double,3>>,std::vector<std::array<unsigned char,3>>> parse_xyz(std::string filename);

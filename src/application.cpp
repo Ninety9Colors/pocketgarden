@@ -21,6 +21,9 @@ using json = nlohmann::json;
 #include "object/procedural/spline.hpp"
 #include "settings.hpp"
 
+#include "util/parse.hpp"
+#include "object/procedural/marching_cubes.hpp"
+
 static RenderTexture2D LoadRenderTextureDepthTex(int width, int height);
 static void UnloadRenderTextureDepthTex(RenderTexture2D target);
 
@@ -64,6 +67,18 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
 }
 
 void Application::run(Game& game) {
+    auto coords = parse_xyz("dryopteris-erythrosora-01 (1).xyz");
+    double voxel_size;
+    std::cout << "Enter voxel size as a double: ";
+    std::cin >> voxel_size;
+    double display_voxel_size;
+    std::cout << "Enter display_voxel_size size as a double: ";
+    std::cin >> display_voxel_size;
+    auto voxels = voxelize_pcd(coords.first,coords.second,voxel_size);
+    std::vector<Mesh> pcd_mesh = march_cubes(voxels.first.first,voxels.first.second,voxels.second,display_voxel_size,0.0);
+    for (int i = 0; i < pcd_mesh.size(); i++)
+        UploadMesh(&pcd_mesh[i],false);
+
     DEBUG("Starting application...");
 
     const float TPS = 20.0f; // ticks per second
@@ -147,6 +162,8 @@ void Application::run(Game& game) {
             game.get_world().get_sun().draw(game);
             draw_players(game,game.get_current_username(), game.get_world().get_players());
             draw_objects(game,game.get_world().get_objects());
+            for (int i = 0; i < pcd_mesh.size(); i++)
+                DrawMesh(pcd_mesh[i],LoadMaterialDefault(),MatrixIdentity());
             EndMode3D();
         EndTextureMode();
 

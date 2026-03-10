@@ -41,15 +41,15 @@ void Object3d::draw(Game& game) const {
     draw(game,material_);
 }
 void Object3d::draw(Game& game, Material material) const {
-    // DrawMesh(mesh_,material,transform_);
-    draw_mesh_skeleton(mesh_,transform_);
+    DrawMesh(mesh_,material,transform_);
+    // draw_mesh_skeleton(mesh_,transform_);
 }
 void Object3d::draw(Game& game, Matrix transform) const {
     draw(game,transform,material_);
 }
 void Object3d::draw(Game& game, Matrix transform, Material material) const {
-    // DrawMesh(mesh_, material, transform);
-    draw_mesh_skeleton(mesh_,transform);
+    DrawMesh(mesh_, material, transform);
+    // draw_mesh_skeleton(mesh_,transform);
 }
 void Object3d::draw_offset(Game& game, float x, float y, float z) const {
     Matrix offset = MatrixAdd(transform_,Matrix{
@@ -67,8 +67,8 @@ void Object3d::draw_instanced(Game& game, const Matrix* transforms, int matrix_c
 
 void Object3d::draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const {
     for (int i = 0; i < matrix_count; i++) {
-        // DrawMesh(mesh_,material,transforms[i]);
-        draw_mesh_skeleton(mesh_,transforms[i]);
+        DrawMesh(mesh_,material,transforms[i]);
+        // draw_mesh_skeleton(mesh_,transforms[i]);
     }
     // TODO: Fix instanced draw
     // DrawMeshInstanced(mesh_,material,transforms,matrix_count);
