@@ -67,7 +67,7 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
 }
 
 void Application::run(Game& game) {
-    auto coords = parse_xyz("dryopteris-erythrosora-01 (1).xyz");
+    auto coords = parse_xyz("dryopteris-erythrosora-01 (1).xyz",true);
     double voxel_size;
     std::cout << "Enter voxel size as a double: ";
     std::cin >> voxel_size;

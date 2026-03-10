@@ -414,7 +414,7 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
     " voxel_size " + std::to_string(voxel_size) + ", iso_value " + std::to_string(iso_value) + "...");
     // Number of 8 corner cubic regions, which is why we subtract one
 
-    const int MESH_VOXELS = 25;
+    const int MESH_VOXELS = 15;
     int x_meshes = (n_x + MESH_VOXELS - 1) / MESH_VOXELS;
     int y_meshes = (n_y + MESH_VOXELS - 1) / MESH_VOXELS;
     int z_meshes = (n_z + MESH_VOXELS - 1) / MESH_VOXELS;
@@ -430,13 +430,13 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                 unsigned int cubeindex = 0;
                 // vertex 0 will be the min coordinate corner, vertex 6 will be the max coordinate corner
                 if (grid[i][j][k] < iso_value) cubeindex |= 1;
-                if (grid[i][j][k+1] < iso_value) cubeindex |= 2;
+                if (grid[i+1][j][k] < iso_value) cubeindex |= 2;
                 if (grid[i+1][j][k+1] < iso_value) cubeindex |= 4;
-                if (grid[i+1][j][k] < iso_value) cubeindex |= 8;
+                if (grid[i][j][k+1] < iso_value) cubeindex |= 8;
                 if (grid[i][j+1][k] < iso_value) cubeindex |= 16;
-                if (grid[i][j+1][k+1] < iso_value) cubeindex |= 32;
+                if (grid[i+1][j+1][k] < iso_value) cubeindex |= 32;
                 if (grid[i+1][j+1][k+1] < iso_value) cubeindex |= 64;
-                if (grid[i+1][j+1][k] < iso_value) cubeindex |= 128;
+                if (grid[i][j+1][k+1] < iso_value) cubeindex |= 128;
                 if (cubeindex == 0) continue; // completely inside or outside surface
                 // DEBUG("Voxel found with cubeindex " + std::to_string(cubeindex));
                 for (int tri = 0; tri <= 5; tri++) {
@@ -447,13 +447,13 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                         Color col;
                         if (edge == 0) {
                             std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,j*voxel_size,k*voxel_size});
-                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,j*voxel_size,(k+1)*voxel_size});
+                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,j*voxel_size,(k)*voxel_size});
                             double valp1 = grid[i][j][k];
-                            double valp2 = grid[i][j][k+1];
+                            double valp2 = grid[i+1][j][k];
                             pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
 
                             Color c1 = color_grid[i][j][k];
-                            Color c2 = color_grid[i][j][k+1];
+                            Color c2 = color_grid[i+1][j][k];
                             if (c1.a != 0 && c2.a != 0)
                                 col = color_lerp(iso_value,c1,c2,valp1,valp2);
                             else if (c1.a != 0)
@@ -461,13 +461,13 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                             else if (c2.a != 0)
                                 col = c2;
                         } else if (edge == 1) {
-                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,j*voxel_size,(k+1)*voxel_size});
+                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,j*voxel_size,(k)*voxel_size});
                             std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,j*voxel_size,(k+1)*voxel_size});
-                            double valp1 = grid[i][j][k+1];
+                            double valp1 = grid[i+1][j][k];
                             double valp2 = grid[i+1][j][k+1];
                             pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
 
-                            Color c1 = color_grid[i][j][k+1];
+                            Color c1 = color_grid[i+1][j][k];
                             Color c2 = color_grid[i+1][j][k+1];
                             if (c1.a != 0 && c2.a != 0)
                                 col = color_lerp(iso_value,c1,c2,valp1,valp2);
@@ -477,13 +477,13 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                                 col = c2;
                         } else if (edge == 2) {
                             std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,j*voxel_size,(k+1)*voxel_size});
-                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,j*voxel_size,k*voxel_size});
+                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i)*voxel_size,j*voxel_size,(k+1)*voxel_size});
                             double valp1 = grid[i+1][j][k+1];
-                            double valp2 = grid[i+1][j][k];
+                            double valp2 = grid[i][j][k+1];
                             pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
 
                             Color c1 = color_grid[i+1][j][k+1];
-                            Color c2 = color_grid[i+1][j][k];
+                            Color c2 = color_grid[i][j][k+1];
                             if (c1.a != 0 && c2.a != 0)
                                 col = color_lerp(iso_value,c1,c2,valp1,valp2);
                             else if (c1.a != 0)
@@ -491,13 +491,13 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                             else if (c2.a != 0)
                                 col = c2;
                         } else if (edge == 3) {
-                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,j*voxel_size,k*voxel_size});
+                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,j*voxel_size,(k+1)*voxel_size});
                             std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,j*voxel_size,k*voxel_size});
-                            double valp1 = grid[i+1][j][k];
+                            double valp1 = grid[i][j][k+1];
                             double valp2 = grid[i][j][k];
                             pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
 
-                            Color c1 = color_grid[i+1][j][k];
+                            Color c1 = color_grid[i][j][k+1];
                             Color c2 = color_grid[i][j][k];
                             if (c1.a != 0 && c2.a != 0)
                                 col = color_lerp(iso_value,c1,c2,valp1,valp2);
@@ -507,38 +507,12 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                                 col = c2;
                         } else if (edge == 4) {
                             std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,(j+1)*voxel_size,k*voxel_size});
-                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
+                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,(k)*voxel_size});
                             double valp1 = grid[i][j+1][k];
-                            double valp2 = grid[i][j+1][k+1];
-                            pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
-
-                            Color c1 = color_grid[i][j+1][k];
-                            Color c2 = color_grid[i][j+1][k+1];
-                            if (c1.a != 0 && c2.a != 0)
-                                col = color_lerp(iso_value,c1,c2,valp1,valp2);
-                            else if (c1.a != 0)
-                                col = c1;
-                            else if (c2.a != 0)
-                                col = c2;
-                        } else if (edge == 5) {
-                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
-                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
-                            double valp1 = grid[i][j+1][k+1];
-                            double valp2 = grid[i+1][j+1][k+1];
-                            pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
-
-                            Color c1 = color_grid[i][j+1][k+1];
-                            Color c2 = color_grid[i+1][j+1][k+1];
-                            if (c1.a != 0 && c2.a != 0)
-                                col = color_lerp(iso_value,c1,c2,valp1,valp2);
-                        } else if (edge == 6) {
-                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
-                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,k*voxel_size});
-                            double valp1 = grid[i+1][j+1][k+1];
                             double valp2 = grid[i+1][j+1][k];
                             pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
 
-                            Color c1 = color_grid[i+1][j+1][k+1];
+                            Color c1 = color_grid[i][j+1][k];
                             Color c2 = color_grid[i+1][j+1][k];
                             if (c1.a != 0 && c2.a != 0)
                                 col = color_lerp(iso_value,c1,c2,valp1,valp2);
@@ -546,14 +520,40 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                                 col = c1;
                             else if (c2.a != 0)
                                 col = c2;
-                        } else if (edge == 7) {
-                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,k*voxel_size});
-                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,(j+1)*voxel_size,k*voxel_size});
+                        } else if (edge == 5) {
+                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,(k)*voxel_size});
+                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
                             double valp1 = grid[i+1][j+1][k];
-                            double valp2 = grid[i][j+1][k];
+                            double valp2 = grid[i+1][j+1][k+1];
                             pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
 
                             Color c1 = color_grid[i+1][j+1][k];
+                            Color c2 = color_grid[i+1][j+1][k+1];
+                            if (c1.a != 0 && c2.a != 0)
+                                col = color_lerp(iso_value,c1,c2,valp1,valp2);
+                        } else if (edge == 6) {
+                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
+                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i)*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
+                            double valp1 = grid[i+1][j+1][k+1];
+                            double valp2 = grid[i][j+1][k+1];
+                            pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
+
+                            Color c1 = color_grid[i+1][j+1][k+1];
+                            Color c2 = color_grid[i][j+1][k+1];
+                            if (c1.a != 0 && c2.a != 0)
+                                col = color_lerp(iso_value,c1,c2,valp1,valp2);
+                            else if (c1.a != 0)
+                                col = c1;
+                            else if (c2.a != 0)
+                                col = c2;
+                        } else if (edge == 7) {
+                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i)*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
+                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,(j+1)*voxel_size,k*voxel_size});
+                            double valp1 = grid[i][j+1][k+1];
+                            double valp2 = grid[i][j+1][k];
+                            pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
+
+                            Color c1 = color_grid[i][j+1][k+1];
                             Color c2 = color_grid[i][j+1][k];
                             if (c1.a != 0 && c2.a != 0)
                                 col = color_lerp(iso_value,c1,c2,valp1,valp2);
@@ -573,14 +573,14 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                             else if (c2.a != 0)
                                 col = c2;
                         } else if (edge == 9) {
-                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,j*voxel_size,(k+1)*voxel_size});
-                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{i*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
-                            double valp1 = grid[i][j][k+1];
-                            double valp2 = grid[i][j+1][k+1];
+                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,j*voxel_size,(k)*voxel_size});
+                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,(k)*voxel_size});
+                            double valp1 = grid[i+1][j][k];
+                            double valp2 = grid[i+1][j+1][k];
                             pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
 
-                            Color c1 = color_grid[i][j][k+1];
-                            Color c2 = color_grid[i][j+1][k+1];
+                            Color c1 = color_grid[i+1][j][k];
+                            Color c2 = color_grid[i+1][j+1][k];
                             if (c1.a != 0 && c2.a != 0)
                                 col = color_lerp(iso_value,c1,c2,valp1,valp2);
                             else if (c1.a != 0)
@@ -603,14 +603,14 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
                             else if (c2.a != 0)
                                 col = c2;
                         } else if (edge == 11) {
-                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,j*voxel_size,k*voxel_size});
-                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i+1)*voxel_size,(j+1)*voxel_size,k*voxel_size});
-                            double valp1 = grid[i+1][j][k];
-                            double valp2 = grid[i+1][j+1][k];
+                            std::array<double,3> p1 = array_3_add(bottom_left_voxel, std::array<double,3>{(i)*voxel_size,j*voxel_size,(k+1)*voxel_size});
+                            std::array<double,3> p2 = array_3_add(bottom_left_voxel, std::array<double,3>{(i)*voxel_size,(j+1)*voxel_size,(k+1)*voxel_size});
+                            double valp1 = grid[i][j][k+1];
+                            double valp2 = grid[i][j+1][k+1];
                             pos = VertexInterp(iso_value,p1,p2,valp1,valp2);
 
-                            Color c1 = color_grid[i+1][j][k];
-                            Color c2 = color_grid[i+1][j+1][k];
+                            Color c1 = color_grid[i][j][k+1];
+                            Color c2 = color_grid[i][j+1][k+1];
                             if (c1.a != 0 && c2.a != 0)
                                 col = color_lerp(iso_value,c1,c2,valp1,valp2);
                             else if (c1.a != 0)
@@ -631,8 +631,10 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
             }
         }
     }
-    std::vector<Mesh> result (n_meshes);
+    std::vector<Mesh> result {};
     for (int i = 0; i < n_meshes; i++) {
+        if (mesh_data[i].vertices.size() == 0)
+            continue;
         Mesh mesh {};
         mesh.triangleCount = mesh_data[i].indices.size()/3;
         mesh.vertexCount = mesh_data[i].vertices.size()/3;
@@ -646,7 +648,7 @@ std::vector<Mesh> march_cubes(std::vector<std::vector<std::vector<double>>> grid
             mesh.indices[j] = mesh_data[i].indices[j];
         for (int j = 0; j < mesh_data[i].colors.size(); j++)
             mesh.colors[j] = mesh_data[i].colors[j];
-        result[i] = mesh;
+        result.push_back(mesh);
     }
     DEBUG("Finished marching cubes, mesh count: " + std::to_string(result.size()));
     return result;
