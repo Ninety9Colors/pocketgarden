@@ -9,9 +9,9 @@
 #include "logging.hpp"
 
 Lily::Lily() : Lily(std::random_device{}()) {}
-Lily::Lily(uint32_t seed) : LSystemObject(seed), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
+Lily::Lily(uint32_t seed) : Object3d(), seed_(seed), stage_(0), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
 Lily::Lily(Quaternion quaternion, Vector3 position, float scale) : Lily(quaternion,position,scale,std::random_device{}()) {}
-Lily::Lily(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : LSystemObject(quaternion,position,scale,seed), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
+Lily::Lily(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : Object3d(quaternion,position,scale), seed_(seed), stage_(0), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
 Lily::Lily(const json& j) {from_json(j);}
 
 // Should regenerate mesh if needed

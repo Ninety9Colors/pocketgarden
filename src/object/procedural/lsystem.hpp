@@ -21,6 +21,7 @@ public:
 
     json to_json() const;
     void from_json(const json& j);
+    std::string to_string() const;
     
     std::string type;
     Vector3 position;
@@ -57,6 +58,7 @@ public:
 
     json to_json() const;
     void from_json(const json& j);
+    std::string to_string() const;
 private:
     std::shared_ptr<LNode> base_node_;
 };

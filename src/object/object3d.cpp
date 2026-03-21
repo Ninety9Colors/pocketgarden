@@ -209,7 +209,3 @@ void ParameterObject::set_parameter(std::string name, Parameter parameter) {
 const Parameter ParameterObject::get_parameter(std::string name) const {
     return parameter_map_.get_parameter(name);
 }
-LSystemObject::LSystemObject() : LSystemObject(std::random_device{}()) {}
-LSystemObject::LSystemObject(uint32_t seed) : Object3d(), seed_(seed), stage_(0) {}
-LSystemObject::LSystemObject(Quaternion quaternion, Vector3 position, float scale) : LSystemObject(quaternion,position,scale,std::random_device{}()) {}
-LSystemObject::LSystemObject(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : Object3d(quaternion,position,scale), seed_(seed), stage_(0) {}

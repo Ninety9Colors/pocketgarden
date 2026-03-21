@@ -28,12 +28,19 @@ void LNode::from_json(const json& j) {
         children.back()->from_json(c);
     }
 }
+std::string LNode::to_string() const {
+    std::string result = type;
+    for (auto c : children)
+        result+=c->to_string();
+    return result;
+}
 
 Rule::Rule(std::function<std::vector<std::shared_ptr<LNode>>(std::shared_ptr<LNode>,std::mt19937_64&)> func) : apply_function_(func) {}
 void Rule::apply(std::shared_ptr<LNode> node,std::mt19937_64& rng) {
     std::vector<std::shared_ptr<LNode>> new_nodes = apply_function_(node,rng);
     for (auto n : new_nodes) {
         node->children.push_back(n);
+        n->parent = node;
     }
 }
 
@@ -83,4 +90,8 @@ void LSystem::from_json(const json& j) {
     }
     base_node_ = std::make_shared<LNode>();
     base_node_->from_json(j.at("base_node"));
+}
+
+std::string LSystem::to_string() const {
+    return base_node_->to_string();
 }

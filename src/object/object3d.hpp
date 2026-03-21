@@ -118,27 +118,3 @@ protected:
     ParameterMap parameter_map_;
     uint32_t seed_;
 };
-
-class LSystemObject : public Object3d {
-public:
-    LSystemObject();
-    LSystemObject(uint32_t seed);
-    LSystemObject(Quaternion quaternion, Vector3 position, float scale);
-    LSystemObject(Quaternion quaternion, Vector3 position, float scale, uint32_t seed);
-    virtual ~LSystemObject() {};
-
-    int get_stage() const {return stage_;};
-
-    // Should regenerate mesh if needed
-    virtual void advance_stage() = 0;
-
-    // Should be called explicitly after the object is created
-    virtual void initialize() = 0;
-    virtual void generate_mesh() = 0;
-protected:
-    LSystem lsystem_;
-    std::map<std::pair<int,int>, RuleSet> stage_transitions_;
-    
-    int stage_;
-    uint32_t seed_;
-};
