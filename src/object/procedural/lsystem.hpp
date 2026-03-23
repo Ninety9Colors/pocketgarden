@@ -33,16 +33,18 @@ public:
 class Rule {
 public:
     Rule() {};
-    Rule(std::function<std::vector<std::shared_ptr<LNode>>(std::shared_ptr<LNode>,std::mt19937_64&)> func);
-    void apply(std::shared_ptr<LNode> node,std::mt19937_64& rng);
+    Rule(std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode>,std::mt19937_64&)> func);
+    std::shared_ptr<LNode> apply(std::shared_ptr<LNode> node,std::mt19937_64& rng);
 private:
-    std::function<std::vector<std::shared_ptr<LNode>>(std::shared_ptr<LNode>,std::mt19937_64&)> apply_function_;
+    // This function should automatically link the node's children to the new replaced sequence of nodes
+    // The parent linkage should not be handled by this function though
+    std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode>,std::mt19937_64&)> apply_function_;
 };
 
 class RuleSet {
 public:
     RuleSet();
-    void apply_rule(std::shared_ptr<LNode> node,std::mt19937_64& rng) ;
+    std::shared_ptr<LNode> apply_rule(std::shared_ptr<LNode> node,std::mt19937_64& rng);
     void add_rule(std::string node_type, Rule rule);
 private:
     std::map<std::string,Rule> rules_;

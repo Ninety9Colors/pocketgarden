@@ -24,6 +24,7 @@ public:
     }
     void draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const override;
 
+    void grow();
     // should be called explicitly after object creation
     void initialize();
 
@@ -40,10 +41,12 @@ public:
 private:
     void initialize_parameters() override;
     std::unique_ptr<TaperedLeaf> leaf_;
-    std::array<Matrix,3> leaf_transforms_;
+    std::vector<Matrix> leaf_transforms_;
+    std::vector<std::pair<Matrix,Matrix>> leaf_transforms_base_;
 
     LSystem lsystem_;
     RuleSet productions_;
+    std::mt19937_64 rng_;
 
     std::pair<int,int> slices_;
 };

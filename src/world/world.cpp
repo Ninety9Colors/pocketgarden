@@ -3,6 +3,7 @@
 
 #include "object/procedural/lily_flower.hpp"
 #include "object/procedural/lily.hpp"
+#include "object/procedural/fern_frond.hpp"
 #include "object/consistent/move_tool.hpp"
 #include "object/consistent/sun_tool.hpp"
 #include "object/consistent/weather_tool.hpp"
@@ -44,6 +45,15 @@ void World::load_world(std::string save_file) {
         flower->advance_stage();
         flower->generate_mesh();
         load_object(std::move(flower));
+
+        auto fern = std::make_unique<FernFrond>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{2.0f,2.0f,0.0f}, 1.0f,601098220);
+        fern->initialize();
+        fern->grow();
+        fern->grow();
+        fern->grow();
+        fern->grow();
+        fern->generate_mesh();
+        load_object(std::move(fern));
 
         // Lily spam!:
         // for (int x = 1; x <= 50; x++) {
