@@ -52,6 +52,14 @@ void World::load_world(std::string save_file) {
         fern->grow();
         fern->grow();
         fern->grow();
+        fern->grow();
+        fern->grow();
+        fern->grow();
+        fern->grow();
+        fern->grow();
+        fern->grow();
+        fern->grow();
+        fern->grow();
         fern->generate_mesh();
         load_object(std::move(fern));
 
@@ -69,7 +77,7 @@ void World::load_world(std::string save_file) {
         // }
         // load_object(std::make_unique<MoveTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 0.0f}, 1.0f));
         // load_object(std::make_unique<SunTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 3.0f}, 1.0f));
-        // load_object(std::make_unique<RotateTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 4.0f}, 1.0f));
+        load_object(std::make_unique<RotateTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 4.0f}, 1.0f));
         // load_object(std::make_unique<WeatherTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 5.0f}, 1.0f));
         INFO("Default world loaded!");
     }

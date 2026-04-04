@@ -18,20 +18,17 @@ public:
     virtual ~FernFrond() {};
 
     void draw(Game& game, Material material) const override;
-    void draw(Game& game,Matrix transform, Material material) const override;
-    void draw_instanced(Game& game, const Matrix* transforms, int matrix_count) const override {
-        draw_instanced(game,material_,transforms,matrix_count);
-    }
-    void draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const override;
+    // void draw(Game& game,Matrix transform, Material material) const override;
+    // void draw_instanced(Game& game, const Matrix* transforms, int matrix_count) const override {
+    //     draw_instanced(game,material_,transforms,matrix_count);
+    // }
+    // void draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const override;
 
     void grow();
     // should be called explicitly after object creation
     void initialize();
 
     void update_matrix() override;
-
-    BoundingBox get_bounding_box() const override;
-    BoundingBox get_bounding_box(Matrix transform) const override;
 
     void generate_mesh() override;
     void set_slices(std::pair<int,int> slices);
@@ -42,7 +39,7 @@ private:
     void initialize_parameters() override;
     std::unique_ptr<TaperedLeaf> leaf_;
     std::vector<Matrix> leaf_transforms_;
-    std::vector<std::pair<Matrix,Matrix>> leaf_transforms_base_;
+    std::vector<std::array<Matrix,3>> leaf_transforms_base_;
 
     LSystem lsystem_;
     RuleSet productions_;

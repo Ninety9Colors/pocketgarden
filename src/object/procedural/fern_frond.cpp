@@ -1,5 +1,6 @@
 #include <cassert>
 #include <functional>
+#include <map>
 
 #include "object/procedural/fern_frond.hpp"
 
@@ -58,15 +59,16 @@ void FernFrond::from_json(const json& j) {
 }
 
 void FernFrond::draw(Game& game, Material material) const {
-    
+    DrawMesh(mesh_,material_,transform_);
+    leaf_->draw_instanced(game,leaf_transforms_.data(),leaf_transforms_.size());
 }
-void FernFrond::draw(Game& game,Matrix transform, Material material) const {
+// void FernFrond::draw(Game& game,Matrix transform, Material material) const {
     
-}
+// }
 
-void FernFrond::draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const {
+// void FernFrond::draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const {
     
-}
+// }
 
 void FernFrond::grow() {
     std::string initial = lsystem_.to_string();
@@ -76,19 +78,33 @@ void FernFrond::grow() {
 
 void FernFrond::initialize() {
     // TODO: make leaf shape correct & generate its mesh
+    leaf_->generate_mesh();
     if (lsystem_.get_base() == nullptr)
         lsystem_ = LSystem(std::make_shared<LNode>("B",position_,Vector3{1,0,0},std::vector<std::shared_ptr<LNode>>{},nullptr));
         
         // base rule
         std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> base = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
-            std::shared_ptr<LNode> stipe = std::make_shared<LNode>("S",node->position,node->direction,std::vector<std::shared_ptr<LNode>>{},nullptr);
+            std::shared_ptr<LNode> stipe_base = std::make_shared<LNode>("S0",node->position,node->direction,std::vector<std::shared_ptr<LNode>>{},nullptr);
+            std::shared_ptr<LNode> stipe = std::make_shared<LNode>("S",node->position,node->direction,std::vector<std::shared_ptr<LNode>>{},stipe_base);
             std::shared_ptr<LNode> rachi = std::make_shared<LNode>("R",node->position,node->direction,std::vector<std::shared_ptr<LNode>>{},stipe);
             std::shared_ptr<LNode> head = std::make_shared<LNode>("H0",node->position,node->direction,std::vector<std::shared_ptr<LNode>>{},rachi);
+            stipe_base->children.push_back(stipe);
             stipe->children.push_back(rachi);
             rachi->children.push_back(head);
-            return stipe;
+            return stipe_base;
         };
         productions_.add_rule("B",Rule(base));
+
+        // stipe growth rule
+        std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> stipe_growth = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
+            std::shared_ptr<LNode> stipe = std::make_shared<LNode>("S",node->position,node->direction,node->children,node);
+            for (auto child : stipe->children)
+                child->parent = stipe;
+            node->children.clear();
+            node->children.push_back(stipe);
+            return node;
+        };
+        productions_.add_rule("S0",Rule(stipe_growth));
 
         // branching rule one
         std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> branching_one = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
@@ -143,30 +159,21 @@ void FernFrond::initialize() {
             return one;
         };
         productions_.add_rule("H1",Rule(branching_two));
-        // growth rule
-        std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> growth = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
-            std::shared_ptr<LNode> stem = std::make_shared<LNode>("S",node->position,node->direction,node->children,node);
-            node->children.clear();
-            node->children.push_back(stem);
-            for (auto child : stem->children)
-                child->parent = stem;
-            return node;
-        };
-        productions_.add_rule("S",Rule(growth));
 }
 
 void FernFrond::update_matrix() {
-    // TODO: update matrix
-}
+    transform_ = MatrixMultiply(MatrixScale(scale_, scale_, scale_),MatrixMultiply(QuaternionToMatrix(quaternion_), MatrixTranslate(position_.x, position_.y, position_.z)));
+    for (int i = 0; i < leaf_transforms_.size(); i++) {
+        Matrix base_rotate = leaf_transforms_base_[i][0];
+        Matrix base_offset = leaf_transforms_base_[i][1];
+        Matrix base_scale = leaf_transforms_base_[i][2]; // scale of the Leaf, not whole object
+        Vector3 leaf_offset = Vector3Scale(Vector3{base_offset.m12,base_offset.m13,base_offset.m14},scale_);
+        leaf_offset = Vector3RotateByQuaternion(leaf_offset,quaternion_);
 
-BoundingBox FernFrond::get_bounding_box() const {
-    // TODO: get bounding box
-    return BoundingBox{};
-}
-BoundingBox FernFrond::get_bounding_box(Matrix transform) const {
-    Matrix m = MatrixMultiply(transform_, transform);
-    // TODO: get bounding box
-    return BoundingBox{};
+        float scale = 1.0f;
+        Matrix transform = MatrixMultiply(MatrixMultiply(MatrixMultiply(MatrixScale(scale_,scale_,scale_),base_scale),MatrixScale(scale, scale, scale)),MatrixMultiply(MatrixMultiply(base_rotate,QuaternionToMatrix(quaternion_)), MatrixTranslate(position_.x+leaf_offset.x, position_.y+leaf_offset.y, position_.z+leaf_offset.z)));
+        leaf_transforms_[i] = transform;
+    }
 }
 
 static void generate_stem_segment(std::vector<float>& vertices,
@@ -182,6 +189,9 @@ static void generate_stem_segment(std::vector<float>& vertices,
                                     std::map<int,std::pair<int,Vector3>>& previous_vertexes,
                                     Color color,
                                     float width = 0.025f) {
+    DEBUG("Generating stem segment");
+    DEBUG(std::to_string(start_pos.x) + "," + std::to_string(start_pos.y) + "," + std::to_string(start_pos.z));
+    DEBUG(std::to_string(end_pos.x) + "," + std::to_string(end_pos.y) + "," + std::to_string(end_pos.z));
     Vector3 direction = Vector3Normalize(Vector3Subtract(end_pos,start_pos));
     Vector3 normal;
 
@@ -280,7 +290,33 @@ namespace {
         std::shared_ptr<LNode> node;
         int id;
         int prev_id;
+        Vector3 prev_dir;
     };
+}
+
+// r = e^(-theta)
+static float polar_x_to_y(float x) {
+    INFO("Converting float x=" + std::to_string(x) + " to polar..");
+    constexpr float epsilon = 0.01f;
+    float theta_min = 0;
+    float theta_max = PI/2.0f;
+    while (theta_max - theta_min > epsilon) {
+        float mid = (theta_max + theta_min)/2.0f;
+        float r = std::expf(-mid);
+        float curr_x = r*std::cosf(mid);
+        float curr_y = r*std::sinf(mid);
+        if (curr_x > x) {
+            theta_min = mid;
+        } else if (curr_x < x) {
+            theta_max = mid;
+        } else {
+            INFO("Result y=" + std::to_string(curr_y));
+            return curr_y;
+        }
+    }
+    float r = std::expf(-theta_min);
+    INFO("Result y=" + std::to_string(r*std::sinf(theta_min)));
+    return r*std::sinf(theta_min);
 }
 
 static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
@@ -292,54 +328,176 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
                                     int& next_id,
                                     std::shared_ptr<LNode> base_node,
                                     StackFrame base_frame,
-                                    ParameterMap& parameters) {
+                                    ParameterMap& parameters,
+                                    const Vector3& leaf_tip_vector,
+                                    std::vector<std::array<Matrix,3>>& leaf_transforms_base,
+                                    std::vector<Matrix>& leaf_transforms,
+                                    std::unordered_map<std::shared_ptr<LNode>,float>& proportions,
+                                    float segment_scale = 1.0f,
+                                    float child_segment_scale = 1.0f) {
+    float mesh_scale = parameters.get_parameter("MeshScale").value;
     float stipe_prop = parameters.get_parameter("StipeProportion").value;
-    float rachi_prop = 1-stipe_prop;
-    float branch_angle = parameters.get_parameter("BranchAngle").value;
+    float rachi_prop = parameters.get_parameter("RachiProportion").value;
+    stipe_prop *= mesh_scale;
+    rachi_prop *= mesh_scale;
+    float branch_angle = parameters.get_parameter("BranchAngle").value*DEG2RAD;
     std::deque<StackFrame> dfs {};
-    dfs.push_back({base_frame.prev_pos,base_frame.pos,base_frame.normal,base_frame.dir,base_node,base_frame.id,base_frame.prev_id});
+    dfs.push_back(StackFrame{base_frame.prev_pos,base_frame.pos,base_frame.normal,base_frame.dir,base_node,base_frame.id,base_frame.prev_id,base_frame.prev_dir});
+    std::shared_ptr<LNode> latest_top = nullptr;
     while (!dfs.empty()) {
         auto top = dfs.back();
+        latest_top = top.node;
         dfs.pop_back();
         for (auto child : top.node->children) {
-            assert(child->children.size() == 1);
             if (child->type == "B") {
             } else if (child->type == "S") {
-                Vector3 new_pos = Vector3Add(top.pos,Vector3Scale(top.dir,stipe_prop));
-                generate_stem_segment(vertices,normals,colors,indices,top.pos,new_pos,top.dir,top.dir,top.id,next_id++,previous_vertexes,color);
-                dfs.push_back({top.pos,new_pos,top.normal,top.dir,child,next_id-1,top.id});
+                DEBUG("S");
+                Vector3 new_pos = Vector3Add(top.pos,Vector3Scale(top.dir,stipe_prop*segment_scale));
+                generate_stem_segment(vertices,normals,colors,indices,top.pos,new_pos,top.dir,top.dir,top.id,next_id++,previous_vertexes,color,2.0f*0.025f*mesh_scale);
+                dfs.push_back({top.pos,new_pos,top.normal,top.dir,child,next_id-1,top.id,top.prev_dir});
             } else if (child->type == "R") {
-                Vector3 new_pos = Vector3Add(top.pos,Vector3Scale(top.dir,rachi_prop));
-                generate_stem_segment(vertices,normals,colors,indices,top.pos,new_pos,top.dir,top.dir,top.id,next_id++,previous_vertexes,color);
-                dfs.push_back({top.pos,new_pos,top.normal,top.dir,child,next_id-1,top.id});
+                DEBUG("R");
+                if (proportions.contains(child))
+                    child_segment_scale = polar_x_to_y(proportions[child]);
+                Vector3 new_pos = Vector3Add(top.pos,Vector3Scale(top.dir,rachi_prop*segment_scale));
+                generate_stem_segment(vertices,normals,colors,indices,top.pos,new_pos,top.dir,top.dir,top.id,next_id++,previous_vertexes,color,2.0f*0.025f*mesh_scale);
+                dfs.push_back({top.pos,new_pos,top.normal,top.dir,child,next_id-1,top.id,top.prev_dir});
             } else if (child->type == "H0") {
-                // TODO: add leaf transform
+                DEBUG("H0");
+                Vector3 leaf_pos = Vector3Subtract(top.pos,Vector3Scale(top.dir,0.001f));
+
+                // align normals
+                Vector3 leaf_tip_normal = Vector3Normalize(Vector3CrossProduct(Vector3CrossProduct(leaf_tip_vector,{0,1,0}),leaf_tip_vector));
+                Quaternion normal_align = QuaternionFromVector3ToVector3(leaf_tip_normal,top.normal);
+                Vector3 tip_two = Vector3RotateByQuaternion(leaf_tip_vector,normal_align);
+
+                // align tips
+                Vector3 cross = Vector3CrossProduct(tip_two,top.dir);
+                int sign = (Vector3DotProduct(cross,top.normal) >= 0) ? 1 : -1;
+                Quaternion tip_align = QuaternionFromAxisAngle(top.normal,Vector3Angle(top.dir,tip_two)*sign);
+
+                Matrix rot = QuaternionToMatrix(QuaternionMultiply(tip_align,normal_align));
+                Matrix translate = MatrixTranslate(leaf_pos.x,leaf_pos.y,leaf_pos.z);
+                Matrix scale = MatrixScale(2.0f*child_segment_scale*mesh_scale,2.0f*child_segment_scale*mesh_scale,2.0f*child_segment_scale*mesh_scale);
+                leaf_transforms.push_back(MatrixIdentity());
+                leaf_transforms_base.push_back({rot,translate,scale});
+                dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,child,top.id,top.prev_id,top.prev_dir});
             } else if (child->type == "H1") {
-                // TODO: add leaf transform
+                DEBUG("H1");
+                Vector3 leaf_pos = Vector3Subtract(top.pos,Vector3Scale(top.dir,0.001f));
+
+                // align normals
+                Vector3 leaf_tip_normal = Vector3Normalize(Vector3CrossProduct(Vector3CrossProduct(leaf_tip_vector,{0,1,0}),leaf_tip_vector));
+                Quaternion normal_align = QuaternionFromVector3ToVector3(leaf_tip_normal,top.normal);
+                Vector3 tip_two = Vector3RotateByQuaternion(leaf_tip_vector,normal_align);
+
+                // align tips
+                Vector3 cross = Vector3CrossProduct(tip_two,top.dir);
+                int sign = (Vector3DotProduct(cross,top.normal) >= 0) ? 1 : -1;
+                Quaternion tip_align = QuaternionFromAxisAngle(top.normal,Vector3Angle(top.dir,tip_two)*sign);
+
+                Matrix rot = QuaternionToMatrix(QuaternionMultiply(tip_align,normal_align));
+                Matrix translate = MatrixTranslate(leaf_pos.x,leaf_pos.y,leaf_pos.z);
+                Matrix scale = MatrixScale(2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale);
+                leaf_transforms.push_back(MatrixIdentity());
+                leaf_transforms_base.push_back({rot,translate,scale});
+                dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,child,top.id,top.prev_id,top.prev_dir});
             } else if (child->type == "H2") {
-                // TODO: add leaf transform
+                DEBUG("H2");
+                Vector3 leaf_pos = Vector3Subtract(top.pos,Vector3Scale(top.dir,0.001f));
+
+                // align normals
+                Vector3 leaf_tip_normal = Vector3Normalize(Vector3CrossProduct(Vector3CrossProduct(leaf_tip_vector,{0,1,0}),leaf_tip_vector));
+                Quaternion normal_align = QuaternionFromVector3ToVector3(leaf_tip_normal,top.normal);
+                Vector3 tip_two = Vector3RotateByQuaternion(leaf_tip_vector,normal_align);
+
+                // align tips
+                Vector3 cross = Vector3CrossProduct(tip_two,top.dir);
+                int sign = (Vector3DotProduct(cross,top.normal) >= 0) ? 1 : -1;
+                Quaternion tip_align = QuaternionFromAxisAngle(top.normal,Vector3Angle(top.dir,tip_two)*sign);
+
+                Matrix rot = QuaternionToMatrix(QuaternionMultiply(tip_align,normal_align));
+                Matrix translate = MatrixTranslate(leaf_pos.x,leaf_pos.y,leaf_pos.z);
+                Matrix scale = MatrixScale(2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale);
+                leaf_transforms.push_back(MatrixIdentity());
+                leaf_transforms_base.push_back({rot,translate,scale});
+                dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,child,top.id,top.prev_id,top.prev_dir});
             } else if (child->type == "+") {
+                DEBUG("+");
                 Vector3 new_dir = Vector3Normalize(Vector3RotateByAxisAngle(top.dir,top.normal,branch_angle));
-                dfs.push_back({top.prev_pos,top.pos,top.normal,new_dir,child,top.id,top.prev_id});
+                dfs.push_back({top.prev_pos,top.pos,top.normal,new_dir,child,top.id,top.prev_id,top.dir});
             } else if (child->type == "-") {
+                DEBUG("-");
                 Vector3 new_dir = Vector3Normalize(Vector3RotateByAxisAngle(top.dir,top.normal,-branch_angle));
-                dfs.push_back({top.prev_pos,top.pos,top.normal,new_dir,child,top.id,top.prev_id});
+                dfs.push_back({top.prev_pos,top.pos,top.normal,new_dir,child,top.id,top.prev_id,top.dir});
             } else if (child->type == "[") {
+                DEBUG("[");
                 std::shared_ptr<LNode> next = generate_rachis(vertices,normals,colors,indices,previous_vertexes,color,next_id,child,
                     {top.prev_pos,top.pos,top.normal,top.dir,child,next_id++,top.id}
-                    ,parameters);
-                dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,next,top.id,top.prev_id});
+                    ,parameters,leaf_tip_vector,leaf_transforms_base,leaf_transforms,proportions,child_segment_scale,child_segment_scale);
+                if (next != nullptr)
+                    dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,next,top.id,top.prev_id,top.prev_dir});
             } else if (child->type == "]") {
+                DEBUG("]");
                 return child;
             }
         }
     }
-    return nullptr;
+    return latest_top;
+}
+
+static void fill_proportion_map(ParameterMap& parameters,
+                                    std::shared_ptr<LNode> base_node,
+                                    std::unordered_map<std::shared_ptr<LNode>,float>& proportions) {
+    std::deque<std::shared_ptr<LNode>> dfs {};
+    float rachi_prop = parameters.get_parameter("RachiProportion").value;
+    float mesh_scale = parameters.get_parameter("MeshScale").value;
+    dfs.push_back(base_node);
+    int depth = 0;
+    int rachi_count = 1;
+    while (!dfs.empty()) {
+        auto top = dfs.back();
+        dfs.pop_back();
+        for (auto child : top->children) {
+            if (child->type == "[") {
+                depth++;
+            } else if (child->type == "]") {
+                depth--;
+            } else if (child->type == "R") {
+                if (depth == 0) rachi_count++;
+            }
+            dfs.push_back(child);
+        }
+    }
+    float total_length = rachi_prop*mesh_scale*rachi_count;
+    float curr_length = 0.0f;
+    dfs.push_back(base_node);
+    while (!dfs.empty()) {
+        auto top = dfs.back();
+        dfs.pop_back();
+        for (auto child : top->children) {
+            if (child->type == "[") {
+                depth++;
+            } else if (child->type == "]") {
+                depth--;
+            } else if (child->type == "R") {
+                if (depth == 0) {
+                    proportions[child] = curr_length/total_length;
+                    curr_length += rachi_prop*mesh_scale;
+                }
+            }
+            dfs.push_back(child);
+        }
+    }
+    for (const auto& p : proportions)
+        INFO(std::to_string(p.second));
 }
 
 void FernFrond::generate_mesh() {
+    DEBUG("Generating fern mesh...");
     if (mesh_.vboId != 0)
         UnloadMesh(mesh_);
+    rng_ = std::mt19937_64(seed_);
     mesh_ = Mesh{0};
     std::vector<float> vertices {};
     std::vector<float> normals {};
@@ -354,8 +512,12 @@ void FernFrond::generate_mesh() {
     leaf_transforms_.clear();
     leaf_transforms_base_.clear();
 
-    StackFrame base_frame = {{0,0,0},{0,0,0},{0,1,0},{1,0,0},lsystem_.get_base(),0,-1};
-    generate_rachis(vertices,normals,colors,indices,previous_vertexes,stem_color,next_id,lsystem_.get_base(),base_frame,parameter_map_);
+    DEBUG("... beginning recursion ...");
+    StackFrame base_frame = {{0,0,0},{0,0,0},{0,1,0},{1,0,0},lsystem_.get_base(),0,-1,{1,0,0}};
+    std::unordered_map<std::shared_ptr<LNode>,float> proportions {};
+    fill_proportion_map(parameter_map_,lsystem_.get_base(),proportions);
+    generate_rachis(vertices,normals,colors,indices,previous_vertexes,stem_color,next_id,lsystem_.get_base(),base_frame,parameter_map_,leaf_->tip_vector(),leaf_transforms_base_,leaf_transforms_,proportions);
+    DEBUG("... done recursing ...");
 
     assert(vertices.size()%3 == 0);
     assert(indices.size()%3 == 0);
@@ -382,6 +544,8 @@ void FernFrond::set_slices(std::pair<int,int> slices) {
 }
 void FernFrond::initialize_parameters() {
     std::mt19937_64 rng(seed_);
-    parameter_map_.set_parameter("StipeProportion", Parameter(0.2f,0.3f,0.5f));
+    parameter_map_.set_parameter("StipeProportion", Parameter(0.2f,0.2f,0.5f));
+    parameter_map_.set_parameter("RachiProportion", Parameter(0.2f,0.7f,0.5f));
     parameter_map_.set_parameter("BranchAngle", Parameter(60.0f,75.0f,85.0f));
+    parameter_map_.set_parameter("MeshScale", Parameter(0.05f,0.1f,0.25f));
 }

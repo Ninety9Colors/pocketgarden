@@ -9,6 +9,7 @@
 #include <object/procedural/lily_flower.hpp>
 #include <object/procedural/lily.hpp>
 #include <object/procedural/tapered_petal.hpp>
+#include <object/procedural/fern_frond.hpp>
 
 #include "logging.hpp"
 
@@ -39,6 +40,9 @@ std::unique_ptr<Object3d> parse_object(const json& j) {
         result->generate_mesh();
     } else if (type == "TaperedLeaf") {
         result = std::make_unique<TaperedLeaf>(j);
+        result->generate_mesh();
+    } else if (type == "FernFrond") {
+        result = std::make_unique<FernFrond>(j);
         result->generate_mesh();
     } else if (type == "null_item") {
         result = nullptr;
