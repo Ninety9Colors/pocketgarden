@@ -333,8 +333,8 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
                                     std::vector<std::array<Matrix,3>>& leaf_transforms_base,
                                     std::vector<Matrix>& leaf_transforms,
                                     std::unordered_map<std::shared_ptr<LNode>,float>& proportions,
-                                    float segment_scale = 1.0f,
-                                    float child_segment_scale = 1.0f) {
+                                    float segment_scale = 0.75f,
+                                    float child_segment_scale = 0.75f) {
     float mesh_scale = parameters.get_parameter("MeshScale").value;
     float stipe_prop = parameters.get_parameter("StipeProportion").value;
     float rachi_prop = parameters.get_parameter("RachiProportion").value;
@@ -357,9 +357,12 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
                 dfs.push_back({top.pos,new_pos,top.normal,top.dir,child,next_id-1,top.id,top.prev_dir});
             } else if (child->type == "R") {
                 DEBUG("R");
-                if (proportions.contains(child))
-                    child_segment_scale = polar_x_to_y(proportions[child]);
+                if (proportions.contains(child)) {
+                    INFO("Child segment found with proportion: " + std::to_string(proportions[child]));
+                    child_segment_scale = polar_x_to_y(proportions[child])*segment_scale;
+                }
                 Vector3 new_pos = Vector3Add(top.pos,Vector3Scale(top.dir,rachi_prop*segment_scale));
+                INFO("Generating stem segment with length: " + std::to_string(rachi_prop*segment_scale));
                 generate_stem_segment(vertices,normals,colors,indices,top.pos,new_pos,top.dir,top.dir,top.id,next_id++,previous_vertexes,color,2.0f*0.025f*mesh_scale);
                 dfs.push_back({top.pos,new_pos,top.normal,top.dir,child,next_id-1,top.id,top.prev_dir});
             } else if (child->type == "H0") {
@@ -378,9 +381,9 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
 
                 Matrix rot = QuaternionToMatrix(QuaternionMultiply(tip_align,normal_align));
                 Matrix translate = MatrixTranslate(leaf_pos.x,leaf_pos.y,leaf_pos.z);
-                Matrix scale = MatrixScale(2.0f*child_segment_scale*mesh_scale,2.0f*child_segment_scale*mesh_scale,2.0f*child_segment_scale*mesh_scale);
-                leaf_transforms.push_back(MatrixIdentity());
-                leaf_transforms_base.push_back({rot,translate,scale});
+                Matrix scale = MatrixScale(2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale);
+                // leaf_transforms.push_back(MatrixIdentity());
+                // leaf_transforms_base.push_back({rot,translate,scale});
                 dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,child,top.id,top.prev_id,top.prev_dir});
             } else if (child->type == "H1") {
                 DEBUG("H1");
@@ -399,8 +402,8 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
                 Matrix rot = QuaternionToMatrix(QuaternionMultiply(tip_align,normal_align));
                 Matrix translate = MatrixTranslate(leaf_pos.x,leaf_pos.y,leaf_pos.z);
                 Matrix scale = MatrixScale(2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale);
-                leaf_transforms.push_back(MatrixIdentity());
-                leaf_transforms_base.push_back({rot,translate,scale});
+                // leaf_transforms.push_back(MatrixIdentity());
+                // leaf_transforms_base.push_back({rot,translate,scale});
                 dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,child,top.id,top.prev_id,top.prev_dir});
             } else if (child->type == "H2") {
                 DEBUG("H2");
@@ -418,9 +421,11 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
 
                 Matrix rot = QuaternionToMatrix(QuaternionMultiply(tip_align,normal_align));
                 Matrix translate = MatrixTranslate(leaf_pos.x,leaf_pos.y,leaf_pos.z);
-                Matrix scale = MatrixScale(2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale,2.0f*segment_scale*mesh_scale);
+                float sc = 2.0f*segment_scale;
+                Matrix scale = MatrixScale(sc,sc,0.1f+sc*0.3f);
                 leaf_transforms.push_back(MatrixIdentity());
                 leaf_transforms_base.push_back({rot,translate,scale});
+                INFO("Generating leaf with scale: " + std::to_string(sc));
                 dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,child,top.id,top.prev_id,top.prev_dir});
             } else if (child->type == "+") {
                 DEBUG("+");
@@ -448,23 +453,32 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
 
 static void fill_proportion_map(ParameterMap& parameters,
                                     std::shared_ptr<LNode> base_node,
-                                    std::unordered_map<std::shared_ptr<LNode>,float>& proportions) {
+                                    std::unordered_map<std::shared_ptr<LNode>,float>& proportions,
+                                    float depth = 0) {
     std::deque<std::shared_ptr<LNode>> dfs {};
+    const float og_depth = depth;
     float rachi_prop = parameters.get_parameter("RachiProportion").value;
     float mesh_scale = parameters.get_parameter("MeshScale").value;
     dfs.push_back(base_node);
-    int depth = 0;
-    int rachi_count = 1;
+    int rachi_count = 0;
     while (!dfs.empty()) {
+        if (depth < og_depth) {
+            depth = og_depth;
+            break;
+        }
         auto top = dfs.back();
         dfs.pop_back();
         for (auto child : top->children) {
             if (child->type == "[") {
+                fill_proportion_map(parameters,child->children[0],proportions,depth+1);
                 depth++;
             } else if (child->type == "]") {
                 depth--;
             } else if (child->type == "R") {
-                if (depth == 0) rachi_count++;
+                if (depth == og_depth) {
+                    INFO("Rachi found at depth: " + std::to_string(depth));
+                    rachi_count++;
+                }
             }
             dfs.push_back(child);
         }
@@ -473,6 +487,10 @@ static void fill_proportion_map(ParameterMap& parameters,
     float curr_length = 0.0f;
     dfs.push_back(base_node);
     while (!dfs.empty()) {
+        if (depth < og_depth) {
+            depth = og_depth;
+            break;
+        }
         auto top = dfs.back();
         dfs.pop_back();
         for (auto child : top->children) {
@@ -481,7 +499,8 @@ static void fill_proportion_map(ParameterMap& parameters,
             } else if (child->type == "]") {
                 depth--;
             } else if (child->type == "R") {
-                if (depth == 0) {
+                if (depth == og_depth) {
+                    INFO("Rachi found at depth: " + std::to_string(depth));
                     proportions[child] = curr_length/total_length;
                     curr_length += rachi_prop*mesh_scale;
                 }
@@ -489,8 +508,6 @@ static void fill_proportion_map(ParameterMap& parameters,
             dfs.push_back(child);
         }
     }
-    for (const auto& p : proportions)
-        INFO(std::to_string(p.second));
 }
 
 void FernFrond::generate_mesh() {
@@ -545,7 +562,14 @@ void FernFrond::set_slices(std::pair<int,int> slices) {
 void FernFrond::initialize_parameters() {
     std::mt19937_64 rng(seed_);
     parameter_map_.set_parameter("StipeProportion", Parameter(0.2f,0.2f,0.5f));
-    parameter_map_.set_parameter("RachiProportion", Parameter(0.2f,0.7f,0.5f));
+    parameter_map_.set_parameter("RachiProportion", Parameter(0.2f,1.5f,0.5f));
     parameter_map_.set_parameter("BranchAngle", Parameter(60.0f,75.0f,85.0f));
     parameter_map_.set_parameter("MeshScale", Parameter(0.05f,0.1f,0.25f));
+
+    leaf_->set_parameter("Sharpness", Parameter{0.8f,0.4f,1.0f});
+    leaf_->set_parameter("Length", Parameter{0.5f,1.0f,1.0f});
+    leaf_->set_parameter("Height", Parameter{0.05f,0.125f,0.4f});
+    leaf_->set_parameter("Curl", Parameter{2.5f,1.75f,3.0f});
+    leaf_->set_parameter("Width", Parameter{0.1f,0.15f,0.2f});
+    leaf_->set_parameter("Curvature", Parameter{0.1f,0.0f,0.3f});
 }

@@ -60,6 +60,8 @@ void World::load_world(std::string save_file) {
         fern->grow();
         fern->grow();
         fern->grow();
+        fern->grow();
+        fern->grow();
         fern->generate_mesh();
         load_object(std::move(fern));
 
