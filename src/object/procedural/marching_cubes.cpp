@@ -1,6 +1,7 @@
 #include "marching_cubes.hpp"
 
 #include <array>
+#include <deque>
 #include <limits>
 #include <math.h>
 
@@ -8,6 +9,8 @@
 #include "raymath.h"
 
 #include "logging.hpp"
+
+static const std::vector<std::array<int,3>> DIRECTIONS {{0,-1,0},{0,1,0},{1,0,0},{-1,0,0},{0,0,1},{0,0,-1}};
 
 static std::array<double,3> array_3_add(std::array<double,3> a, std::array<double,3> b) {
     return std::array<double,3>{a[0]+b[0],a[1]+b[1],a[2]+b[2]};
@@ -347,6 +350,31 @@ static int triTable[256][16] =
 {0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
 
+static void flood(std::vector<std::vector<std::vector<double>>>& grid_result, const std::vector<std::vector<std::vector<double>>>& grid, int i, int j, int k) {
+    std::deque<std::array<int,3>> dfs {};
+    dfs.push_back({i,j,k});
+    int n_x = grid.size();
+    int n_y = grid[0].size();
+    int n_z = grid[0][0].size();
+    while (!dfs.empty()) {
+        int x = dfs.back()[0];
+        int y = dfs.back()[1];
+        int z = dfs.back()[2];
+        dfs.pop_back();
+        grid_result[x][y][z] = 1.0;
+        for (const auto& d : DIRECTIONS) {
+            int x2 = x+d[0];
+            int y2 = y+d[1];
+            int z2 = z+d[2];
+            if (x2 < 0 || x2 >= n_x ||
+                y2 < 0 || y2 >= n_y ||
+                z2 < 0 || z2 >= n_z ||
+                !(grid_result[x2][y2][z2] < 0.0 && grid[x2][y2][z2] > 0.0)) continue;
+            dfs.push_back({x2,y2,z2});
+        }
+    }
+}
+
 std::pair<std::pair<std::vector<std::vector<std::vector<double>>>,std::vector<std::vector<std::vector<Color>>>>,std::array<double,3>> voxelize_pcd(std::vector<std::array<double,3>> coordinates, std::vector<std::array<unsigned char,3>> colors, double voxel_size) {
     DEBUG("Voxellizing point cloud distribution of " + std::to_string(coordinates.size()) + " points with voxel size " + std::to_string(voxel_size) + "...");
     std::array<double,3> bottom_left {std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity()};
@@ -393,8 +421,22 @@ std::pair<std::pair<std::vector<std::vector<std::vector<double>>>,std::vector<st
             }
         }
     }
+    int voxel_count_before = 0;
+    for (int i = 0; i < n_x; i++)
+        for (int j = 0; j < n_y; j++)
+            for (int k = 0; k < n_z; k++)
+                voxel_count_before += grid[i][j][k] < 0.0;
+    // Flood fill exterior to fill hollow insides
+    std::vector<std::vector<std::vector<double>>> grid_result (n_x,std::vector<std::vector<double>>(n_y,std::vector<double>(n_z,-1.0)));
+    flood(grid_result,grid,0,0,0);
+    int voxel_count_after = 0;
+    for (int i = 0; i < n_x; i++)
+        for (int j = 0; j < n_y; j++)
+            for (int k = 0; k < n_z; k++)
+                voxel_count_after += grid_result[i][j][k] < 0.0;
+    INFO("Voxel grid voxel count after flooding went from " + std::to_string(voxel_count_before) + " to " + std::to_string(voxel_count_after));
     DEBUG("Finished creating voxel grid, ended with voxel grid of size (" + std::to_string(n_x) + "," + std::to_string(n_y) + "," + std::to_string(n_z) + ")");
-    return {{grid,color_result},bottom_left_voxel};
+    return {{grid_result,color_result},bottom_left_voxel};
 }
 
 struct MeshData {
