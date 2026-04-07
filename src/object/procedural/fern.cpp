@@ -28,8 +28,8 @@ void Fern::advance_stage() {
     std::uniform_real_distribution<> gen(0.0,360.0);
     std::uniform_real_distribution<> gen2(-0.25,0.25);
     float dx = gen2(rng_);
-    float dy = gen2(rng_);
-    Matrix translate = MatrixTranslate(dx,dy,0.0f);
+    float dz = gen2(rng_);
+    Matrix translate = MatrixTranslate(dx,0.0f,dz);
     Matrix rot = MatrixRotate({0,1,0},gen(rng_)*DEG2RAD);
     Matrix scale = MatrixScale(1.0f,1.0f,1.0f);
     fern_transforms_base_.push_back({rot,translate,scale});
