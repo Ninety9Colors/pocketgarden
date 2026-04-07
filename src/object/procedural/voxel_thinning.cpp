@@ -265,6 +265,48 @@ void fill_lut() {
     LUT[255] = -1;
 }
 
+int thin_voxels_once(std::vector<std::vector<std::vector<double>>>& voxels) {
+    int n = voxels.size();
+    int m = voxels[0].size();
+    int q = voxels[0][0].size();
+    std::vector<std::array<int,3>> remove_list {};
+    int total_removed = 0;
+    for (const auto& d : DIRECTIONS) {
+        int dx = d[0];
+        int dy = d[1];
+        int dz = d[2];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int k = 0; k < q; k++) {
+                    if (voxels[i][j][k] < 0.0&&
+                        is_border(i,j,k,voxels,d)&&
+                        !is_endpoint(i,j,k,voxels)&&
+                        is_euler_invariant(i,j,k,voxels)&&
+                        is_simple(i,j,k,voxels))
+                        remove_list.push_back({i,j,k});
+                    if (voxels[i][j][k] < 0.0) {
+                        bool border   = is_border(i,j,k,voxels,d);
+                        bool endpoint = is_endpoint(i,j,k,voxels);
+                        bool euler    = is_euler_invariant(i,j,k,voxels);
+                        bool simple   = is_simple(i,j,k,voxels);
+                    }
+                }
+            }
+        }
+        INFO("Removing " + std::to_string(remove_list.size()) + " voxels...");
+        total_removed += remove_list.size();
+        for (const auto& a : remove_list) {
+            int x = a[0];
+            int y = a[1];
+            int z = a[2];
+            voxels[x][y][z] = 1.0;
+        }
+        if (remove_list.size() > 0)
+            remove_list.clear();
+    }
+    return total_removed;
+}
+
 void thin_voxels(std::vector<std::vector<std::vector<double>>>& voxels) {
     fill_lut();
     int n = voxels.size();
@@ -278,47 +320,13 @@ void thin_voxels(std::vector<std::vector<std::vector<double>>>& voxels) {
                 fg_count += voxels[i][j][k] < 0.0;
     INFO("Foreground voxels: " + std::to_string(fg_count));
 
-    std::vector<std::array<int,3>> remove_list {};
     bool changed = true;
     int total_removed = 0;
 
     while (changed) {
-        changed = false;
-        for (const auto& d : DIRECTIONS) {
-            int dx = d[0];
-            int dy = d[1];
-            int dz = d[2];
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < m; j++) {
-                    for (int k = 0; k < q; k++) {
-                        if (voxels[i][j][k] < 0.0&&
-                            is_border(i,j,k,voxels,d)&&
-                            !is_endpoint(i,j,k,voxels)&&
-                            is_euler_invariant(i,j,k,voxels)&&
-                            is_simple(i,j,k,voxels))
-                            remove_list.push_back({i,j,k});
-                        if (voxels[i][j][k] < 0.0) {
-                            bool border   = is_border(i,j,k,voxels,d);
-                            bool endpoint = is_endpoint(i,j,k,voxels);
-                            bool euler    = is_euler_invariant(i,j,k,voxels);
-                            bool simple   = is_simple(i,j,k,voxels);
-                        }
-                    }
-                }
-            }
-            INFO("Removing " + std::to_string(remove_list.size()) + " voxels...");
-            total_removed += remove_list.size();
-            for (const auto& a : remove_list) {
-                int x = a[0];
-                int y = a[1];
-                int z = a[2];
-                voxels[x][y][z] = 1.0;
-            }
-            if (remove_list.size() > 0) {
-                changed = true;
-                remove_list.clear();
-            }
-        }
+        int num = thin_voxels_once(voxels);
+        changed = num > 0;
+        total_removed += changed;
     }
     INFO("Complete, removed " + std::to_string(total_removed) + " voxels");
 }

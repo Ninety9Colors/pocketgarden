@@ -51,7 +51,6 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
     shader_default_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_default_, "colorDiffuse");
 
     shader_instanced_ = LoadShader("shaders/instanced.vs","shaders/default.fs");
-    shader_instanced_.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader_instanced_,"viewPos");
     shader_instanced_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader_instanced_, "instanceTransform");
     shader_instanced_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_instanced_, "colorDiffuse");
 
@@ -75,11 +74,13 @@ void Application::run(Game& game) {
     std::cout << "Enter display_voxel_size size as a double: ";
     std::cin >> display_voxel_size;
     auto voxels = voxelize_pcd(coords.first,coords.second,voxel_size);
-    auto voxel_grid = voxels.first.first;
+    dilate(voxels.first.first);
+    dilate(voxels.first.first);
     std::vector<Mesh> pcd_mesh = march_cubes(voxels.first.first,voxels.first.second,voxels.second,display_voxel_size,0.0);
     for (int i = 0; i < pcd_mesh.size(); i++)
         UploadMesh(&pcd_mesh[i],false);
-    thin_voxels(voxel_grid);
+    // thin_voxels(voxels.first.first);
+    Mesh cube = GenMeshCube(1.0f,1.0f,1.0f);
 
     DEBUG("Starting application...");
 
@@ -156,6 +157,10 @@ void Application::run(Game& game) {
         SetShaderValue(shader_default_, shader_default_.locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
         SetShaderValue(shader_instanced_, shader_instanced_.locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
         
+        if (IsKeyPressed(KEY_H))
+            dilate(voxels.first.first);
+        if (IsKeyPressed(KEY_G))
+            thin_voxels_once(voxels.first.first);
         BeginTextureMode(target);
             ClearBackground(SKYBLUE);
             // Draw Calls
@@ -166,7 +171,7 @@ void Application::run(Game& game) {
             draw_objects(game,game.get_world().get_objects());
             // for (int i = 0; i < pcd_mesh.size(); i++)
             //     DrawMesh(pcd_mesh[i],LoadMaterialDefault(),MatrixIdentity());
-            draw_binary_voxels(voxel_grid,0.1f);
+            draw_binary_voxels(voxels.first.first,0.1f,cube);
             EndMode3D();
         EndTextureMode();
 

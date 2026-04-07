@@ -42,7 +42,7 @@ void draw_mesh_skeleton(Mesh mesh, Matrix transform) {
     }
 }
 
-void draw_binary_voxels(const std::vector<std::vector<std::vector<double>>>& coordinates, float size) {
+void draw_binary_voxels(const std::vector<std::vector<std::vector<double>>>& coordinates, float size, Mesh mesh) {
     long long n = coordinates.size();
     long long m = coordinates[0].size();
     long long q = coordinates[0][0].size();
@@ -53,15 +53,12 @@ void draw_binary_voxels(const std::vector<std::vector<std::vector<double>>>& coo
             for (int k = 0; k < q; k++) {
                 bool inside = coordinates[i][j][k] < 0.0; // -1.0 means inside object, 1.0 means outside
                 if (inside)
-                    transforms.push_back(MatrixMultiply(MatrixScale(1.0f,1.0f,1.0f),MatrixMultiply(MatrixRotateX(0.0f),MatrixTranslate(i*size,j*size,k*size))));
+                    transforms.push_back(MatrixMultiply(MatrixScale(size,size,size),MatrixMultiply(MatrixRotateX(0.0f),MatrixTranslate(i*size,j*size,k*size))));
             }
         }
     }
-    Mesh cube = GenMeshCube(size,size,size);
-    // UploadMesh(&cube,false);
     Material mat = LoadMaterialDefault();
     mat.shader = Application::get_shader_instanced();
     mat.maps[MATERIAL_MAP_DIFFUSE].color = Color(255,0,0,255);
-    DrawMeshInstanced(cube,mat,transforms.data(),transforms.size());
-    UnloadMesh(cube);
+    DrawMeshInstanced(mesh,mat,transforms.data(),transforms.size());
 }

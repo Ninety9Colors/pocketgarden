@@ -326,13 +326,21 @@ void World::update_sun() {
     int sun_color_loc = GetShaderLocation(shader_default,"sunColor");
     int ambient_loc = GetShaderLocation(shader_default,"ambient");
 
+    Shader shader_instanced = Application::get_shader_instanced();
+    int sun_position_loc_instanced = GetShaderLocation(shader_instanced,"sunPos");
+    int sun_color_loc_instanced = GetShaderLocation(shader_instanced,"sunColor");
+    int ambient_loc_instanced = GetShaderLocation(shader_instanced,"ambient");
+
     const Vector3 sun_position = sun_.get_position();
     float sun_pos[3] = {sun_position.x, sun_position.y, sun_position.z};
     SetShaderValue(shader_default, sun_position_loc, sun_pos, SHADER_UNIFORM_VEC3);
+    SetShaderValue(shader_instanced, sun_position_loc_instanced, sun_pos, SHADER_UNIFORM_VEC3);
     float sun_color[4] = {1.0f,1.0f,(std::pow(std::max(sun_position.y,0.0f),2)/10000.0f),1.0f};
     SetShaderValue(shader_default, sun_color_loc, sun_color, SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader_instanced, sun_color_loc_instanced, sun_color, SHADER_UNIFORM_VEC4);
 
     float ambient_level = (std::pow(std::max(sun_position.y,0.0f),2)/10000.0f)*0.5f + 0.25f;
     float ambient[4] = {ambient_level,ambient_level,ambient_level,1.0f};
     SetShaderValue(shader_default, ambient_loc, ambient, SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader_instanced, ambient_loc_instanced, ambient, SHADER_UNIFORM_VEC4);
 }
