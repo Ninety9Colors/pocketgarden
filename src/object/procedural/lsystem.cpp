@@ -3,6 +3,8 @@
 #include <queue>
 
 #include "logging.hpp"
+#include "json.hpp"
+using json = nlohmann::json;
 
 LNode::LNode(const json& j) : parent(nullptr) {from_json(j);}
 
@@ -19,19 +21,35 @@ json LNode::to_json() const {
     return result;
 }
 void LNode::from_json(const json& j) {
-    type = j.at("type");
-    position = Vector3{j.at("position")["x"],j.at("position")["y"],j.at("position")["z"]};
-    direction = Vector3{j.at("direction")["x"],j.at("direction")["y"],j.at("direction")["z"]};
-    for (json c : j.at("children")) {
-        children.push_back(std::make_shared<LNode>());
-        children.back()->parent = shared_from_this();
-        children.back()->from_json(c);
+    std::shared_ptr<LNode> base = shared_from_this();
+    std::deque<std::pair<std::shared_ptr<LNode>,std::shared_ptr<json>>> bfs {};
+    bfs.push_back({base,std::make_shared<json>(j)});
+    while (!bfs.empty()) {
+        const auto& front = bfs.front();
+        auto node = front.first;
+        auto j2 = front.second;
+        node->type = j2->at("type");
+        node->position = Vector3{j2->at("position")["x"],j2->at("position")["y"],j2->at("position")["z"]};
+        node->direction = Vector3{j2->at("direction")["x"],j2->at("direction")["y"],j2->at("direction")["z"]};
+        for (const json& c : j2->at("children")) {
+            node->children.push_back(std::make_shared<LNode>());
+            node->children.back()->parent = node;
+            bfs.push_back({node->children.back(),std::make_shared<json>(c)});
+        }
+        bfs.pop_front();
     }
 }
 std::string LNode::to_string() const {
-    std::string result = type;
-    for (auto c : children)
-        result+=c->to_string();
+    std::string result;
+    std::deque<std::shared_ptr<const LNode>> s;
+    s.push_back(shared_from_this());
+    while (!s.empty()) {
+        auto n = s.back(); 
+        s.pop_back();
+        result += n->type;
+        for (auto child : n->children)
+            s.push_back(child);
+    }
     return result;
 }
 

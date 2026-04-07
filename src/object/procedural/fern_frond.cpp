@@ -12,18 +12,18 @@ constexpr int DEFAULT_SLICES_X = 40;
 constexpr int DEFAULT_SLICES_Y = 20;
 
 FernFrond::FernFrond() : FernFrond(std::random_device{}()) {}
-FernFrond::FernFrond(uint32_t seed) : ParameterObject(seed), rng_(seed), slices_(DEFAULT_SLICES_X, DEFAULT_SLICES_Y) {
+FernFrond::FernFrond(uint32_t seed) : ParameterObject(seed), rng_(seed), slices_(DEFAULT_SLICES_X, DEFAULT_SLICES_Y), growth_stage_(0) {
     leaf_ = std::make_unique<TaperedLeaf>(seed);
     leaf_->set_slices(slices_);
     initialize_parameters();
 }
 FernFrond::FernFrond(Quaternion quaternion, Vector3 position, float scale) : FernFrond(quaternion,position,scale,std::random_device{}()) {}
-FernFrond::FernFrond(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : ParameterObject(quaternion, position, scale,seed), rng_(seed), slices_(DEFAULT_SLICES_X, DEFAULT_SLICES_Y) {
+FernFrond::FernFrond(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : ParameterObject(quaternion, position, scale,seed), rng_(seed), slices_(DEFAULT_SLICES_X, DEFAULT_SLICES_Y), growth_stage_(0) {
     leaf_ = std::make_unique<TaperedLeaf>(seed);
     leaf_->set_slices(slices_);
     initialize_parameters();
 }
-FernFrond::FernFrond(const json& j) {
+FernFrond::FernFrond(const json& j) : growth_stage_(0) {
     from_json(j);
     initialize_parameters();
 }
@@ -39,7 +39,7 @@ json FernFrond::to_json() const {
         {"parameter_map",parameter_map_.to_json()},
         {"slices",{{"first",slices_.first},{"second",slices_.second}}},
         {"leaf",leaf_->to_json()},
-        {"lsystem",lsystem_.to_json()}
+        {"growth_stage",growth_stage_}
     };
     return j;
 }
@@ -55,31 +55,33 @@ void FernFrond::from_json(const json& j) {
     leaf_ = std::make_unique<TaperedLeaf>(j.at("leaf"));
     leaf_->set_slices(slices_);
     rng_ = std::mt19937_64(seed_);
-    lsystem_ = LSystem(j.at("lsystem"));
+    growth_stage_ = j.at("growth_stage");
+    lsystem_ = LSystem();
 }
 
 void FernFrond::draw(Game& game, Material material) const {
     DrawMesh(mesh_,material_,transform_);
     leaf_->draw_instanced(game,leaf_transforms_.data(),leaf_transforms_.size());
 }
-// void FernFrond::draw(Game& game,Matrix transform, Material material) const {
-    
-// }
 
-// void FernFrond::draw_instanced(Game& game, Material material, const Matrix* transforms, int matrix_count) const {
-    
-// }
+void FernFrond::draw(Game& game, Matrix transform, Material material) const {
+    DrawMesh(mesh_,material_,transform);
+    std::vector<Matrix> lt (leaf_transforms_.size());
+    for (int i = 0; i < leaf_transforms_.size(); i++)
+        lt[i] = MatrixMultiply(leaf_transforms_[i],transform);
+    leaf_->draw_instanced(game,lt.data(),lt.size());
+}
 
 void FernFrond::grow() {
     std::string initial = lsystem_.to_string();
     lsystem_.apply_ruleset(productions_,rng_);
     DEBUG("Grew fern frond l system from " + initial + " to " + lsystem_.to_string());
+    growth_stage_++;
 }
 
 void FernFrond::initialize() {
-    // TODO: make leaf shape correct & generate its mesh
     leaf_->generate_mesh();
-    if (lsystem_.get_base() == nullptr)
+    if (lsystem_.get_base() == nullptr) {
         lsystem_ = LSystem(std::make_shared<LNode>("B",position_,Vector3{1,0,0},std::vector<std::shared_ptr<LNode>>{},nullptr));
         
         // base rule
@@ -159,6 +161,11 @@ void FernFrond::initialize() {
             return one;
         };
         productions_.add_rule("H1",Rule(branching_two));
+        for (int j = 0; j < growth_stage_; j++) {
+            grow();
+            growth_stage_--;
+        }
+    }
 }
 
 void FernFrond::update_matrix() {
@@ -302,7 +309,7 @@ static float polar_x_to_y(float x) {
     float theta_max = PI/2.0f;
     while (theta_max - theta_min > epsilon) {
         float mid = (theta_max + theta_min)/2.0f;
-        float r = std::expf(-mid);
+        float r = std::expf(-std::powf(mid,1/1.5f));
         float curr_x = r*std::cosf(mid);
         float curr_y = r*std::sinf(mid);
         if (curr_x > x) {
@@ -314,7 +321,7 @@ static float polar_x_to_y(float x) {
             return curr_y;
         }
     }
-    float r = std::expf(-theta_min);
+    float r = std::expf(-std::powf(theta_min,1/1.5f));
     INFO("Result y=" + std::to_string(r*std::sinf(theta_min)));
     return r*std::sinf(theta_min);
 }
@@ -333,14 +340,23 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
                                     std::vector<std::array<Matrix,3>>& leaf_transforms_base,
                                     std::vector<Matrix>& leaf_transforms,
                                     std::unordered_map<std::shared_ptr<LNode>,float>& proportions,
+                                    std::pair<int,int> stem_counts,
                                     float segment_scale = 0.75f,
-                                    float child_segment_scale = 0.75f) {
+                                    float child_segment_scale = 0.75f,
+                                    int depth = 0) {
     float mesh_scale = parameters.get_parameter("MeshScale").value;
     float stipe_prop = parameters.get_parameter("StipeProportion").value;
     float rachi_prop = parameters.get_parameter("RachiProportion").value;
     stipe_prop *= mesh_scale;
     rachi_prop *= mesh_scale;
     float branch_angle = parameters.get_parameter("BranchAngle").value*DEG2RAD;
+
+    float frond_tilt = parameters.get_parameter("FrondTilt").value*DEG2RAD;
+    int stipe_count = stem_counts.first;
+    int rachi_count = stem_counts.second;
+    float stipe_total_proportion = stipe_prop*stipe_count/(rachi_count*rachi_prop+stipe_prop*stipe_count);
+    float stipe_tilt = stipe_total_proportion*frond_tilt;
+    float rachi_tilt = (1-stipe_total_proportion)*frond_tilt;
     std::deque<StackFrame> dfs {};
     dfs.push_back(StackFrame{base_frame.prev_pos,base_frame.pos,base_frame.normal,base_frame.dir,base_node,base_frame.id,base_frame.prev_id,base_frame.prev_dir});
     std::shared_ptr<LNode> latest_top = nullptr;
@@ -352,6 +368,10 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
             if (child->type == "B") {
             } else if (child->type == "S") {
                 DEBUG("S");
+                if (depth == 0) {
+                    top.dir = Vector3RotateByAxisAngle(top.dir,{0,0,1},stipe_tilt/stipe_count);
+                    top.normal = Vector3RotateByAxisAngle(top.normal,{0,0,1},stipe_tilt/stipe_count);
+                }
                 Vector3 new_pos = Vector3Add(top.pos,Vector3Scale(top.dir,stipe_prop*segment_scale));
                 generate_stem_segment(vertices,normals,colors,indices,top.pos,new_pos,top.dir,top.dir,top.id,next_id++,previous_vertexes,color,2.0f*0.025f*mesh_scale);
                 dfs.push_back({top.pos,new_pos,top.normal,top.dir,child,next_id-1,top.id,top.prev_dir});
@@ -360,6 +380,10 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
                 if (proportions.contains(child)) {
                     INFO("Child segment found with proportion: " + std::to_string(proportions[child]));
                     child_segment_scale = polar_x_to_y(proportions[child])*segment_scale;
+                }
+                if (depth == 0) {
+                    top.dir = Vector3RotateByAxisAngle(top.dir,{0,0,1},rachi_tilt/rachi_count);
+                    top.normal = Vector3RotateByAxisAngle(top.normal,{0,0,1},rachi_tilt/rachi_count);
                 }
                 Vector3 new_pos = Vector3Add(top.pos,Vector3Scale(top.dir,rachi_prop*segment_scale));
                 INFO("Generating stem segment with length: " + std::to_string(rachi_prop*segment_scale));
@@ -421,7 +445,7 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
 
                 Matrix rot = QuaternionToMatrix(QuaternionMultiply(tip_align,normal_align));
                 Matrix translate = MatrixTranslate(leaf_pos.x,leaf_pos.y,leaf_pos.z);
-                float sc = 2.0f*segment_scale;
+                float sc = 2.5f*segment_scale;
                 Matrix scale = MatrixScale(sc,sc,0.1f+sc*0.3f);
                 leaf_transforms.push_back(MatrixIdentity());
                 leaf_transforms_base.push_back({rot,translate,scale});
@@ -430,16 +454,36 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
             } else if (child->type == "+") {
                 DEBUG("+");
                 Vector3 new_dir = Vector3Normalize(Vector3RotateByAxisAngle(top.dir,top.normal,branch_angle));
+                if (depth == 1) {
+                    INFO("Previous normal: " + std::to_string(top.normal.x) + "," + std::to_string(top.normal.y) + "," + std::to_string(top.normal.z));
+                    Vector3 up = {0, 1, 0};
+                    Vector3 up_projected = Vector3Normalize(Vector3Subtract(up, Vector3Scale(new_dir, Vector3DotProduct(up, new_dir))));
+                    float angle = std::acosf(Vector3DotProduct(top.normal,up_projected));
+                    Vector3 one = Vector3Normalize(Vector3RotateByAxisAngle(top.normal,new_dir,angle/1.5f));
+                    Vector3 two = Vector3Normalize(Vector3RotateByAxisAngle(top.normal,new_dir,-angle/1.5f));
+                    top.normal = (Vector3DotProduct(one,up_projected) > Vector3DotProduct(two,up_projected)) ? one : two;
+                    INFO("New normal: " + std::to_string(top.normal.x) + "," + std::to_string(top.normal.y) + "," + std::to_string(top.normal.z));
+                }
                 dfs.push_back({top.prev_pos,top.pos,top.normal,new_dir,child,top.id,top.prev_id,top.dir});
             } else if (child->type == "-") {
                 DEBUG("-");
                 Vector3 new_dir = Vector3Normalize(Vector3RotateByAxisAngle(top.dir,top.normal,-branch_angle));
+                if (depth == 1) {
+                    INFO("Previous normal: " + std::to_string(top.normal.x) + "," + std::to_string(top.normal.y) + "," + std::to_string(top.normal.z));
+                    Vector3 up = {0, 1, 0};
+                    Vector3 up_projected = Vector3Normalize(Vector3Subtract(up, Vector3Scale(new_dir, Vector3DotProduct(up, new_dir))));
+                    float angle = std::acosf(Vector3DotProduct(top.normal,up_projected));
+                    Vector3 one = Vector3Normalize(Vector3RotateByAxisAngle(top.normal,new_dir,angle/1.5f));
+                    Vector3 two = Vector3Normalize(Vector3RotateByAxisAngle(top.normal,new_dir,-angle/1.5f));
+                    top.normal = (Vector3DotProduct(one,up_projected) > Vector3DotProduct(two,up_projected)) ? one : two;
+                    INFO("New normal: " + std::to_string(top.normal.x) + "," + std::to_string(top.normal.y) + "," + std::to_string(top.normal.z));
+                }
                 dfs.push_back({top.prev_pos,top.pos,top.normal,new_dir,child,top.id,top.prev_id,top.dir});
             } else if (child->type == "[") {
                 DEBUG("[");
                 std::shared_ptr<LNode> next = generate_rachis(vertices,normals,colors,indices,previous_vertexes,color,next_id,child,
                     {top.prev_pos,top.pos,top.normal,top.dir,child,next_id++,top.id}
-                    ,parameters,leaf_tip_vector,leaf_transforms_base,leaf_transforms,proportions,child_segment_scale,child_segment_scale);
+                    ,parameters,leaf_tip_vector,leaf_transforms_base,leaf_transforms,proportions,stem_counts,child_segment_scale,child_segment_scale,depth+1);
                 if (next != nullptr)
                     dfs.push_back({top.prev_pos,top.pos,top.normal,top.dir,next,top.id,top.prev_id,top.prev_dir});
             } else if (child->type == "]") {
@@ -451,7 +495,7 @@ static std::shared_ptr<LNode> generate_rachis(std::vector<float>& vertices,
     return latest_top;
 }
 
-static void fill_proportion_map(ParameterMap& parameters,
+static std::pair<int,int> fill_proportion_map(ParameterMap& parameters,
                                     std::shared_ptr<LNode> base_node,
                                     std::unordered_map<std::shared_ptr<LNode>,float>& proportions,
                                     float depth = 0) {
@@ -460,6 +504,7 @@ static void fill_proportion_map(ParameterMap& parameters,
     float rachi_prop = parameters.get_parameter("RachiProportion").value;
     float mesh_scale = parameters.get_parameter("MeshScale").value;
     dfs.push_back(base_node);
+    int stipe_count = 0;
     int rachi_count = 0;
     while (!dfs.empty()) {
         if (depth < og_depth) {
@@ -479,6 +524,8 @@ static void fill_proportion_map(ParameterMap& parameters,
                     INFO("Rachi found at depth: " + std::to_string(depth));
                     rachi_count++;
                 }
+            } else if (child->type == "S") {
+                stipe_count++;
             }
             dfs.push_back(child);
         }
@@ -508,13 +555,13 @@ static void fill_proportion_map(ParameterMap& parameters,
             dfs.push_back(child);
         }
     }
+    return {stipe_count,rachi_count};
 }
 
 void FernFrond::generate_mesh() {
     DEBUG("Generating fern mesh...");
     if (mesh_.vboId != 0)
         UnloadMesh(mesh_);
-    rng_ = std::mt19937_64(seed_);
     mesh_ = Mesh{0};
     std::vector<float> vertices {};
     std::vector<float> normals {};
@@ -530,10 +577,12 @@ void FernFrond::generate_mesh() {
     leaf_transforms_base_.clear();
 
     DEBUG("... beginning recursion ...");
-    StackFrame base_frame = {{0,0,0},{0,0,0},{0,1,0},{1,0,0},lsystem_.get_base(),0,-1,{1,0,0}};
+    Vector3 start_dir = Vector3Normalize({-1,1,0});
+    Vector3 start_norm = Vector3Normalize(Vector3CrossProduct(start_dir,{0,0,1}));
+    StackFrame base_frame = {{0,0,0},{0,0,0},start_norm,start_dir,lsystem_.get_base(),0,-1,start_dir};
     std::unordered_map<std::shared_ptr<LNode>,float> proportions {};
-    fill_proportion_map(parameter_map_,lsystem_.get_base(),proportions);
-    generate_rachis(vertices,normals,colors,indices,previous_vertexes,stem_color,next_id,lsystem_.get_base(),base_frame,parameter_map_,leaf_->tip_vector(),leaf_transforms_base_,leaf_transforms_,proportions);
+    std::pair<int,int> stem_counts = fill_proportion_map(parameter_map_,lsystem_.get_base(),proportions);
+    generate_rachis(vertices,normals,colors,indices,previous_vertexes,stem_color,next_id,lsystem_.get_base(),base_frame,parameter_map_,leaf_->tip_vector(),leaf_transforms_base_,leaf_transforms_,proportions,stem_counts);
     DEBUG("... done recursing ...");
 
     assert(vertices.size()%3 == 0);
@@ -561,10 +610,12 @@ void FernFrond::set_slices(std::pair<int,int> slices) {
 }
 void FernFrond::initialize_parameters() {
     std::mt19937_64 rng(seed_);
-    parameter_map_.set_parameter("StipeProportion", Parameter(0.2f,0.2f,0.5f));
-    parameter_map_.set_parameter("RachiProportion", Parameter(0.2f,1.5f,0.5f));
+    parameter_map_.set_parameter("StipeProportion", Parameter(0.2f,0.1f,0.5f));
+    parameter_map_.set_parameter("RachiProportion", Parameter(0.2f,2.0f,0.5f));
     parameter_map_.set_parameter("BranchAngle", Parameter(60.0f,75.0f,85.0f));
     parameter_map_.set_parameter("MeshScale", Parameter(0.05f,0.1f,0.25f));
+    parameter_map_.set_parameter("FrondTilt", Parameter(30.0f,60.0f,90.0f)); // degrees
+    parameter_map_.seed_gaussian("FrondTilt",rng);
 
     leaf_->set_parameter("Sharpness", Parameter{0.8f,0.4f,1.0f});
     leaf_->set_parameter("Length", Parameter{0.5f,1.0f,1.0f});

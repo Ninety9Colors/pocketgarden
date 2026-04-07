@@ -18,7 +18,7 @@ public:
     virtual ~FernFrond() {};
 
     void draw(Game& game, Material material) const override;
-    // void draw(Game& game,Matrix transform, Material material) const override;
+    void draw(Game& game,Matrix transform, Material material) const override;
     // void draw_instanced(Game& game, const Matrix* transforms, int matrix_count) const override {
     //     draw_instanced(game,material_,transforms,matrix_count);
     // }
@@ -44,6 +44,8 @@ private:
     LSystem lsystem_;
     RuleSet productions_;
     std::mt19937_64 rng_;
+    
+    int growth_stage_;
 
     std::pair<int,int> slices_;
 };
