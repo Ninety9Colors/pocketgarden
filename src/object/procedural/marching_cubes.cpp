@@ -350,20 +350,6 @@ static int triTable[256][16] =
 {0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
 
-void dilate(std::vector<std::vector<std::vector<double>>>& voxels) {
-    int n=voxels.size(), m=voxels[0].size(), q=voxels[0][0].size();
-    auto copy = voxels;
-    for (int i=0;i<n;i++)
-        for (int j=0;j<m;j++)
-            for (int k=0;k<q;k++)
-                if (copy[i][j][k] < 0.0)
-                    for (const auto& d : DIRECTIONS) {
-                        int nx=i+d[0],ny=j+d[1],nz=k+d[2];
-                        if (nx>=0&&nx<n&&ny>=0&&ny<m&&nz>=0&&nz<q)
-                            voxels[nx][ny][nz] = -1.0;
-                    }
-}
-
 static void flood(std::vector<std::vector<std::vector<double>>>& grid_result, const std::vector<std::vector<std::vector<double>>>& grid, int i, int j, int k) {
     std::deque<std::array<int,3>> dfs {};
     dfs.push_back({i,j,k});
@@ -387,6 +373,23 @@ static void flood(std::vector<std::vector<std::vector<double>>>& grid_result, co
             dfs.push_back({x2,y2,z2});
         }
     }
+}
+
+void dilate(std::vector<std::vector<std::vector<double>>>& voxels) {
+    int n=voxels.size(), m=voxels[0].size(), q=voxels[0][0].size();
+    auto copy = voxels;
+    for (int i=0;i<n;i++)
+        for (int j=0;j<m;j++)
+            for (int k=0;k<q;k++)
+                if (copy[i][j][k] < 0.0)
+                    for (const auto& d : DIRECTIONS) {
+                        int nx=i+d[0],ny=j+d[1],nz=k+d[2];
+                        if (nx>=0&&nx<n&&ny>=0&&ny<m&&nz>=0&&nz<q)
+                            voxels[nx][ny][nz] = -1.0;
+                    }
+    // Flood fill exterior to fill hollow insides
+    copy = voxels;
+    flood(voxels,copy,0,0,0);
 }
 
 std::pair<std::pair<std::vector<std::vector<std::vector<double>>>,std::vector<std::vector<std::vector<Color>>>>,std::array<double,3>> voxelize_pcd(std::vector<std::array<double,3>> coordinates, std::vector<std::array<unsigned char,3>> colors, double voxel_size) {

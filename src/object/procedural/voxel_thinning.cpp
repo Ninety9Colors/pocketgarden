@@ -104,6 +104,32 @@ static void mark_neighbors(int comp, int a, int b, int c, int i, int j, int k, s
         mark_neighbors(comp,x,y,z,i,j,k,component_number,voxels);
     }
 }
+static void mark_neighbors_6(int comp, int a, int b, int c, int i, int j, int k, std::array<std::array<std::array<int,3>,3>,3>& component_number, std::vector<std::vector<std::vector<double>>>& voxels) {
+    int n = voxels.size();
+    int m = voxels[0].size();
+    int q = voxels[0][0].size();
+    for (const auto& d : DIRECTIONS) {
+        int dx = d[0];
+        int dy = d[1];
+        int dz = d[2];
+        int x = a+dx;
+        int y = b+dy;
+        int z = c+dz;
+        if (x < 0 || x < i-1 ||
+            y < 0 || y < j-1 ||
+            z < 0 || z < k-1 ||
+            x >= n || x > i+1 ||
+            y >= m || y > j+1 ||
+            z >= q || z > k+1 ||
+            voxels[x][y][z] < 0.0) continue;
+        int index_i = x-i+1;
+        int index_j = y-j+1;
+        int index_k = z-k+1;
+        if (component_number[index_i][index_j][index_k] != 0) continue;
+        component_number[index_i][index_j][index_k] = comp;
+        mark_neighbors_6(comp,x,y,z,i,j,k,component_number,voxels);
+    }
+}
 static bool is_simple(int i, int j, int k, std::vector<std::vector<std::vector<double>>>& voxels) {
     int n = voxels.size();
     int m = voxels[0].size();
@@ -127,7 +153,46 @@ static bool is_simple(int i, int j, int k, std::vector<std::vector<std::vector<d
         }
     }
     voxels[i][j][k] = -1.0;
-    return comp == 2;
+
+    component_number = {};
+    int background_comp_prev = 1;
+    for (int a = std::max(0,i-1); a <= std::min(n-1,i+1);a++) {
+        for (int b = std::max(0,j-1); b <= std::min(m-1,j+1);b++) {
+            for (int c = std::max(0,k-1); c <= std::min(q-1,k+1);c++) {
+                if (voxels[a][b][c] < 0.0) continue;
+                int index_i = a-i+1;
+                int index_j = b-j+1;
+                int index_k = c-k+1;
+                if (component_number[index_i][index_j][index_k] == 0) {
+                    component_number[index_i][index_j][index_k] = background_comp_prev;
+                    mark_neighbors_6(background_comp_prev,a,b,c,i,j,k,component_number,voxels);
+                    background_comp_prev++;
+                }
+            }
+        }
+    }
+
+    component_number = {};
+    int background_comp_after = 1;
+    voxels[i][j][k] = 1.0;
+    for (int a = std::max(0,i-1); a <= std::min(n-1,i+1);a++) {
+        for (int b = std::max(0,j-1); b <= std::min(m-1,j+1);b++) {
+            for (int c = std::max(0,k-1); c <= std::min(q-1,k+1);c++) {
+                if (voxels[a][b][c] < 0.0) continue;
+                int index_i = a-i+1;
+                int index_j = b-j+1;
+                int index_k = c-k+1;
+                if (component_number[index_i][index_j][index_k] == 0) {
+                    component_number[index_i][index_j][index_k] = background_comp_after;
+                    mark_neighbors_6(background_comp_after,a,b,c,i,j,k,component_number,voxels);
+                    background_comp_after++;
+                }
+            }
+        }
+    }
+    voxels[i][j][k] = -1.0;
+
+    return comp == 2 && (background_comp_after==background_comp_prev);
 }
 
 void fill_lut() {
@@ -293,14 +358,18 @@ int thin_voxels_once(std::vector<std::vector<std::vector<double>>>& voxels) {
                 }
             }
         }
-        INFO("Removing " + std::to_string(remove_list.size()) + " voxels...");
-        total_removed += remove_list.size();
+        int remove_amount = 0;
         for (const auto& a : remove_list) {
             int x = a[0];
             int y = a[1];
             int z = a[2];
-            voxels[x][y][z] = 1.0;
+            if (is_simple(x,y,z,voxels)) {
+                voxels[x][y][z] = 1.0;
+                remove_amount++;
+            }
         }
+        total_removed += remove_amount;
+        INFO("Removed " + std::to_string(remove_amount) + " voxels...");
         if (remove_list.size() > 0)
             remove_list.clear();
     }

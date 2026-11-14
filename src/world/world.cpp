@@ -47,6 +47,20 @@ void World::load_world(std::string save_file) {
         flower->generate_mesh();
         load_object(std::move(flower));
 
+        auto fern_frond = std::make_unique<FernFrond>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{4.0f,0.0f,0.0f}, 1.0f);
+        fern_frond->initialize();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->generate_mesh();
+        load_object(std::move(fern_frond));
+
         auto fern = std::make_unique<Fern>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{2.0f,0.0f,0.0f}, 1.0f);
         fern->initialize();
         fern->advance_stage();
