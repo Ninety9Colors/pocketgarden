@@ -11,7 +11,7 @@ PocketGarden began as a weekend experiment to learn how graphics and basic netwo
 
 This project is the foundation of my **Mathematics Internal Assessment (IA)** research paper, which explores how Lindenmeyer systems can model fern meshes using 3D geometry.
 
-**[Read the paper (PDF)](<docs/Math IA.pdf>)**
+**[Read the paper (PDF)](<docs/Math IA_compressed.pdf>)**
 
 ## What's Inside
 
