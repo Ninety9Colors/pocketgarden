@@ -3,6 +3,8 @@
 
 #include "object/procedural/lily_flower.hpp"
 #include "object/procedural/lily.hpp"
+#include "object/procedural/fern_frond.hpp"
+#include "object/procedural/fern.hpp"
 #include "object/consistent/move_tool.hpp"
 #include "object/consistent/sun_tool.hpp"
 #include "object/consistent/weather_tool.hpp"
@@ -45,6 +47,56 @@ void World::load_world(std::string save_file) {
         flower->generate_mesh();
         load_object(std::move(flower));
 
+        auto fern_frond = std::make_unique<FernFrond>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{4.0f,0.0f,0.0f}, 1.0f);
+        fern_frond->initialize();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->grow();
+        fern_frond->generate_mesh();
+        load_object(std::move(fern_frond));
+
+        auto fern = std::make_unique<Fern>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{2.0f,0.0f,0.0f}, 1.0f);
+        fern->initialize();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->advance_stage();
+        fern->generate_mesh();
+        load_object(std::move(fern));
+
+        // Fern spam!:
+        // for (int x = -1; x >= -10; x--) {
+        //     uint32_t seed = std::random_device{}();
+        //     for (int y = 1; y <= 17; y+=8) {
+        //         auto f = std::make_unique<Fern>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{x,0.0f,y}, 0.5f,seed);
+        //         f->initialize();
+        //         for (int k = 0; k < y; k++)
+        //             f->advance_stage();
+        //         f->generate_mesh();
+        //         load_object(std::move(f));
+        //     }
+        // }
+
         // Lily spam!:
         // for (int x = 1; x <= 50; x++) {
         //     uint32_t seed = std::random_device{}();
@@ -57,10 +109,10 @@ void World::load_world(std::string save_file) {
         //         load_object(std::move(f));
         //     }
         // }
-        // load_object(std::make_unique<MoveTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 0.0f}, 1.0f));
-        // load_object(std::make_unique<SunTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 3.0f}, 1.0f));
-        // load_object(std::make_unique<RotateTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 4.0f}, 1.0f));
-        // load_object(std::make_unique<WeatherTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 5.0f}, 1.0f));
+        load_object(std::make_unique<MoveTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 0.0f}, 1.0f));
+        load_object(std::make_unique<SunTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 3.0f}, 1.0f));
+        load_object(std::make_unique<RotateTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 4.0f}, 1.0f));
+        load_object(std::make_unique<WeatherTool>(Quaternion(0.0f,0.0f,0.0f,1.0f),Vector3{0.0f, 2.0f, 5.0f}, 1.0f));
         INFO("Default world loaded!");
     }
     file.close();
@@ -288,13 +340,21 @@ void World::update_sun() {
     int sun_color_loc = GetShaderLocation(shader_default,"sunColor");
     int ambient_loc = GetShaderLocation(shader_default,"ambient");
 
+    Shader shader_instanced = Application::get_shader_instanced();
+    int sun_position_loc_instanced = GetShaderLocation(shader_instanced,"sunPos");
+    int sun_color_loc_instanced = GetShaderLocation(shader_instanced,"sunColor");
+    int ambient_loc_instanced = GetShaderLocation(shader_instanced,"ambient");
+
     const Vector3 sun_position = sun_.get_position();
     float sun_pos[3] = {sun_position.x, sun_position.y, sun_position.z};
     SetShaderValue(shader_default, sun_position_loc, sun_pos, SHADER_UNIFORM_VEC3);
+    SetShaderValue(shader_instanced, sun_position_loc_instanced, sun_pos, SHADER_UNIFORM_VEC3);
     float sun_color[4] = {1.0f,1.0f,(std::pow(std::max(sun_position.y,0.0f),2)/10000.0f),1.0f};
     SetShaderValue(shader_default, sun_color_loc, sun_color, SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader_instanced, sun_color_loc_instanced, sun_color, SHADER_UNIFORM_VEC4);
 
     float ambient_level = (std::pow(std::max(sun_position.y,0.0f),2)/10000.0f)*0.5f + 0.25f;
     float ambient[4] = {ambient_level,ambient_level,ambient_level,1.0f};
     SetShaderValue(shader_default, ambient_loc, ambient, SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader_instanced, ambient_loc_instanced, ambient, SHADER_UNIFORM_VEC4);
 }

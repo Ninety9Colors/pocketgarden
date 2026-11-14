@@ -21,6 +21,11 @@ using json = nlohmann::json;
 #include "object/procedural/spline.hpp"
 #include "settings.hpp"
 
+#include "util/parse.hpp"
+#include "util/draw.hpp"
+#include "object/procedural/marching_cubes.hpp"
+#include "object/procedural/voxel_thinning.hpp"
+
 static RenderTexture2D LoadRenderTextureDepthTex(int width, int height);
 static void UnloadRenderTextureDepthTex(RenderTexture2D target);
 
@@ -44,13 +49,10 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
     SetExitKey(KEY_NULL);
     shader_default_ = LoadShader("shaders/default.vs","shaders/default.fs");
     shader_default_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_default_, "colorDiffuse");
-    shader_default_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader_default_, "instanceTransform");
 
-    shader_instanced_ = LoadShader("shaders/instanced.vs","shaders/instanced.fs");
+    shader_instanced_ = LoadShader("shaders/instanced.vs","shaders/default.fs");
+    shader_instanced_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader_instanced_, "instanceTransform");
     shader_instanced_.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(shader_instanced_, "colorDiffuse");
-    shader_instanced_.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader_instanced_, "mvp");
-    shader_instanced_.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader_instanced_, "matModel");
-    shader_instanced_.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader_instanced_, "viewPos");
 
     shader_fog_ = LoadShader("shaders/fog.vs","shaders/fog.fs");
 
@@ -64,6 +66,21 @@ Application::Application() : ip_({0}), port_({0}), username_({0}), ip_focus_(fal
 }
 
 void Application::run(Game& game) {
+    // auto coords = parse_xyz("dryopteris-erythrosora-01 (1).xyz",true);
+    // double voxel_size;
+    // std::cout << "Enter voxel size as a double: ";
+    // std::cin >> voxel_size;
+    // double display_voxel_size;
+    // std::cout << "Enter display_voxel_size size as a double: ";
+    // std::cin >> display_voxel_size;
+    // auto voxels = voxelize_pcd(coords.first,coords.second,voxel_size);
+    // dilate(voxels.first.first);
+    // std::vector<Mesh> pcd_mesh = march_cubes(voxels.first.first,voxels.first.second,voxels.second,display_voxel_size,0.0);
+    // for (int i = 0; i < pcd_mesh.size(); i++)
+    //     UploadMesh(&pcd_mesh[i],false);
+    // // thin_voxels(voxels.first.first);
+    // Mesh cube = GenMeshCube(1.0f,1.0f,1.0f);
+
     DEBUG("Starting application...");
 
     const float TPS = 20.0f; // ticks per second
@@ -139,6 +156,10 @@ void Application::run(Game& game) {
         SetShaderValue(shader_default_, shader_default_.locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
         SetShaderValue(shader_instanced_, shader_instanced_.locs[SHADER_LOC_VECTOR_VIEW], cam_pos, SHADER_UNIFORM_VEC3);
         
+        // if (IsKeyPressed(KEY_H))
+        //     dilate(voxels.first.first);
+        // if (IsKeyPressed(KEY_G))
+        //     thin_voxels_once(voxels.first.first);
         BeginTextureMode(target);
             ClearBackground(SKYBLUE);
             // Draw Calls
@@ -147,6 +168,9 @@ void Application::run(Game& game) {
             game.get_world().get_sun().draw(game);
             draw_players(game,game.get_current_username(), game.get_world().get_players());
             draw_objects(game,game.get_world().get_objects());
+            // for (int i = 0; i < pcd_mesh.size(); i++)
+            //     DrawMesh(pcd_mesh[i],LoadMaterialDefault(),MatrixIdentity());
+            // draw_binary_voxels(voxels.first.first,0.1f,cube);
             EndMode3D();
         EndTextureMode();
 
@@ -158,7 +182,6 @@ void Application::run(Game& game) {
 
         // Debug UI
         if (current_timestamp-last_ui_update >= UI_UPDATE_INTERVAL) {
-            INFO("Updating FPS");
             fps_buffer = std::to_string((int)round(1.0f/dt));
             last_ui_update = current_timestamp;
         }

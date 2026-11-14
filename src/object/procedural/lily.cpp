@@ -9,9 +9,9 @@
 #include "logging.hpp"
 
 Lily::Lily() : Lily(std::random_device{}()) {}
-Lily::Lily(uint32_t seed) : LSystemObject(seed), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
+Lily::Lily(uint32_t seed) : Object3d(), seed_(seed), stage_(0), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
 Lily::Lily(Quaternion quaternion, Vector3 position, float scale) : Lily(quaternion,position,scale,std::random_device{}()) {}
-Lily::Lily(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : LSystemObject(quaternion,position,scale,seed), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
+Lily::Lily(Quaternion quaternion, Vector3 position, float scale, uint32_t seed) : Object3d(quaternion,position,scale), seed_(seed), stage_(0), flower_(std::make_unique<LilyFlower>(seed)), leaf_(std::make_unique<TaperedLeaf>(std::mt19937_64{seed}())) {}
 Lily::Lily(const json& j) {from_json(j);}
 
 // Should regenerate mesh if needed
@@ -42,109 +42,116 @@ void Lily::initialize() {
     leaf_->generate_mesh();
 
     if (lsystem_.get_base() == nullptr) {
+        int original_stage = stage_;
         lsystem_ = LSystem(std::make_shared<LNode>("Seed",position_,Vector3{0,1,0},std::vector<std::shared_ptr<LNode>>{},nullptr));
         stage_ = 1;
-    }
 
-    RuleSet one_to_two {};
-        std::function<std::vector<std::shared_ptr<LNode>>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> germinate = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
-            std::uniform_real_distribution gen (0.0,1.0);
-            float roll = gen(rng);
-            float length;
-            if (roll < 0.05) {
-                length = 0.05f;
-            } else if (roll < 0.8) {
-                length = 0.15f;
-            } else {
-                length = 0.3f;
-            }
-            std::shared_ptr<LNode> stem = std::make_shared<LNode>("Stem",Vector3Scale(node->direction,length),node->direction,std::vector<std::shared_ptr<LNode>>{},node);
-            std::vector<std::shared_ptr<LNode>> result {};
-            result.push_back(stem);
-            return result;
-        };
-        one_to_two.add_rule("Seed",Rule(germinate));
-    stage_transitions_[std::pair<int,int>{1,2}] = one_to_two;
-
-    RuleSet two_to_three {};
-        std::function<std::vector<std::shared_ptr<LNode>>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> juvenile = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
-            std::uniform_real_distribution gen (0.0,1.0);
-            int stem_children = 0;
-            for (auto c : node->children)
-                stem_children += (c->type=="Stem");
-            bool is_tip = !stem_children;
-            float roll1 = gen(rng);
-            std::vector<std::shared_ptr<LNode>> result {};
-            if (roll1 < 0.7f) {
-                std::uniform_real_distribution angle (0.0f,2*PI);
-                Vector3 perp = Vector3Perpendicular(node->direction);
-                perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
-                std::uniform_real_distribution tilt (0.0f,15.0f*DEG2RAD);
-                Vector3 new_direction = Vector3Normalize(Vector3RotateByAxisAngle(node->direction,perp,tilt(rng)));
-
+        RuleSet one_to_two {};
+            std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> germinate = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
+                std::uniform_real_distribution gen (0.0,1.0);
                 float roll = gen(rng);
                 float length;
                 if (roll < 0.05) {
-                    length = 0.025f;
+                    length = 0.05f;
                 } else if (roll < 0.8) {
-                    length = 0.075f;
+                    length = 0.15f;
                 } else {
-                    length = 0.06f;
+                    length = 0.3f;
                 }
-                std::shared_ptr<LNode> new_stem = std::make_shared<LNode>("Stem",Vector3Scale(new_direction,length),new_direction,node->children,node);
+                std::shared_ptr<LNode> stem = std::make_shared<LNode>("Stem",Vector3Scale(node->direction,length),node->direction,node->children,node);
+                for (auto child : stem->children)
+                    child->parent = stem;
                 node->children.clear();
-                result.push_back(new_stem);
-                is_tip = false;
-            }
+                node->children.push_back(stem);
+                return node;
+            };
+            one_to_two.add_rule("Seed",Rule(germinate));
+        stage_transitions_[std::pair<int,int>{1,2}] = one_to_two;
 
-            if (is_tip)
-                return std::vector<std::shared_ptr<LNode>>{};
-            float roll = gen(rng);
-            if (roll < 0.8) { // Branch and leaf
-                std::uniform_real_distribution angle (0.0f,2*PI);
-                Vector3 perp = Vector3Perpendicular(node->direction);
-                perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
-                std::uniform_real_distribution tilt (45.0f*DEG2RAD,90.0f*DEG2RAD);
-                Vector3 leaf_dir = Vector3RotateByAxisAngle(node->direction,perp,tilt(rng));
-                float length = 0.05f;
+        RuleSet two_to_three {};
+            std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> juvenile = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
+                std::uniform_real_distribution gen (0.0,1.0);
+                int stem_children = 0;
+                for (auto c : node->children)
+                    stem_children += (c->type=="Stem");
+                bool is_tip = !stem_children;
+                float roll1 = gen(rng);
+                std::shared_ptr<LNode> new_stem = nullptr;
+                std::shared_ptr<LNode> leaf = nullptr;
+                if (roll1 < 0.7f) {
+                    std::uniform_real_distribution angle (0.0f,2*PI);
+                    Vector3 perp = Vector3Perpendicular(node->direction);
+                    perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
+                    std::uniform_real_distribution tilt (0.0f,15.0f*DEG2RAD);
+                    Vector3 new_direction = Vector3Normalize(Vector3RotateByAxisAngle(node->direction,perp,tilt(rng)));
 
-                std::shared_ptr<LNode> leaf = std::make_shared<LNode>("Leaf",Vector3Scale(leaf_dir,length),leaf_dir,std::vector<std::shared_ptr<LNode>>{},node);
-                result.push_back(leaf);
-            }
-            return result;
-        };
-        two_to_three.add_rule("Stem",Rule(juvenile));
-    stage_transitions_[std::pair<int,int>{2,3}] = two_to_three;
+                    float roll = gen(rng);
+                    float length;
+                    if (roll < 0.05) {
+                        length = 0.025f;
+                    } else if (roll < 0.8) {
+                        length = 0.075f;
+                    } else {
+                        length = 0.06f;
+                    }
+                    new_stem = std::make_shared<LNode>("Stem",Vector3Scale(new_direction,length),new_direction,node->children,node);
+                    for (auto child : new_stem->children)
+                        child->parent = new_stem;
+                    node->children.clear();
+                    node->children.push_back(new_stem);
+                    is_tip = false;
+                }
 
-    RuleSet three_to_four {};
-        std::function<std::vector<std::shared_ptr<LNode>>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> mature = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
-            int stem_children = 0;
-            for (auto c : node->children)
-                stem_children += (c->type=="Stem") || (c->type=="Flower" && c->direction == node->direction);
-            if (stem_children)
-                return std::vector<std::shared_ptr<LNode>>{};
-            std::uniform_real_distribution gen (0.0,1.0);
-            float roll = gen(rng);
-            std::vector<std::shared_ptr<LNode>> result {};
-            if (roll < 0.8) { // Branch and bloom
-                std::uniform_real_distribution angle (0.0f,2*PI);
-                Vector3 perp = Vector3Perpendicular(node->direction);
-                perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
-                std::uniform_real_distribution tilt (45.0f*DEG2RAD,90.0f*DEG2RAD);
-                Vector3 flower_dir = Vector3RotateByAxisAngle(node->direction,perp,tilt(rng));
-                float length = 0.25f;
+                if (is_tip)
+                    return node;
+                float roll = gen(rng);
+                if (roll < 0.8) { // Branch and leaf
+                    std::uniform_real_distribution angle (0.0f,2*PI);
+                    Vector3 perp = Vector3Perpendicular(node->direction);
+                    perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
+                    std::uniform_real_distribution tilt (45.0f*DEG2RAD,90.0f*DEG2RAD);
+                    Vector3 leaf_dir = Vector3RotateByAxisAngle(node->direction,perp,tilt(rng));
+                    float length = 0.05f;
 
-                std::shared_ptr<LNode> flower = std::make_shared<LNode>("Flower",Vector3Scale(flower_dir,length),flower_dir,std::vector<std::shared_ptr<LNode>>{},node);
-                result.push_back(flower);
-            } else {
-                float length = 0.25f;
-                std::shared_ptr<LNode> flower = std::make_shared<LNode>("Flower",Vector3Scale(node->direction,length),node->direction,std::vector<std::shared_ptr<LNode>>{},node);
-                result.push_back(flower);
-            }
-            return result;
-        };
-        three_to_four.add_rule("Stem",Rule(mature));
-    stage_transitions_[std::pair<int,int>{3,4}] = three_to_four;
+                    leaf = std::make_shared<LNode>("Leaf",Vector3Scale(leaf_dir,length),leaf_dir,std::vector<std::shared_ptr<LNode>>{},node);
+                    node->children.push_back(leaf);
+                }
+                return node;
+            };
+            two_to_three.add_rule("Stem",Rule(juvenile));
+        stage_transitions_[std::pair<int,int>{2,3}] = two_to_three;
+
+        RuleSet three_to_four {};
+            std::function<std::shared_ptr<LNode>(std::shared_ptr<LNode> node, std::mt19937_64& rng)> mature = [](std::shared_ptr<LNode> node, std::mt19937_64& rng){
+                int stem_children = 0;
+                for (auto c : node->children)
+                    stem_children += (c->type=="Stem") || (c->type=="Flower" && c->direction == node->direction);
+                if (stem_children)
+                    return node;
+                std::uniform_real_distribution gen (0.0,1.0);
+                float roll = gen(rng);
+                std::shared_ptr<LNode> flower = nullptr;
+                if (roll < 0.8) { // Branch and bloom
+                    std::uniform_real_distribution angle (0.0f,2*PI);
+                    Vector3 perp = Vector3Perpendicular(node->direction);
+                    perp = Vector3RotateByAxisAngle(perp,node->direction,angle(rng));
+                    std::uniform_real_distribution tilt (45.0f*DEG2RAD,90.0f*DEG2RAD);
+                    Vector3 flower_dir = Vector3RotateByAxisAngle(node->direction,perp,tilt(rng));
+                    float length = 0.25f;
+
+                    flower = std::make_shared<LNode>("Flower",Vector3Scale(flower_dir,length),flower_dir,std::vector<std::shared_ptr<LNode>>{},node);
+                } else {
+                    float length = 0.25f;
+                    flower = std::make_shared<LNode>("Flower",Vector3Scale(node->direction,length),node->direction,std::vector<std::shared_ptr<LNode>>{},node);
+                }
+                node->children.push_back(flower);
+                return node;
+            };
+            three_to_four.add_rule("Stem",Rule(mature));
+        stage_transitions_[std::pair<int,int>{3,4}] = three_to_four;
+        while (stage_ < original_stage)
+            advance_stage();
+    }
     INFO("Initialized Lily with Seed LNode and stage: " + std::to_string(stage_));
 }
 
@@ -164,8 +171,7 @@ json Lily::to_json() const {
         {"seed",seed_},
         {"flower",flower_->to_json()},
         {"leaf",leaf_->to_json()},
-        {"stage",stage_},
-        {"lsystem",lsystem_.to_json()}
+        {"stage",stage_}
     };
     return j;
 }
@@ -179,7 +185,7 @@ void Lily::from_json(const json& j) {
     flower_ = std::make_unique<LilyFlower>(j.at("flower"));
     leaf_ = std::make_unique<TaperedPetal>(j.at("leaf"));
     stage_ = j.at("stage");
-    lsystem_ = LSystem(j.at("lsystem"));
+    lsystem_ = LSystem();
 }
 
 static void generate_stem_segment(std::vector<float>& vertices,
@@ -283,13 +289,16 @@ static void generate_stem_segment(std::vector<float>& vertices,
         }
     }
 }
-struct StackFrame {
-    Vector3 prev_pos;
-    Vector3 pos;
-    std::shared_ptr<LNode> node;
-    int id;
-    int prev_id;
-};
+
+namespace {
+    struct StackFrame {
+        Vector3 prev_pos;
+        Vector3 pos;
+        std::shared_ptr<LNode> node;
+        int id;
+        int prev_id;
+    };
+}
 
 void Lily::generate_mesh() {
     if (mesh_.vboId != 0)
@@ -313,6 +322,7 @@ void Lily::generate_mesh() {
     leaf_transforms_base_.clear();
     while (!dfs.empty()) {
         auto top = dfs.back();
+        DEBUG(top.node->type);
         if (top.node->type == "Stem") {
             generate_stem_segment(vertices,normals,colors,indices,top.prev_pos,top.pos,top.node->parent->direction,top.node->direction,top.prev_id,top.id,previous_vertexes,stem_color);
         } else if (top.node->type == "Flower") {

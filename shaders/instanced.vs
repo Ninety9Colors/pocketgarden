@@ -8,7 +8,6 @@ in vec4 vertexColor;
 in mat4 instanceTransform;
 
 uniform mat4 mvp;
-uniform mat4 matModel;
 uniform mat4 matNormal;
 
 out vec3 fragPosition;
